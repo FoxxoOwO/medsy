@@ -1,6 +1,3 @@
----
-lastSync: Sat Dec 06 2025 11:13:53 GMT+0100 (středoevropský standardní čas)
----
 # Medsy
 
 ## 1. Funkční specifikace
