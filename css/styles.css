@@ -139,3 +139,7 @@ body {
 .big-icon { font-size: 4rem; color: #e0e0e0; margin-bottom: 10px; }
 .empty-state { text-align: center; color: #999; margin-top: 40px; }
 .hidden { display: none; }
+
+#btn-add-time {margin-top:5px}
+#progress-bar {width: 0%}
+#btn-enable-notif {background: #e8def8}
