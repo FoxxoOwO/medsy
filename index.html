@@ -14,6 +14,113 @@
     <script src="./js/Controller.js"></script>
 </head>
 <body>
+    <div class="md3-layout">
+        <nav class="nav-rail">
+            <div class="app-logo">
+                <span class="material-symbols-outlined logo-icon">medication</span>
+                <span>Medsy</span>
+            </div>
+            
+            <div class="nav-links">
+                <button class="nav-item active" data-target="page-today">Dnes</button>
+                <button class="nav-item" data-target="page-manager">Moje léky</button>
+                <button class="nav-item" data-target="page-stats">Statistiky</button>
+            </div>
+        </nav>
 
+        <main class="main-content">
+            
+            <section id="page-today" class="page-section active">
+                <header class="top-bar">
+                    <div class="headline">
+                        <h1>Dnešní přehled</h1>
+                        <p id="current-date-display">...</p>
+                    </div>
+                    <button id="btn-enable-notif" class="btn-text hidden" style="background: #e8def8;">
+                        <span class="material-symbols-outlined">notifications</span> Zapnout
+                    </button>
+                </header>
+
+                <div class="progress-card">
+                    <div class="text-part">
+                        <h3>Váš denní plán</h3>
+                        <p id="progress-text">0% splněno</p>
+                    </div>
+                    <div class="track">
+                        <div class="indicator" id="progress-bar" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div id="today-grid" class="cards-grid"></div>
+                <div id="today-empty" class="empty-state hidden">
+                    <span class="material-symbols-outlined big-icon">check_circle</span>
+                    <p>Hotovo.</p>
+                </div>
+            </section>
+
+            <section id="page-manager" class="page-section hidden">
+                <header class="top-bar">
+                    <h1>Správa medikací</h1>
+                    <button id="btn-open-add" class="btn-filled">
+                        <span class="material-symbols-outlined">add</span> Nový lék
+                    </button>
+                </header>
+                <div class="manager-list-container">
+                    <table class="med-table">
+                        <thead>
+                            <tr><th>Název</th><th>Dávka</th><th>Časy</th><th style="text-align: right;">Akce</th></tr>
+                        </thead>
+                        <tbody id="manager-list-body"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="page-stats" class="page-section hidden">
+                <header class="top-bar"><h1>Historie</h1></header>
+                <div class="stats-overview">
+                    <div class="stat-box">
+                        <h2 id="stat-total-taken">0</h2><p>Užitých dávek</p>
+                    </div>
+                </div>
+                <div class="calendar-container">
+                    <h3 id="calendar-month-name">Měsíc</h3>
+                    <div class="calendar-grid" id="calendar-grid"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <dialog id="med-dialog" class="md3-dialog">
+        <form id="med-form" method="dialog">
+            <input type="hidden" id="med-id">
+            <h2 id="dialog-title">Lék</h2>
+            
+            <div class="input-field">
+                <input type="text" id="med-name" required placeholder=" ">
+                <label>Název léku</label>
+            </div>
+            <div class="input-field">
+                <input type="text" id="med-dosage" required placeholder=" ">
+                <label>Dávka</label>
+            </div>
+
+            <div class="times-section">
+                <label class="section-label">Časy užívání</label>
+                <div id="times-container"></div>
+                <button type="button" id="btn-add-time" class="btn-text" style="margin-top:5px;">+ Čas</button>
+            </div>
+
+            <div class="dialog-actions">
+                <button type="button" id="btn-cancel" class="btn-text">Zrušit</button>
+                <button type="submit" class="btn-filled">Uložit</button>
+            </div>
+        </form>
+    </dialog>
+
+    <script>
+        const model = new Model();
+        const view = new View();
+        const app = new Controller(model, view);
+    </script>
 </body>
 </html>
