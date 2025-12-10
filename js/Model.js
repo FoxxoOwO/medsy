@@ -1,11 +1,15 @@
 class Model {
     #meds = [];
     
+    onDataChanged = null;
 
     constructor() {
         this.#meds = this.#loadFromStorage();
     }
 
+    bindDataChanged(handler) {
+        this.onDataChanged = handler;
+    }
 
     getMedications() {
         return this.#meds;
@@ -27,12 +31,27 @@ class Model {
             this.#meds.push(newMed);
         }
         
-        
+        this.#commit();
     }
 
     remove(id) {
         this.#meds = this.#meds.filter(m => m.id !== id);
-        
+        this.#commit();
+    }
+
+    toggleStatus(id, time, dateStr) {
+        const med = this.getById(id);
+        if(med) {
+            med.toggleTaken(dateStr, time);
+            this.#commit();
+        }
+    }
+
+    #commit() {
+        this.#saveToStorage(this.#meds);
+        if(this.onDataChanged) {
+            this.onDataChanged(this.#meds);
+        }
     }
 
 
@@ -54,5 +73,18 @@ class Medication {
         this.dosage = dosage;
         this.times = times; 
         this.history = history;
+    }
+
+    isTakenAt(dateStr, timeStr) {
+        return this.history.includes(`${dateStr}|${timeStr}`);
+    }
+
+    toggleTaken(dateStr, timeStr) {
+        const record = `${dateStr}|${timeStr}`;
+        if (this.history.includes(record)) {
+            this.history = this.history.filter(h => h !== record);
+        } else {
+            this.history.push(record);
+        }
     }
 }
