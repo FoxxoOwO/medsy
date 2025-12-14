@@ -14,6 +14,7 @@ class Controller {
         this.#view.bindDeleteOrEdit(this.handleDelete, this.handleEdit);
         this.#view.bindFormSubmit(this.handleSubmit);
         this.#view.bindAddTimer();
+        this.#view.bindNotificationReq(this.handleNotifReq);
         this.#view.initDialogListeners(); 
 
         this.#model.bindDataChanged(this.onMedListChanged);
