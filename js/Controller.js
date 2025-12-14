@@ -56,7 +56,7 @@ class Controller {
     handleNotifReq = () => {
         Notification.requestPermission().then(p => {
             if(p === 'granted') {
-                new Notification('MediPlan', {body: 'Zapnuto!'});
+                new Notification('Medsy', {body: 'Zapnuto!'});
                 this.#checkNotifPermission();
             }
         });

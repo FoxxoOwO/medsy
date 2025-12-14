@@ -224,13 +224,4 @@ class View {
         else this.btnNotif.classList.add('hidden');
     }
 
-    #addTimeInput(val = '') {
-        const div = document.createElement('div');
-        div.style.cssText = 'display:flex; gap:5px; margin-bottom:5px;';
-        div.innerHTML = `
-            <input type="time" class="med-time-input" value="${val}" required style="flex:1; padding:10px;">
-            <button type="button" class="btn-text" onclick="this.parentElement.remove()">X</button>
-        `;
-        this.timesContainer.appendChild(div);
-    }
 }
