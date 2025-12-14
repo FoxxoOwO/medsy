@@ -73,6 +73,7 @@ class Controller {
         const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
         const today = now.toISOString().split('T')[0];
 
+        console.log(`Kontrola notifikací v ${timeStr} ${today}`);
         this.#model.getMedications().forEach(med => {
             if(med.times.includes(timeStr) && !med.isTakenAt(today, timeStr)) {
                 new Notification(`Čas na léky: ${med.name}`, { body: `Dávka: ${med.dosage}` });
