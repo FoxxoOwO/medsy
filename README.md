@@ -67,15 +67,15 @@ Vzhledem k architektuře aplikace (Client-Side Only) existuje pouze jedna role.
 - **Role: Vlastník zařízení (Lokální Uživatel)**
     - **Přístup:** Aplikace je přístupná okamžitě po načtení stránky, nevyžaduje přihlášení.
     - **Oprávnění:**
-        - Plný přístup ke čtení i zápisu dat (CRUD).
+        - Plný přístup ke čtení i zápisu dat.
         - Správa nastavení prohlížeče (povolení notifikací).
         - Data jsou vázána na konkrétní prohlížeč a zařízení (localStorage).
 ### 1.3 Uživatelské grafické rozhraní
 
-Aplikace využívá designový jazyk **Material Design 3**, je rozvržena do layoutu s postranní navigací a hlavním obsahem.
+Aplikace využívá designový jazyk Material Design 3, je rozvržena do layoutu s postranní navigací a hlavním obsahem.
 #### A. Hlavní navigace
 - Panel vlevo obsahující logo aplikace nahoře.
-- Tři navigační tlačítka pro přepínání sekcí: **Dnes**, **Moje léky**, **Statistiky**.
+- Tři navigační tlačítka pro přepínání sekcí: Dnes, Moje léky, Statistiky.
 - Aktivní sekce je vizuálně zvýrazněna.
 #### B. Sekce 1: Dnes - Výchozí obrazovka
 - **Hlavička:** Zobrazuje aktuální datum a tlačítko "Zapnout upozornění" (pokud nejsou povolena).
@@ -94,13 +94,13 @@ Aplikace využívá designový jazyk **Material Design 3**, je rozvržena do lay
 #### D. Sekce 3: Statistiky
 - **Přehled čísel:** Karta s celkovým počtem užitých dávek.
 - **Kalendář:** Mřížka generovaná JavaScriptem pro dny aktuálního měsíce.
-    - Algoritmus prochází historii a pro každý den vypočítá poměr _plánované vs. splněné_.
+    - Algoritmus prochází historii a pro každý den vypočítá poměr plánované vs. splněné.
     - Buňky dne jsou podbarveny dle stavu - nesplnění, splněno částečně, splněno.
 
 ## 2. Technická specifikace
 ### 2.1 Datový logický model
 
-Data jsou ukládána v **Local Storage** prohlížeče pod klíčem `medsy_db`. Formát dat je JSON pole objektů.
+Data jsou ukládána v Local Storage prohlížeče pod klíčem `medsy_db`. Formát dat je JSON pole objektů.
 
 **Struktura JSON objektu:**
 `[`
@@ -117,8 +117,8 @@ Data jsou ukládána v **Local Storage** prohlížeče pod klíčem `medsy_db`. 
 `]`
 ### 2.2 Popis architektury
 
-Aplikace je navržena podle návrhového vzoru **MVC (Model-View-Controller)**.
-1. **Model (`js/Model.js`):** Zodpovídá za data a logiku. Komunikuje s `localStorage`. Obsahuje Observer pattern (`onDataChanged`) pro notifikaci změn.
+Aplikace je navržena podle návrhového vzoru MVC.
+1. **Model (`js/Model.js`):** Zodpovídá za data a logiku. Komunikuje s `localStorage`.
 2. **View (`js/View.js`):** Zodpovídá za manipulaci s DOM. Generuje HTML a zachytává uživatelské vstupy (kliknutí, formuláře), které předává Controlleru.
 3. **Controller (`js/Controller.js`):** Spojuje Model a View. Inicializuje aplikaci, obsahuje smyčku pro kontrolu času (notifikace) a řídí tok dat.
 #### Třída Medication
@@ -135,18 +135,16 @@ Aplikace je navržena podle návrhového vzoru **MVC (Model-View-Controller)**.
     - `toggleStatus(id, time, date)`: Změní stav užití konkrétní dávky.    
     - `#saveToStorage()`, `#loadFromStorage()`: Práce s JSON v localStorage.
 #### Třída View
-- Atributy: Reference na DOM elementy (`todayGrid`, `dialog`, `form`...).
 - Metody (Render):
     - `render(meds, pageId)`: Hlavní metoda pro překreslení.    
-    - `#renderToday(meds)`: Generuje karty pro denní přehled.    
-    - `#renderStats(meds)`: Generuje kalendář a logiku barev.    
-- Metody (Bind): `bindNavigation`, `bindToggleTaken`, `bindDeleteOrEdit`, `bindFormSubmit`.
-- Metody (UI): `openDialog(med)`, `#addTimeInput()`.    
+    - `#renderToday(meds)`: Generuje karty pro denní přehled.
+    - `#renderManager(meds)`: Generuje seznam léků k jejich správě.
+    - `#renderStats(meds)`: Generuje kalendář.    
+- Metody (UI): `openDialog(med)`. 
 #### Třída Controller
 - Metody:
-    - `constructor(model, view)`: Inicializace a binding.    
-    - `handleToggleTaken(id, time)`: Callback pro View.    
-    - `#checkTimeLoop()`: Běží každých 30s, kontroluje shodu aktuálního času s časy léků pro notifikace.
+	- `onMedListChanged(meds)`: Překreslení stránky při změně obsahu (léků).
+    - `#checkNotifPermission`: Kontrola oprávnění pro notifikace.
 #### Class diagram
 ```mermaid
 classDiagram
@@ -173,22 +171,17 @@ classDiagram
 
     class View {
         +render(meds, pageId)
-        +bindNavigation(handler)
-        +bindToggleTaken(handler)
-        +bindDeleteOrEdit(handler)
-        +bindFormSubmit(handler)
+        -renderToday(meds)
+        -renderManager(meds)
+        -renderStats(meds)
         +openDialog(med)
     }
 
     class Controller {
         -Model model
         -View view
-        +onMedListChanged(meds)
-        +handleNavigation(pageId)
-        +handleToggleTaken(id, time)
-        +handleDelete(id)
-        +handleSubmit(data)
-        -checkTimeLoop()
+        +onMedListChanged()
+        -checkNotifPermission()
     }
 
     Controller --> Model : Manipuluje daty
