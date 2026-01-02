@@ -25,10 +25,12 @@ class Controller {
 
     }
 
+    // aktualizace zobrazení při změně dat v modelu
     onMedListChanged = (meds) => {
         this.#view.render(meds, this.#activePage);
     }
 
+    // navigace mezi stránkami
     handleNavigation = (pageId) => {
         this.#activePage = pageId;
         this.#view.render(this.#model.getMedications(), pageId);
@@ -55,26 +57,36 @@ class Controller {
     }
 
     handleNotifReq = () => {
+        // požádání o povolení notifikací
         Notification.requestPermission().then(p => {
             if(p === 'granted') {
+                // potvrzovací notifikace
                 new Notification('Medsy', {body: 'Zapnuto!'});
+                // aktualizace zobrazení tlačítka
                 this.#checkNotifPermission();
             }
         });
     }
 
     #checkNotifPermission() {
+        // kontrola podpory notifikací
         if(!("Notification" in window)) return;
+        // zobrazit tlacitko pro povoleni notifikaci pokud jeste neni povoleno ani zakazano
         this.#view.showNotifBtn(Notification.permission === 'default');
     }
 
+    // Kontrola času pro notifikace
     #checkTimeLoop() {
         if(Notification.permission !== 'granted') return;
+
+        // Získání sktuálního data a času - HH:MM a YYYY-MM-DD
         const now = new Date();
         const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
         const today = now.toISOString().split('T')[0];
 
         console.log(`Kontrola notifikací v ${timeStr} ${today}`);
+
+        // Kontrola času a užití pro každý lék
         this.#model.getMedications().forEach(med => {
             if(med.times.includes(timeStr) && !med.isTakenAt(today, timeStr)) {
                 new Notification(`Čas na léky: ${med.name}`, { body: `Dávka: ${med.dosage}` });

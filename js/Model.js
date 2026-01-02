@@ -15,15 +15,19 @@ class Model {
         return this.#meds;
     }
 
+    // získání konkrétního léku podle ID
     getById(id) {
         return this.#meds.find(m => m.id === id);
     }
 
+    // přidání nebo aktualizace léku (pokud je předáno ID, jedná se o aktualizaci)
     addOrUpdate(name, dosage, times, id) {
         if (id) {
             const index = this.#meds.findIndex(m => m.id === id);
+            // ověření, že lék s daným ID skutečně existuje
             if(index !== -1) {
                 const oldMed = this.#meds[index];
+                // náhrada starého léku novým, přičemž se zachová historie užití
                 this.#meds[index] = new Medication(name, dosage, times, id, oldMed.history);
             }
         } else {
@@ -47,6 +51,7 @@ class Model {
         }
     }
 
+    // uložení změn a oznámení o změně dat
     #commit() {
         this.#saveToStorage(this.#meds);
         if(this.onDataChanged) {
@@ -75,10 +80,12 @@ class Medication {
         this.history = history;
     }
 
+    // Kontrola jestli byl lék už užit v daný den a čas
     isTakenAt(dateStr, timeStr) {
         return this.history.includes(`${dateStr}|${timeStr}`);
     }
 
+    // zapsaní nebo odebrání záznamu o užití léku
     toggleTaken(dateStr, timeStr) {
         const record = `${dateStr}|${timeStr}`;
         if (this.history.includes(record)) {
