@@ -11,7 +11,7 @@ class Controller {
 
         this.#view.bindNavigation(this.handleNavigation);
         this.#view.bindToggleTaken(this.handleToggleTaken);
-        this.#view.bindDeleteOrEdit(this.handleDelete, this.handleEdit);
+        this.#view.bindDeleteOrEdit(this.handleDelete, this.handleEdit, this.handleCopy);
         this.#view.bindFormSubmit(this.handleSubmit);
         this.#view.bindAddTimer();
         this.#view.bindNotificationReq(this.handleNotifReq);
