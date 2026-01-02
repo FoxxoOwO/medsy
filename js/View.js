@@ -76,7 +76,7 @@ class View {
                 <td>${med.times.join(', ')}</td>
                 <td style="text-align: right;">
                     <button class="btn-icon edit" data-id="${med.id}"><span class="material-symbols-outlined">edit</span></button>
-                    <button class="btn-icon copy" data-id="${med.id}"><span class="material-symbols-outlined">copy</span></button>
+                    <button class="btn-icon copy" data-id="${med.id}"><span class="material-symbols-outlined">content_copy</span></button>
                     <button class="btn-icon delete" data-id="${med.id}"><span class="material-symbols-outlined">delete</span></button>
                 </td>
             `;
