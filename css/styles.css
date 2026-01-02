@@ -144,10 +144,29 @@ body {
 #progress-bar {width: 0%}
 #btn-enable-notif {background: #e8def8}
 
+@keyframes fadein {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
 
 #manager-list-body tr.deleting {
     transition: all 0.3s ease;
     opacity: 0;
     transform: translateX(50px); /* Odjede doprava */
     background-color: #ffb9c3; /* Zčervená */
+}
+
+#med-dialog {
+    transition: all 0.3s ease;
+    animation: fadein 0.3s ease;
+}
+
+#times-container div {
+    transition: all 0.3s ease;
+    animation: fadein 0.3s ease;
 }

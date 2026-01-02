@@ -52,7 +52,8 @@ class Controller {
 
     handleCopy = (id) => {
         const med = this.#model.getById(id);
-        this.#model.addOrUpdate(med.name, med.dosage, med.times);
+        const name = med.name + ' (kopie)';
+        this.#model.addOrUpdate(name, med.dosage, med.times);
     }
 
     handleSubmit = (data) => {
