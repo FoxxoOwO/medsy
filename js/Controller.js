@@ -52,6 +52,11 @@ class Controller {
         this.#view.openDialog(med);
     }
 
+    handleCopy = (id) => {
+        const med = this.#model.getById(id);
+        this.#model.addOrUpdate(med.name, med.dosage, med.times);
+    }
+
     handleSubmit = (data) => {
         this.#model.addOrUpdate(data.name, data.dosage, data.times, data.id);
     }

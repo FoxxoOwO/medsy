@@ -76,6 +76,7 @@ class View {
                 <td>${med.times.join(', ')}</td>
                 <td style="text-align: right;">
                     <button class="btn-icon edit" data-id="${med.id}"><span class="material-symbols-outlined">edit</span></button>
+                    <button class="btn-icon copy" data-id="${med.id}"><span class="material-symbols-outlined">copy</span></button>
                     <button class="btn-icon delete" data-id="${med.id}"><span class="material-symbols-outlined">delete</span></button>
                 </td>
             `;
@@ -151,6 +152,7 @@ class View {
             if(!btn) return;
             if(btn.classList.contains('delete')) deleteHandler(btn.dataset.id);
             if(btn.classList.contains('edit')) editHandler(btn.dataset.id);
+            if(btn.classList.contains('copy')) copyHandler(btn.dataset.id);
         });
     }
 
