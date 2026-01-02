@@ -146,7 +146,7 @@ class View {
         });
     }
 
-    bindDeleteOrEdit(deleteHandler, editHandler) {
+    bindDeleteOrEdit(deleteHandler, editHandler, copyHandler) {
         this.managerList.addEventListener('click', e => {
             const btn = e.target.closest('button');
             if(!btn) return;
