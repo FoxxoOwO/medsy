@@ -150,6 +150,18 @@ class View {
         this.managerList.addEventListener('click', e => {
             const btn = e.target.closest('button');
             if(!btn) return;
+
+            if(btn.classList.contains('delete')) {
+                if(confirm('Smazat?')) {
+                    const row = btn.closest('tr');
+                    row.classList.add('deleting');
+                    setTimeout(() => {
+                        deleteHandler(btn.dataset.id);
+                    }, 300);
+                return;
+                }
+            }
+
             if(btn.classList.contains('delete')) deleteHandler(btn.dataset.id);
             if(btn.classList.contains('edit')) editHandler(btn.dataset.id);
             if(btn.classList.contains('copy')) copyHandler(btn.dataset.id);

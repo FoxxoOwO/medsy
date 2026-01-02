@@ -42,9 +42,7 @@ class Controller {
     }
 
     handleDelete = (id) => {
-        if(confirm('Smazat?')) {
-            this.#model.remove(id);
-        }
+        this.#model.remove(id);
     }
 
     handleEdit = (id) => {

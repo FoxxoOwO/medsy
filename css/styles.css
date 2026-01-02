@@ -144,17 +144,10 @@ body {
 #progress-bar {width: 0%}
 #btn-enable-notif {background: #e8def8}
 
-@keyframes slideInRow {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
 
-#manager-list-body tr {
-    animation: slideInRow 0.4s ease-out forwards;
+#manager-list-body tr.deleting {
+    transition: all 0.3s ease;
+    opacity: 0;
+    transform: translateX(50px); /* Odjede doprava */
+    background-color: #ffb9c3; /* Zčervená */
 }
