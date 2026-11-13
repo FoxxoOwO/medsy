@@ -16,9 +16,14 @@ class StringsParityTest {
         File("app/src/main/res/$dir/strings.xml"),
     ).first { it.exists() }
 
+    /** Names of every string that is supposed to be translated; `translatable="false"` is exempt. */
     private fun keys(path: File): Set<String> {
         val text = path.readText()
-        return Regex("<string name=\"([^\"]+)\"").findAll(text).map { it.groupValues[1] }.toSet()
+        return Regex("<string name=\"([^\"]+)\"([^>]*)>")
+            .findAll(text)
+            .filterNot { it.groupValues[2].contains("translatable=\"false\"") }
+            .map { it.groupValues[1] }
+            .toSet()
     }
 
     @Test
@@ -30,6 +35,26 @@ class StringsParityTest {
             "missing from values-cs: ${(english - czech).sorted()}",
             english.sorted(),
             czech.sorted(),
+        )
+    }
+
+    private val englishFile = stringsFile("values")
+
+    @Test
+    fun `endonyms are deliberately untranslated`() {
+        // "Čeština" and "English" are shown in their own language in either locale, so they must
+        // not appear in values-cs — that would be a translation of a language's own name.
+        val untranslated = Regex("<string name=\"([^\"]+)\"[^>]*translatable=\"false\"")
+            .findAll(englishFile.readText())
+            .map { it.groupValues[1] }
+            .toSet()
+        val czech = Regex("<string name=\"([^\"]+)\"").findAll(stringsFile("values-cs").readText())
+            .map { it.groupValues[1] }
+            .toSet()
+
+        assertTrue(
+            "translatable=false keys leaked into values-cs: ${(untranslated intersect czech).sorted()}",
+            (untranslated intersect czech).isEmpty(),
         )
     }
 

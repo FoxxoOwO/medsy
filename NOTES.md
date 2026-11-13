@@ -1695,3 +1695,12 @@ The shelf card now shows the lot number next to the expiry of the box that will 
 only a quantity: the expiry appeared only when it was within 30 days, and the lot never appeared at
 all — which made a scanned-but-unmatched box impossible to check against the physical carton. The
 line is informational and always visible now, while the 30-day warning stays a separate signal.
+
+The in-app language switch is AppCompat's per-app locale, not a preference of our own
+(`AppLanguage.apply` → `AppCompatDelegate.setApplicationLocales`). That matters because the choice
+then reaches places a preference cannot: `cmd locale get-app-locales` reports it, Android 13+ shows
+it in the system's per-app language screen, and resource lookups from services (reminders, the PDF
+report) follow it. Two manifest entries are load-bearing — `android:localeConfig` lists cs/en so the
+system knows what may be picked, and `AppLocalesMetadataHolderService` with `autoStoreLocales` keeps
+the choice across cold starts on Android 12 and below, where AppCompat stores it itself. Removing
+either makes the switch look broken in a way that only shows up after a restart.

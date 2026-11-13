@@ -106,6 +106,10 @@
     <string name="settings_dynamic_color">Dynamic color</string>
     <string name="settings_palette">Palette</string>
     <string name="settings_language">Language</string>
+    <string name="settings_language_desc">Applies to the whole app, reminder notifications included.</string>
+    <string name="settings_language_system">System</string>
+    <string name="settings_language_czech" translatable="false">Čeština</string>
+    <string name="settings_language_english" translatable="false">English</string>
     <string name="settings_sukl_sync">Sync SÚKL database</string>
     <string name="settings_report">Export doctor report</string>
 

@@ -97,6 +97,8 @@
     <string name="settings_dynamic_color">Dynamické barvy</string>
     <string name="settings_palette">Paleta</string>
     <string name="settings_language">Jazyk</string>
+    <string name="settings_language_desc">Platí pro celou aplikaci včetně upozornění na dávky.</string>
+    <string name="settings_language_system">Systém</string>
     <string name="settings_sukl_sync">Synchronizovat databázi SÚKL</string>
     <string name="settings_report">Exportovat zprávu pro lékaře</string>
 

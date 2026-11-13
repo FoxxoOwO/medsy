@@ -61,10 +61,14 @@ fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
     val exported by viewModel.exportedReport.collectAsStateWithLifecycle()
     var notificationsBlocked by remember { mutableStateOf(viewModel.notificationsBlocked()) }
     var fullScreenAllowed by remember { mutableStateOf(viewModel.fullScreenAllowed()) }
+    // AppCompat recreates the activity when the locale changes, so this is only read once — but a
+    // language can also be picked in the system settings on Android 13+, hence the resume refresh.
+    var language by remember { mutableStateOf(AppLanguage.current()) }
     // Both permissions live in system settings, so they can change while the app is away.
     androidx.lifecycle.compose.LifecycleResumeEffect(Unit) {
         notificationsBlocked = viewModel.notificationsBlocked()
         fullScreenAllowed = viewModel.fullScreenAllowed()
+        language = AppLanguage.current()
         // Health Connect grants also change outside the app (the sheet, or the "Open settings"
         // button), and the switch has to follow them instead of showing a stale state.
         viewModel.refreshHealthState()
@@ -197,6 +201,11 @@ fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
         onDynamicColor = viewModel::setDynamicColor,
         onPalette = viewModel::setPalette,
         onThemeMode = viewModel::setThemeMode,
+        currentLanguage = language,
+        onLanguageChange = { picked ->
+            language = picked
+            AppLanguage.apply(picked)
+        },
         onSyncSukl = viewModel::syncSukl,
     )
 }
@@ -234,6 +243,9 @@ fun SettingsScreen(
     onDynamicColor: (Boolean) -> Unit,
     onPalette: (MedsyPalette) -> Unit,
     onThemeMode: (ThemeMode) -> Unit,
+    /** Where the in-app language switch points right now; SYSTEM keeps following the device. */
+    currentLanguage: AppLanguage = AppLanguage.SYSTEM,
+    onLanguageChange: (AppLanguage) -> Unit = {},
     onSyncSukl: () -> Unit,
     suklSync: SuklSyncUi = SuklSyncUi(),
     modifier: Modifier = Modifier,
@@ -456,6 +468,23 @@ fun SettingsScreen(
                         )
                     }
                 }
+                Spacer(Modifier.height(12.dp))
+                Text(stringResource(R.string.settings_language), style = MaterialTheme.typography.labelLarge)
+                Spacer(Modifier.height(4.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    AppLanguage.entries.forEach { language ->
+                        FilterChip(
+                            selected = currentLanguage == language,
+                            onClick = { onLanguageChange(language) },
+                            label = { Text(stringResource(language.labelRes)) },
+                        )
+                    }
+                }
+                Text(
+                    text = stringResource(R.string.settings_language_desc),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
         }
 
