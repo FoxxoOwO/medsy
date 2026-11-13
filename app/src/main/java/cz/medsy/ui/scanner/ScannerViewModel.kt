@@ -16,6 +16,7 @@ import cz.medsy.domain.repository.MedicationLookupRepository
 import cz.medsy.domain.model.DataSourceOrigin
 import cz.medsy.domain.model.ResolvedMedicationCandidate
 import cz.medsy.domain.util.MedicationFormMapper
+import cz.medsy.domain.util.MedicationStrength
 import cz.medsy.domain.scanner.PackageToInventory
 import cz.medsy.data.repository.SuklRepository
 import cz.medsy.domain.model.Medication
@@ -378,20 +379,11 @@ class ScannerViewModel @Inject constructor(
         else "${value.stripTrailingZeros().toPlainString()} $unit"
     }
 
-    private fun parseStrength(value: String): BigDecimal? =
-        Regex("\\d+[.,]?\\d*").find(value)?.value?.replace(',', '.')?.toBigDecimalOrNull()
+    private fun parseStrength(value: String): BigDecimal? = MedicationStrength.valueOf(value)
 
-    private fun parseStrengthUnit(value: String): String? =
-        Regex("[a-zA-Zµ]+").find(value)?.value
+    private fun parseStrengthUnit(value: String): String? = MedicationStrength.unitOf(value)
 
-    /**
-     * G03 = sex hormones (estrogens, progestogens, androgens), G02 = other gynaecological
-     * hormones. H02 is *corticosteroids*, which are not HRT — including it previously
-     * marked every prednisone prescription as HRT and made it skew the trough analysis.
-     */
-    private fun isHrt(atc: String): Boolean =
-        atc.startsWith("G03") || atc.startsWith("G02")
-
+    private fun isHrt(atc: String): Boolean = MedicationStrength.isHrtAtc(atc)
 
 }
 
