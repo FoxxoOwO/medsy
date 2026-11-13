@@ -199,9 +199,21 @@ fun InventoryScreen(
                             color = accent,
                         )
                     }
-                    line.expiringBatches.firstOrNull()?.expirationDate?.let { expiry ->
+                    // The lot number is the part of a hand-added package the user can actually
+                    // verify against the box, so it is shown next to its expiry.
+                    line.nextBatch?.caption()?.takeUnless { it.isEmpty }?.let { caption ->
                         Text(
-                            text = stringResource(R.string.inventory_expires, expiry),
+                            text = when {
+                                caption.expirationDate != null && caption.lot != null ->
+                                    stringResource(
+                                        R.string.inventory_expires_batch,
+                                        caption.expirationDate,
+                                        caption.lot,
+                                    )
+                                caption.expirationDate != null ->
+                                    stringResource(R.string.inventory_expires, caption.expirationDate)
+                                else -> stringResource(R.string.inventory_lot, caption.lot.orEmpty())
+                            },
                             style = MaterialTheme.typography.labelSmall,
                             color = muted,
                         )
@@ -434,6 +446,14 @@ private fun InventoryPreview() {
                     expiredBatches = emptyList(),
                     beyondUsePassed = emptyList(),
                     beyondUseSoon = emptyList(),
+                    nextBatch = cz.medsy.domain.model.InventoryBatch(
+                        medicationId = 1,
+                        batchNumber = "LOT42",
+                        expirationDate = LocalDate.of(2027, 3, 31),
+                        initialQuantity = BigDecimal("2.4"),
+                        remainingQuantity = BigDecimal("2.4"),
+                        unit = "mL",
+                    ),
                 ),
             ),
             consumables = listOf(

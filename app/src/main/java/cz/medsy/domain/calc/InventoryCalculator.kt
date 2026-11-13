@@ -47,6 +47,11 @@ object InventoryCalculator {
         val beyondUseSoon: List<InventoryBatch>,
         /** Gel/spray pump count, when the stock is counted in actuations. */
         val meter: MeteredDose.Meter? = null,
+        /**
+         * The box that will be opened next. Carries the lot number and expiry, which is the only
+         * thing a hand-added package can be checked against — the name is whatever the user typed.
+         */
+        val nextBatch: InventoryBatch? = null,
     )
 
     fun totalRemaining(batches: List<InventoryBatch>, medicationId: Long): BigDecimal =
@@ -150,6 +155,12 @@ object InventoryCalculator {
                 schedules.firstOrNull { it.medicationId == medicationId },
             )
         }
+        // Earliest expiry among usable stock; when nothing carries a date, fall back to the first
+        // box that is at least identifiable by its lot number.
+        val usableBatches = own.filterNot { it.isExpired(today) || it.isPastBeyondUse(today) }
+        val nextBatch = usableBatches.filter { it.expirationDate != null }
+            .minByOrNull { requireNotNull(it.expirationDate) }
+            ?: usableBatches.firstOrNull { !it.batchNumber.isNullOrBlank() }
         val budSoon = own.filter { batch ->
             val bud = batch.beyondUseDate() ?: return@filter false
             !bud.isBefore(today) && !bud.isAfter(today.plusDays(BUD_WARNING_DAYS))
@@ -168,6 +179,7 @@ object InventoryCalculator {
             beyondUsePassed = budPassed,
             beyondUseSoon = budSoon,
             meter = meter,
+            nextBatch = nextBatch,
         )
     }
 
