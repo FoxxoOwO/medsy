@@ -31,7 +31,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cz.medsy.domain.model.Medication
 import cz.medsy.domain.model.MedicationForm
-import cz.medsy.ui.components.FormShape
+import cz.medsy.ui.components.MedicationIcon
 import cz.medsy.ui.theme.BentoMedium
 import cz.medsy.ui.theme.BentoSmall
 import cz.medsy.ui.theme.FloatingPill
@@ -180,10 +180,9 @@ private fun MedicationCard(
         modifier = Modifier.fillMaxWidth(),
     ) {
         Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            FormShape(
+            MedicationIcon(
                 form = medication.form,
                 size = 46.dp,
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
             )
             Spacer(Modifier.width(14.dp))
             val display = cz.medsy.domain.discreet.DiscreetDisplay.row(medication, discreet)

@@ -55,7 +55,7 @@ import cz.medsy.domain.model.DoseStatus
 import cz.medsy.domain.model.MedicationForm
 import cz.medsy.domain.schedule.Occurrence
 import cz.medsy.ui.components.BodyMapPicker
-import cz.medsy.ui.components.FormShape
+import cz.medsy.ui.components.MedicationIcon
 import cz.medsy.ui.components.MorphingDoseButton
 import cz.medsy.ui.components.MorphingProgressRing
 import cz.medsy.ui.prescriptions.describePrescription
@@ -634,10 +634,11 @@ private fun NextDoseBento(state: DashboardUiState) {
                 )
                 Spacer(Modifier.height(14.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    FormShape(
+                    MedicationIcon(
                         form = next.form,
                         size = 40.dp,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.15f),
+                        container = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.15f),
+                        content = MaterialTheme.colorScheme.onPrimaryContainer,
                     )
                     Spacer(Modifier.width(12.dp))
                     Column(modifier = Modifier.weight(1f)) {
@@ -762,13 +763,18 @@ private fun DoseRow(
             modifier = Modifier.padding(14.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            FormShape(
+            MedicationIcon(
                 form = dose.form,
                 size = 38.dp,
-                color = if (taken) {
+                container = if (taken) {
                     MaterialTheme.colorScheme.tertiary.copy(alpha = 0.35f)
                 } else {
                     MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                },
+                content = if (taken) {
+                    MaterialTheme.colorScheme.onTertiaryContainer
+                } else {
+                    MaterialTheme.colorScheme.primary
                 },
             )
             Spacer(Modifier.width(12.dp))
