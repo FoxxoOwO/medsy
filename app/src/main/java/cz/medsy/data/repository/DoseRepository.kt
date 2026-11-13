@@ -21,6 +21,7 @@ import cz.medsy.domain.model.Medication
 import cz.medsy.domain.model.MedicationMilestone
 import cz.medsy.domain.model.MedicationForm
 import cz.medsy.domain.model.Schedule
+import cz.medsy.domain.scanner.Gtin
 import cz.medsy.domain.schedule.Occurrence
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -48,7 +49,16 @@ class MedicationRepository @Inject constructor(
 
     suspend fun getById(id: Long): Medication? = medicationDao.getById(id)?.toDomain()
 
-    suspend fun findByGtin(gtin: String): Medication? = medicationDao.findByGtin(gtin)?.toDomain()
+    /**
+     * Looks the medication up by any packaging indicator of the same GTIN, not just the exact
+     * scanned string. A single-unit box (indicator 0) and a multipack (indicator 1–8) are the same
+     * product, and without this the user rescanned a box the app already knew.
+     */
+    suspend fun findByGtin(gtin: String): Medication? {
+        val candidates = Gtin.variantsOf(gtin)
+        if (candidates.isEmpty()) return null
+        return medicationDao.findByAnyGtin(candidates)?.toDomain()
+    }
 
     suspend fun save(medication: Medication): Long {
         val entity = medication.toEntity()

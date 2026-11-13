@@ -41,6 +41,9 @@ interface MedicationDao {
     @Query("SELECT * FROM medications WHERE gtin = :gtin LIMIT 1")
     suspend fun findByGtin(gtin: String): MedicationEntity?
 
+    @Query("SELECT * FROM medications WHERE gtin IN (:gtins) ORDER BY gtin LIMIT 1")
+    suspend fun findByAnyGtin(gtins: List<String>): MedicationEntity?
+
     @Query("SELECT * FROM medications WHERE suklCode = :code LIMIT 1")
     suspend fun findBySuklCode(code: String): MedicationEntity?
 

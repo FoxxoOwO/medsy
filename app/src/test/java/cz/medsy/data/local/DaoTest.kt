@@ -15,6 +15,7 @@ import cz.medsy.data.local.entity.MedicationEntity
 import cz.medsy.data.local.entity.ScheduleEntity
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
+import cz.medsy.domain.scanner.Gtin
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -104,6 +105,14 @@ class DaoTest {
         val found = medicationDao.findByGtin("08595000000126")
         assertNotNull(found)
         assertNull(medicationDao.findByGtin("00000000000000"))
+    }
+
+    /** A multipack box of the same product carries a different packaging indicator. */
+    @Test
+    fun `any gtin lookup ignores the packaging indicator`() = runTest {
+        medicationDao.insert(medication(gtin = "08595000000126"))
+        val variants = Gtin.packagingVariants("18595000000126")
+        assertEquals("08595000000126", medicationDao.findByAnyGtin(variants)?.gtin)
     }
 
     @Test

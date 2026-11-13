@@ -6,6 +6,7 @@ import cz.medsy.data.remote.SuklConfig
 import cz.medsy.data.remote.SuklCsvParser
 import cz.medsy.data.remote.SuklDlpDataset
 import cz.medsy.domain.model.SuklMedication
+import cz.medsy.domain.scanner.Gtin
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.net.HttpURLConnection
@@ -41,19 +42,20 @@ class SuklRepository @Inject constructor(
      * Only an exact GTIN recorded in the dataset is accepted. The packaging indicator
      * (first digit, 0 = single unit, 1–8 = multipack) is ignored, because the same
      * product legitimately carries several GTINs.
+     *
+     * As of the 2026-07 and later DLP releases the `EAN` column exists but is blank on every
+     * row; SÚKL's own data-interface sheet (DLP_datove_rozhrani, column 35) says "Pole je prázdné,
+     * údaje již nejsou k dispozici" — the barcode data is no longer published. No other SÚKL open
+     * dataset carries a GTIN either (`dlp_slozeni` has only substances, the packaging dataset is
+     * a zip of PDFs), and no free Czech GTIN↔SÚKL registry exists. So this lookup normally misses
+     * and the mapping is learned instead: [cz.medsy.ui.scanner.ScannerViewModel.save] stores the
+     * scanned GTIN on the medication, and `DoseRepository.findByGtin` finds it on the next scan.
      */
     suspend fun findByGtin(gtin: String): SuklMedication? = withContext(Dispatchers.IO) {
-        val digits = gtin.filter(Char::isDigit)
-        if (digits.isEmpty()) return@withContext null
-        val normalized = digits.padStart(14, '0').takeLast(14)
-        val candidates = packagingVariants(normalized)
-        dao.findByGtin(normalized)?.toDomain()
+        val candidates = Gtin.variantsOf(gtin)
+        dao.findByGtin(candidates.first())?.toDomain()
             ?: dao.findByAnyGtin(candidates)?.toDomain()
     }
-
-    /** Same GTIN with every legal packaging indicator (0–8). */
-    private fun packagingVariants(gtin14: String): List<String> =
-        (0..8).map { indicator -> "$indicator${gtin14.drop(1)}" }
 
     /**
      * Downloads and ingests the SÚKL DLP dataset. Returns the number of ingested records.
