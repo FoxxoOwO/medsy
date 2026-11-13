@@ -2,12 +2,10 @@ package cz.medsy.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.annotation.StringRes
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.size
@@ -24,8 +22,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.ShortNavigationBar
-import androidx.compose.material3.ShortNavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -60,6 +56,7 @@ import cz.medsy.ui.medications.MedicationsRoute
 import cz.medsy.ui.scanner.ScannerRoute
 import cz.medsy.ui.settings.SettingsRoute
 import cz.medsy.ui.symptoms.SymptomsRoute
+import cz.medsy.ui.components.MedsyBottomBar
 import cz.medsy.ui.theme.FloatingPill
 import cz.medsy.ui.theme.LocalDiscreetMode
 import cz.medsy.ui.theme.MedsyTheme
@@ -155,40 +152,24 @@ private fun AppScaffold() {
         Scaffold(
             containerColor = MaterialTheme.colorScheme.background,
             bottomBar = {
-                ShortNavigationBar(
-                    // ShortNavigationBar defaults to `surfaceContainer`, which in the OLED palette
-                    // was almost the same black as the screen behind it, so the bar looked
-                    // transparent and the list appeared to scroll under floating text.
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .border(
-                            width = 1.dp,
-                            color = MaterialTheme.colorScheme.outlineVariant,
-                            shape = FloatingPill,
-                        )
-                        .navigationBarsPadding(),
-                ) {
-                    destinations.forEach { destination ->
-                        val selected = currentDestination?.hierarchy?.any {
-                            it.route == destination.route
-                        } == true
-                        ShortNavigationBarItem(
-                            selected = selected,
-                            onClick = {
-                                navController.navigate(destination.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
-                                    }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            },
-                            icon = { Icon(destination.icon, contentDescription = null) },
-                            label = { Text(stringResource(destination.label)) },
-                        )
-                    }
+                // The selected tab is matched through the hierarchy so a nested screen still
+                // highlights its top-level destination.
+                val selected = destinations.firstOrNull { destination ->
+                    currentDestination?.hierarchy?.any { it.route == destination.route } == true
                 }
+                MedsyBottomBar(
+                    destinations = destinations,
+                    selectedRoute = selected?.route,
+                    onSelect = { destination ->
+                        navController.navigate(destination.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                )
             },
             floatingActionButton = {
                 AnimatedVisibility(visible = true) {
