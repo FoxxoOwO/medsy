@@ -5,7 +5,14 @@ import cz.medsy.domain.message.MessageKey
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import cz.medsy.data.local.MedsyDatabase
+import cz.medsy.data.local.datasource.AtcFallbackDataSource
+import cz.medsy.data.local.datasource.HrtCuratedCatalogDataSource
+import cz.medsy.data.local.datasource.SuklCatalogDataSource
 import cz.medsy.data.local.entity.SuklMedicationEntity
+import cz.medsy.data.repository.MedicationLookupRepositoryImpl
+import cz.medsy.domain.model.ParsedBarcode
+import cz.medsy.domain.model.ResolvedMedicationCandidate
+import cz.medsy.domain.repository.SupplementLookup
 import cz.medsy.data.repository.InventoryRepository
 import cz.medsy.data.repository.MedicationRepository
 import cz.medsy.data.repository.PrescriptionRepository
@@ -51,6 +58,16 @@ class ScannerSearchTest {
                 db.scheduleDao(),
             ),
             prescriptionRepository = PrescriptionRepository(db.prescriptionDao()),
+            lookupRepository = MedicationLookupRepositoryImpl(
+                sukl = SuklCatalogDataSource(db.suklDao()),
+                hrt = HrtCuratedCatalogDataSource(context),
+                // The waterfall's network stage is the only thing faked here: every other rung
+                // runs against the real database and the real shipped assets.
+                supplements = object : SupplementLookup {
+                    override suspend fun lookup(parsed: ParsedBarcode): ResolvedMedicationCandidate? = null
+                },
+                atc = AtcFallbackDataSource(context),
+            ),
         )
     }
 
@@ -86,8 +103,8 @@ class ScannerSearchTest {
     fun `typing a name is not overwritten by a search result`() = kotlinx.coroutines.runBlocking {
         seed()
         viewModel.updateManualName("Estro")
-        viewModel.searchSukl("Estro")
-        await { viewModel.state.value.suklSuggestions.ifEmpty { null } }
+        viewModel.searchMedications("Estro")
+        await { viewModel.state.value.matches.ifEmpty { null } }
 
         assertEquals("Estro", viewModel.state.value.manualName)
     }
@@ -100,31 +117,31 @@ class ScannerSearchTest {
         val direct = SuklRepository(db.suklDao()).search("Estrofem")
         assertTrue("repository search must find the seeded row: $direct", direct.isNotEmpty())
 
-        viewModel.searchSukl("Estrofem")
-        val suggestions = await { viewModel.state.value.suklSuggestions.ifEmpty { null } }
+        viewModel.searchMedications("Estrofem")
+        val suggestions = await { viewModel.state.value.matches.ifEmpty { null } }
 
         assertTrue(suggestions.isNotEmpty())
     }
 
     @Test
-    fun `short queries are not searched`() {
-        viewModel.searchSukl("Es")
+    fun `a one character query is not searched`() {
+        viewModel.searchMedications("E")
         Thread.sleep(200)
-        assertTrue(viewModel.state.value.suklSuggestions.isEmpty())
+        assertTrue(viewModel.state.value.matches.isEmpty())
     }
 
     @Test
     fun `picking a suggestion fills the form and clears the list`() = kotlinx.coroutines.runBlocking {
         seed()
-        viewModel.searchSukl("Estrofem")
-        val match = await { viewModel.state.value.suklSuggestions.firstOrNull() }
+        viewModel.searchMedications("Estrofem")
+        val match = await { viewModel.state.value.matches.firstOrNull() }
 
-        viewModel.pickSukl(match)
+        viewModel.pickMatch(match)
 
         val state = viewModel.state.value
         assertEquals("Estrofem 2mg", state.manualName)
-        assertEquals("0213070", state.matchedMedication?.suklCode)
-        assertTrue(state.suklSuggestions.isEmpty())
+        assertEquals("0213070", state.resolved?.suklCode)
+        assertTrue(state.matches.isEmpty())
     }
 
     @Test

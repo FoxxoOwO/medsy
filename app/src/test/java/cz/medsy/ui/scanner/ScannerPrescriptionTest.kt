@@ -9,6 +9,13 @@ import cz.medsy.domain.message.MessageKey
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import cz.medsy.data.local.MedsyDatabase
+import cz.medsy.data.local.datasource.AtcFallbackDataSource
+import cz.medsy.data.local.datasource.HrtCuratedCatalogDataSource
+import cz.medsy.data.local.datasource.SuklCatalogDataSource
+import cz.medsy.data.repository.MedicationLookupRepositoryImpl
+import cz.medsy.domain.model.ParsedBarcode
+import cz.medsy.domain.model.ResolvedMedicationCandidate
+import cz.medsy.domain.repository.SupplementLookup
 import cz.medsy.data.repository.InventoryRepository
 import cz.medsy.data.repository.MedicationRepository
 import cz.medsy.data.repository.PrescriptionRepository
@@ -65,6 +72,14 @@ class ScannerPrescriptionTest {
                 db.scheduleDao(),
             ),
             prescriptionRepository = PrescriptionRepository(db.prescriptionDao()),
+            lookupRepository = MedicationLookupRepositoryImpl(
+                sukl = SuklCatalogDataSource(db.suklDao()),
+                hrt = HrtCuratedCatalogDataSource(context),
+                supplements = object : SupplementLookup {
+                    override suspend fun lookup(parsed: ParsedBarcode): ResolvedMedicationCandidate? = null
+                },
+                atc = AtcFallbackDataSource(context),
+            ),
         )
     }
 

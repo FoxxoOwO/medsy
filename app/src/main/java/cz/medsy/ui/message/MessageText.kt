@@ -30,6 +30,9 @@ internal fun MessageKey.res(): Res = when (this) {
     MessageKey.SCAN_ALREADY_LISTED -> Res(string = R.string.msg_scan_already_listed)
     MessageKey.SCAN_MATCHED_SUKL -> Res(string = R.string.msg_scan_matched_sukl)
     MessageKey.SCAN_NO_SUKL_MATCH -> Res(string = R.string.msg_scan_no_sukl_match)
+    MessageKey.SCAN_MATCHED_CATALOG -> Res(string = R.string.msg_scan_matched_catalog)
+    MessageKey.SCAN_MATCHED_SUPPLEMENT -> Res(string = R.string.msg_scan_matched_supplement)
+    MessageKey.SCAN_PARTIAL_UNKNOWN -> Res(string = R.string.msg_scan_partial_unknown)
     MessageKey.SCAN_NAME_REQUIRED -> Res(string = R.string.msg_scan_name_required)
     MessageKey.SCAN_SAVED -> Res(string = R.string.msg_scan_saved)
 

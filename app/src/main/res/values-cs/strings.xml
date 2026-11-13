@@ -129,6 +129,7 @@
     <string name="settings_full_screen_alert_desc">Zobrazit dávku přes zamčenou obrazovku, když je telefon zamčený</string>
     <string name="settings_credit">Vytvořila FoxxoOwO ❤️</string>
     <string name="settings_credit_github">Zobrazit na GitHubu</string>
+    <string name="settings_trans_rights">Trans rights are human rights 🏳️‍⚧️</string>
     <string name="settings_test_notification">Odeslat testovací oznámení</string>
     <string name="permission_notifications_title">Oznámení jsou blokována</string>
     <string name="permission_notifications_body">Připomínky léků nelze zobrazit, dokud nepovolíte oznámení.</string>
@@ -261,7 +262,14 @@
     <string name="rx_title">Recepty</string>
     <string name="rx_empty_hint">Naskenujte QR kód z eReceptu a recept tu bude čekat, dokud si ho nevyzvednete.</string>
     <string name="scan_camera_required">Pro skenování krabiček je potřeba přístup ke kamerě.</string>
-    <string name="scan_sukl_matches">Shody v SÚKL — klepněte pro použití</string>
+    <string name="scan_sukl_matches">Shody — klepněte pro použití</string>
+    <string name="scan_atc_matches">Kódy látek — klepněte pro přiřazení</string>
+    <string name="scan_source_sukl">Registr SÚKL</string>
+    <string name="scan_source_catalog">Kurátorský katalog</string>
+    <string name="scan_source_supplement">Databáze doplňků</string>
+    <string name="scan_source_manual">Ruční zadání</string>
+    <string name="scan_biotin_warning">Obsahuje biotin — vysaďte 72 h před odběrem krve</string>
+    <string name="scan_cation_warning">Užívejte nejméně 2 h od levothyroxinu a antibiotik</string>
     <string name="common_loading">Načítání…</string>
     <string name="schedule_no_time">Čas zatím není nastaven</string>
     <string name="schedule_title_edit">Upravit rozvrh</string>
@@ -283,6 +291,8 @@
     <string name="rx_state_today">Propadá dnes</string>
     <string name="rx_state_tomorrow">Propadá zítra</string>
     <string name="inventory_expires">Expirace %1$s</string>
+    <string name="inventory_expires_batch">Expirace %1$s · šarže %2$s</string>
+    <string name="inventory_lot">Šarže %1$s</string>
     <string name="inventory_usable">%1$s %2$s použitelných</string>
     <string name="inventory_pumps_line">%1$s z %2$s dávek · zbývá %3$d dávek</string>
     <string name="inventory_need_have">Potřeba %1$s · máte %2$s</string>
@@ -345,7 +355,10 @@
     <string name="msg_scan_rx_duplicate">eRecept %1$s je už uložen</string>
     <string name="msg_scan_already_listed">Už máte v seznamu: %1$s</string>
     <string name="msg_scan_matched_sukl">Nalezeno v SÚKL: %1$s</string>
-    <string name="msg_scan_no_sukl_match">Pro GTIN %1$s není shoda v SÚKL — zadejte údaje ručně</string>
+    <string name="msg_scan_no_sukl_match">Pro GTIN %1$s není shoda v SÚKL — vyplňte název ručně, balení si pak zapamatujeme</string>
+    <string name="msg_scan_matched_catalog">Nalezeno v kurátorském katalogu: %1$s</string>
+    <string name="msg_scan_matched_supplement">Nalezeno v databázi doplňků: %1$s</string>
+    <string name="msg_scan_partial_unknown">Neznámý kód — pojmenujte lék, šarži i expiraci si ponecháme</string>
     <string name="msg_scan_name_required">Nejdřív zadejte název léku</string>
     <string name="msg_scan_saved">Uloženo</string>
     <string name="msg_rx_reminder_one">eRecept %1$s — %2$s. Vyzvedněte ho, dokud platí.</string>
@@ -643,6 +656,7 @@
     <string name="form_short_spray">Sprej</string>
     <string name="form_short_sublingual">SL</string>
     <string name="form_short_drops">Kapky</string>
+    <string name="form_short_supplement">Doplněk</string>
 
     <!-- Backup and restore -->
     <string name="backup_title">Záloha</string>

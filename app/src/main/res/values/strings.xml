@@ -272,7 +272,14 @@
     <string name="rx_title">Prescriptions</string>
     <string name="rx_empty_hint">Scan the QR code on an eRecept and it will wait here until you collect it.</string>
     <string name="scan_camera_required">Camera permission is required to scan boxes.</string>
-    <string name="scan_sukl_matches">SÚKL matches — tap to use</string>
+    <string name="scan_sukl_matches">Matches — tap to use</string>
+    <string name="scan_atc_matches">Substance codes — tap to link</string>
+    <string name="scan_source_sukl">SÚKL register</string>
+    <string name="scan_source_catalog">Curated catalogue</string>
+    <string name="scan_source_supplement">Supplement database</string>
+    <string name="scan_source_manual">Manual entry</string>
+    <string name="scan_biotin_warning">Contains biotin — stop 72 h before a blood test</string>
+    <string name="scan_cation_warning">Take at least 2 h apart from levothyroxine and antibiotics</string>
     <string name="common_loading">Loading…</string>
     <string name="schedule_no_time">No time set yet</string>
     <string name="schedule_title_edit">Edit schedule</string>
@@ -294,6 +301,8 @@
     <string name="rx_state_today">Expires today</string>
     <string name="rx_state_tomorrow">Expires tomorrow</string>
     <string name="inventory_expires">Expires %1$s</string>
+    <string name="inventory_expires_batch">Expires %1$s · lot %2$s</string>
+    <string name="inventory_lot">Lot %1$s</string>
     <string name="inventory_usable">%1$s %2$s usable</string>
     <string name="inventory_pumps_line">%1$s of %2$s pumps · %3$d doses left</string>
     <string name="inventory_need_have">Need %1$s · have %2$s</string>
@@ -344,7 +353,10 @@
     <string name="msg_scan_rx_duplicate">eRecept %1$s is already saved</string>
     <string name="msg_scan_already_listed">Already in your list: %1$s</string>
     <string name="msg_scan_matched_sukl">Matched SÚKL %1$s</string>
-    <string name="msg_scan_no_sukl_match">No SÚKL match for GTIN %1$s — enter details manually</string>
+    <string name="msg_scan_no_sukl_match">No SÚKL match for GTIN %1$s — enter the name manually, we will remember this package</string>
+    <string name="msg_scan_matched_catalog">Matched curated catalogue: %1$s</string>
+    <string name="msg_scan_matched_supplement">Matched supplement database: %1$s</string>
+    <string name="msg_scan_partial_unknown">Unknown code — name it once, batch and expiry are kept</string>
     <string name="msg_scan_name_required">Enter a medication name first</string>
     <string name="msg_scan_saved">Saved</string>
     <string name="msg_rx_reminder_one">eRecept %1$s — %2$s. Collect it before the validity ends.</string>

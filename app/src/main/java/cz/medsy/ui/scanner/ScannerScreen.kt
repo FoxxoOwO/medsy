@@ -54,6 +54,8 @@ import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import cz.medsy.domain.model.MedicationForm
+import cz.medsy.domain.model.DataSourceOrigin
+import cz.medsy.domain.model.ResolvedMedicationCandidate
 import cz.medsy.domain.model.ScannedPackage
 import cz.medsy.domain.model.Symbology
 import cz.medsy.ui.theme.BentoMedium
@@ -107,8 +109,9 @@ fun ScannerRoute(
         onConcentrationChange = viewModel::updateManualConcentration,
         onQuantityChange = viewModel::updateManualQuantity,
         onFormChange = viewModel::updateManualForm,
-        onSearchSukl = viewModel::searchSukl,
-        onPickSukl = viewModel::pickSukl,
+        onSearchSukl = viewModel::searchMedications,
+        onPickSukl = viewModel::pickMatch,
+        onPickAtc = viewModel::pickAtc,
         onSave = viewModel::save,
         onCancel = onFinished,
     )
@@ -127,7 +130,8 @@ fun ScannerScreen(
     onQuantityChange: (String) -> Unit,
     onFormChange: (MedicationForm) -> Unit,
     onSearchSukl: (String) -> Unit,
-    onPickSukl: (cz.medsy.domain.model.SuklMedication) -> Unit,
+    onPickSukl: (ResolvedMedicationCandidate) -> Unit,
+    onPickAtc: (AtcSuggestion) -> Unit,
     onSave: () -> Unit,
     onCancel: () -> Unit,
     modifier: Modifier = Modifier,
@@ -194,6 +198,35 @@ fun ScannerScreen(
             }
         }
 
+        state.resolved?.let { resolved ->
+            val biotinWarning = resolved.hasBiotinInterference
+            val cationWarning = !resolved.divalentCationTags.isNullOrEmpty()
+            if (biotinWarning || cationWarning) {
+                item {
+                    Surface(
+                        shape = BentoSmall,
+                        color = MaterialTheme.colorScheme.tertiaryContainer,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Column(modifier = Modifier.padding(14.dp)) {
+                            if (biotinWarning) {
+                                Text(
+                                    text = stringResource(R.string.scan_biotin_warning),
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
+                            }
+                            if (cationWarning) {
+                                Text(
+                                    text = stringResource(R.string.scan_cation_warning),
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         item {
             Text(stringResource(R.string.scan_details), style = MaterialTheme.typography.headlineSmall)
         }
@@ -203,13 +236,15 @@ fun ScannerScreen(
                 value = state.manualName,
                 onValueChange = { value ->
                     onNameChange(value)
-                    if (value.length >= 3) onSearchSukl(value)
+                    // Two characters is enough for the waterfall; ATC picks appear only when
+                    // the local catalogue has nothing, so the two lists never compete.
+                    onSearchSukl(value)
                 },
                 label = { Text(stringResource(R.string.scan_name)) },
                 modifier = Modifier.fillMaxWidth(),
             )
         }
-        if (state.suklSuggestions.isNotEmpty()) {
+        if (state.matches.isNotEmpty()) {
             item {
                 Surface(
                     shape = BentoSmall,
@@ -222,26 +257,69 @@ fun ScannerScreen(
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
-                        state.suklSuggestions.forEach { suggestion ->
+                        state.matches.forEach { candidate ->
                             androidx.compose.material3.TextButton(
-                                onClick = { onPickSukl(suggestion) },
+                                onClick = { onPickSukl(candidate) },
                                 modifier = Modifier.fillMaxWidth(),
                             ) {
                                 Column(modifier = Modifier.fillMaxWidth()) {
                                     Text(
-                                        text = suggestion.name,
+                                        text = candidate.name.ifBlank {
+                                            stringResource(R.string.scan_source_manual)
+                                        },
                                         style = MaterialTheme.typography.bodyMedium,
                                     )
                                     Text(
                                         text = listOfNotNull(
-                                            suggestion.suklCode,
-                                            suggestion.strength,
-                                            suggestion.formName,
+                                            candidate.suklCode,
+                                            candidate.activeSubstance,
+                                            candidate.atcCode,
+                                            candidate.strengthValue?.let { value ->
+                                                listOfNotNull(
+                                                    value.stripTrailingZeros().toPlainString(),
+                                                    candidate.strengthUnit,
+                                                ).joinToString(" ")
+                                            },
+                                            stringResource(candidate.origin.labelRes),
                                         ).joinToString(" · "),
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
                                 }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (state.atcSuggestions.isNotEmpty()) {
+            item {
+                Surface(
+                    shape = BentoSmall,
+                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Column(modifier = Modifier.padding(10.dp)) {
+                        Text(
+                            text = stringResource(R.string.scan_atc_matches),
+                            style = MaterialTheme.typography.labelSmall,
+                        )
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            modifier = Modifier.padding(top = 6.dp),
+                        ) {
+                            state.atcSuggestions.forEach { suggestion ->
+                                FilterChip(
+                                    selected = state.manualAtc == suggestion.code,
+                                    onClick = { onPickAtc(suggestion) },
+                                    label = {
+                                        Text(
+                                            text = "${suggestion.code} ${suggestion.name}",
+                                            style = MaterialTheme.typography.labelSmall,
+                                        )
+                                    },
+                                )
                             }
                         }
                     }
@@ -395,6 +473,16 @@ private fun BarcodeCameraPreview(onBarcode: (String, Int) -> Unit) {
  * Short chip labels for the manual-entry form picker. They were English literals, which put
  * "SubQ"/"Drops" next to a Czech screen; the resource ids keep the chips short per language.
  */
+/** Source labels keep the promise explicit: a register hit is not an Open Food Facts guess. */
+@get:StringRes
+private val DataSourceOrigin.labelRes: Int
+    get() = when (this) {
+        DataSourceOrigin.SUKL_CZ -> R.string.scan_source_sukl
+        DataSourceOrigin.HRT_CURATED_CATALOG -> R.string.scan_source_catalog
+        DataSourceOrigin.OPEN_FOOD_FACTS -> R.string.scan_source_supplement
+        DataSourceOrigin.MANUAL_ATC_FALLBACK -> R.string.scan_source_manual
+    }
+
 @get:StringRes
 internal val MedicationForm.shortLabelRes: Int
     get() = when (this) {
@@ -437,6 +525,7 @@ private fun ScannerPreview() {
             onFormChange = {},
             onSearchSukl = {},
             onPickSukl = {},
+            onPickAtc = {},
             onSave = {},
             onCancel = {},
         )
