@@ -85,6 +85,15 @@ class SettingsViewModel @Inject constructor(
         _healthStatus.asStateFlow()
 
     init {
+        refreshHealthState()
+    }
+
+    /**
+     * Called on every resume: grants can change in the Health Connect app (the "Open settings"
+     * button sends the user there) and the switch must not keep claiming a permission that was
+     * revoked, nor stay off after one was granted.
+     */
+    fun refreshHealthState() {
         viewModelScope.launch(Dispatchers.IO) {
             _healthStatus.value = cz.medsy.health.HealthConnectAvailability.status(context)
             syncHealthConnectWithGrants()

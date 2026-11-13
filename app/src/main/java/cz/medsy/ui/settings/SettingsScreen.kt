@@ -65,6 +65,9 @@ fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
     androidx.lifecycle.compose.LifecycleResumeEffect(Unit) {
         notificationsBlocked = viewModel.notificationsBlocked()
         fullScreenAllowed = viewModel.fullScreenAllowed()
+        // Health Connect grants also change outside the app (the sheet, or the "Open settings"
+        // button), and the switch has to follow them instead of showing a stale state.
+        viewModel.refreshHealthState()
         onPauseOrDispose { }
     }
     val healthStatus by viewModel.healthStatus.collectAsStateWithLifecycle()

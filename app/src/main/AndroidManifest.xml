@@ -52,15 +52,34 @@
         </activity>
 
         <!-- Health Connect requires an exported activity that explains the permission, and the
-             permission sheet fails on Android 14 if nothing answers this action. -->
+             permission sheet fails on Android 14 if nothing answers this action. The DEFAULT
+             category is not optional: Health Connect resolves the intent with
+             MATCH_DEFAULT_ONLY, and without it PermissionsActivity logs "App should support
+             rationale intent, finishing!" and the sheet closes before the user can grant. -->
         <activity
             android:name=".health.HealthRationaleActivity"
             android:exported="true"
             android:theme="@style/Theme.Medsy">
             <intent-filter>
                 <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+
+        <!-- Android 14+: Health Connect no longer asks for the rationale action above. Its
+             HealthPermissionReader queries Intent.ACTION_VIEW_PERMISSION_USAGE with
+             CATEGORY_HEALTH_PERMISSIONS and MATCH_ALL to decide whether the app "supports the
+             rationale intent", so the alias below is what keeps the permission sheet open. -->
+        <activity-alias
+            android:name=".health.ViewPermissionUsageActivity"
+            android:exported="true"
+            android:permission="android.permission.START_VIEW_PERMISSION_USAGE"
+            android:targetActivity=".health.HealthRationaleActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
+                <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
+            </intent-filter>
+        </activity-alias>
 
         <activity-alias
             android:name=".MainActivityDiscreet"

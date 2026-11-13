@@ -56,4 +56,47 @@ class HealthPermissionsTest {
             Regex("""HealthRationaleActivity"[\s\S]{0,200}?android:exported="true"""").containsMatchIn(text),
         )
     }
+
+    /**
+     * Health Connect resolves the rationale intent with MATCH_DEFAULT_ONLY, so a filter without
+     * CATEGORY_DEFAULT resolves to nothing on the device: PermissionsActivity logs "App should
+     * support rationale intent, finishing!" and the sheet closes before the user can grant
+     * anything, leaving the switch off. Nothing else in the build catches this.
+     */
+    @Test
+    fun `the rationale filter is default-resolvable`() {
+        val filter = Regex(
+            """androidx\.health\.ACTION_SHOW_PERMISSIONS_RATIONALE"[\s\S]{0,200}?</intent-filter>""",
+        ).find(manifest.readText())?.value
+
+        assertTrue("rationale intent filter missing", filter != null)
+        assertTrue(
+            "filter must declare android.intent.category.DEFAULT",
+            filter!!.contains("""android:name="android.intent.category.DEFAULT""""),
+        )
+    }
+
+    /**
+     * Android 14+: Health Connect ignores the action above and looks for
+     * `Intent(ACTION_VIEW_PERMISSION_USAGE)` with CATEGORY_HEALTH_PERMISSIONS
+     * (`HealthPermissionReader.isRationaleIntentDeclared`, MATCH_ALL). Without this alias the
+     * sheet still closes with "App should support rationale intent, finishing!".
+     */
+    @Test
+    fun `the android 14 usage alias is declared`() {
+        val text = manifest.readText()
+
+        assertTrue(
+            "missing android.intent.action.VIEW_PERMISSION_USAGE",
+            text.contains("android.intent.action.VIEW_PERMISSION_USAGE"),
+        )
+        assertTrue(
+            "missing android.intent.category.HEALTH_PERMISSIONS",
+            text.contains("android.intent.category.HEALTH_PERMISSIONS"),
+        )
+        assertTrue(
+            "the usage alias must target the rationale screen",
+            text.contains("""android:targetActivity=".health.HealthRationaleActivity""""),
+        )
+    }
 }
