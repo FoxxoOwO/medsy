@@ -139,6 +139,7 @@
     <string name="settings_full_screen_alert_desc">Show the dose over the lock screen when the phone is locked</string>
     <string name="settings_credit">Created by FoxxoOwO ❤️</string>
     <string name="settings_credit_github">View on GitHub</string>
+    <string name="settings_trans_rights">Trans rights are human rights 🏳️‍⚧️</string>
     <string name="settings_test_notification">Send test notification</string>
     <string name="permission_notifications_title">Notifications are blocked</string>
     <string name="permission_notifications_body">Dose reminders cannot be shown until notifications are allowed.</string>

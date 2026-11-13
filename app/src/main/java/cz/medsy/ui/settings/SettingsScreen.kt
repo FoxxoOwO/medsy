@@ -617,6 +617,13 @@ private fun AppCredit() {
                 runCatching { context.startActivity(intent) }
             },
         ) { Text(stringResource(R.string.settings_credit_github)) }
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = stringResource(R.string.settings_trans_rights),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
     }
 }
 
