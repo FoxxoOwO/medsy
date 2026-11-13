@@ -10,13 +10,68 @@ import cz.medsy.domain.model.SuklMedication
  */
 object SuklConfig {
     const val BASE_URL = "https://opendata.sukl.gov.cz"
-    const val MEDICINES_CSV_URL = "$BASE_URL/api/1.0/csv/dlp_lecivepripravky.csv"
+
+    /**
+     * The old `api/1.0/csv/dlp_lecivepripravky.csv` endpoint is gone (HTTP 404). DLP is now
+     * published as a **monthly zip** whose URL carries the release date, listed on this page, so
+     * the address cannot be a constant any more.
+     */
+    const val DLP_CATALOG_URL = "$BASE_URL/katalog-otevrenych-dat/databaze-lecivych-pripravku-dlp"
+    const val DLP_CSV_ENTRY = "dlp_lecivepripravky.csv"
     const val DOC_BASE = "https://sukl.gov.cz/download"
 
     fun pilUrl(suklCode: String): String = "$DOC_BASE/pil/PIL${pad(suklCode)}.pdf"
     fun spcUrl(suklCode: String): String = "$DOC_BASE/spc/SPC${pad(suklCode)}.pdf"
 
     private fun pad(code: String): String = code.padStart(7, '0')
+}
+
+/**
+ * Finds the current DLP archive and pulls the medicines CSV out of it.
+ *
+ * SÚKL renames the archive on every monthly release (`DLP20261027.zip`), and the download is a
+ * zip of several CSVs — not one CSV as it used to be. Both steps are pure functions so they can
+ * be tested without the network.
+ */
+object SuklDlpDataset {
+
+    private val ZIP_LINK =
+        Regex("""https?://opendata\.sukl\.gov\.cz/soubory/[^"'\s<>]+\.zip""")
+
+    /**
+     * The CSV inside the archive is Czech Windows-1250, not UTF-8: decoding it as UTF-8 throws on
+     * names such as "HYDROCHLOROTHIAZID LÉČIVA". ISO-8859-2 is the same for the letters used here
+     * and exists on every runtime, so it is the fallback.
+     */
+    private val SUKL_CHARSET: java.nio.charset.Charset =
+        runCatching { java.nio.charset.Charset.forName("windows-1250") }
+            .getOrElse { java.nio.charset.Charset.forName("ISO-8859-2") }
+
+    /** The newest DLP zip advertised on the catalog page, or null when the page changed shape. */
+    fun zipUrl(catalogHtml: String): String? =
+        ZIP_LINK.findAll(catalogHtml)
+            .map { it.value.replace("&amp;", "&") }
+            .lastOrNull { it.substringAfterLast('/').startsWith("DLP", ignoreCase = true) }
+
+    /** The medicines table from the archive; null when the entry is missing or not a zip. */
+    fun medicinesCsv(archive: ByteArray): String? {
+        if (archive.size < 4 || archive[0] != 'P'.code.toByte() || archive[1] != 'K'.code.toByte()) {
+            return null
+        }
+        return runCatching {
+            java.util.zip.ZipInputStream(archive.inputStream()).use { zip ->
+                var entry = zip.nextEntry
+                while (entry != null) {
+                    val name = entry.name.substringAfterLast('/')
+                    if (!entry.isDirectory && name.equals(SuklConfig.DLP_CSV_ENTRY, ignoreCase = true)) {
+                        return@use zip.readBytes().toString(SUKL_CHARSET)
+                    }
+                    entry = zip.nextEntry
+                }
+                null
+            }
+        }.getOrNull()
+    }
 }
 
 /**

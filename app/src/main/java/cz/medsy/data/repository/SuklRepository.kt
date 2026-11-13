@@ -4,6 +4,7 @@ import cz.medsy.data.local.dao.SuklDao
 import cz.medsy.data.local.entity.SuklMedicationEntity
 import cz.medsy.data.remote.SuklConfig
 import cz.medsy.data.remote.SuklCsvParser
+import cz.medsy.data.remote.SuklDlpDataset
 import cz.medsy.domain.model.SuklMedication
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -55,13 +56,13 @@ class SuklRepository @Inject constructor(
         (0..8).map { indicator -> "$indicator${gtin14.drop(1)}" }
 
     /**
-     * Downloads and ingests the SÚKL CSV. Returns the number of ingested records.
+     * Downloads and ingests the SÚKL DLP dataset. Returns the number of ingested records.
      * A failed download leaves the existing local copy untouched.
      */
-    suspend fun sync(url: String = SuklConfig.MEDICINES_CSV_URL): Result<Int> =
+    suspend fun sync(): Result<Int> =
         withContext(Dispatchers.IO) {
             runCatching {
-                val csv = download(url)
+                val csv = downloadDataset()
                 val parsed = SuklCsvParser.parse(csv)
                 if (parsed.isEmpty()) error("SÚKL CSV contained no parsable rows")
                 ingest(parsed)
@@ -69,23 +70,39 @@ class SuklRepository @Inject constructor(
             }
         }
 
+    /**
+     * The catalog page is re-read on every sync because SÚKL publishes a new date-stamped zip
+     * each month; the archive itself then has to be unpacked to reach the medicines table.
+     */
+    private fun downloadDataset(): String {
+        val catalog = download(SuklConfig.DLP_CATALOG_URL)
+        val archiveUrl = SuklDlpDataset.zipUrl(catalog)
+            ?: error("SÚKL catalog listed no DLP archive")
+        val archive = downloadBytes(archiveUrl)
+        return SuklDlpDataset.medicinesCsv(archive)
+            ?: error("SÚKL archive contained no ${SuklConfig.DLP_CSV_ENTRY}")
+    }
+
     private suspend fun ingest(items: List<SuklMedication>) {
         val entities = items.map { it.toEntity() }
         entities.chunked(INSERT_CHUNK).forEach { chunk -> dao.upsertAll(chunk) }
     }
 
-    private fun download(url: String): String {
+    private fun download(url: String): String =
+        downloadBytes(url).toString(Charsets.UTF_8)
+
+    private fun downloadBytes(url: String): ByteArray {
         val connection = (URL(url).openConnection() as HttpURLConnection).apply {
             requestMethod = "GET"
             connectTimeout = 20_000
-            readTimeout = 60_000
-            setRequestProperty("Accept", "text/csv, */*")
+            readTimeout = 120_000
+            setRequestProperty("Accept", "*/*")
             setRequestProperty("User-Agent", "Medsy/1.0 (+offline-first medication tracker)")
         }
         try {
             val status = connection.responseCode
             if (status !in 200..299) error("SÚKL sync failed with HTTP $status")
-            return connection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
+            return connection.inputStream.use { it.readBytes() }
         } finally {
             connection.disconnect()
         }
