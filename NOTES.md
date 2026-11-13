@@ -1512,3 +1512,186 @@ fails when a probe function is dropped into `ui/`.
 
 Tests: `BodyMapLabelsTest` (distinct keys per site, no sentence inside the enum, plural counts
 survive, six units for nine forms). Suite **729 tests / 0 failures**, APK 108,98 MB.
+
+## SÚKL sync hit a dead endpoint
+
+Checked the live dataset instead of trusting the constant: `GET
+https://opendata.sukl.gov.cz/api/1.0/csv/dlp_lecivepripravky.csv` answers **HTTP 404** since the
+portal moved to Drupal. DLP is now one **zip of CSVs per monthly release**, and its address carries
+the release date (`/soubory/SOD20261027/DLP20261027.zip`), so a constant cannot work — the app would
+have failed every sync and shown "Last sync failed" forever.
+
+- `SuklConfig.MEDICINES_CSV_URL` is gone; `DLP_CATALOG_URL` points at
+  `/katalog-otevrenych-dat/databaze-lecivych-pripravku-dlp` and `DLP_CSV_ENTRY` names the table
+  (`dlp_lecivepripravky.csv`).
+- `SuklDlpDataset.zipUrl(catalogHtml)` takes the last `…/soubory/….zip` link whose file name starts
+  with `DLP` (the page also lists the schema CSV, which must not win), and
+  `SuklDlpDataset.medicinesCsv(archive)` walks the zip with `ZipInputStream`, matching the entry by
+  basename so a folder prefix does not matter. Both are pure and tested with a synthetic archive —
+  no network in unit tests.
+- `SuklRepository` downloads the catalog page, then the archive, then parses the CSV. Read timeout is
+  120 s because the archive is ~9 MB.
+- **Encoding trap:** the CSV is Czech **Windows-1250**, not UTF-8. Decoding as UTF-8 throws on the
+  first `É` (`HYDROCHLOROTHIAZID LÉČIVA`), which `runCatching` in `sync` would have reported as a
+  generic failure. `SUKL_CHARSET` is `windows-1250` with `ISO-8859-2` as fallback; a test asserts
+  the 0xC9 byte survives.
+- The live snapshot (70 032 rows) has the `EAN` column **empty for every row**, so GTIN lookups
+  cannot match from this dataset alone. Not changed here — worth revisiting with `dlp_slozeni` or
+  the packaging data.
+
+Verified against the real files: page regex picks exactly the `DLP20261027.zip` link, the archive
+contains `dlp_lecivepripravky.csv` (13,3 MB, cp1250), and the parser's `KOD_SUKL` / `NAZEV` aliases
+match the new header. Suite green, `assembleDebug` builds.
+
+## There is no GTIN in SÚKL open data any more
+
+Checked every plausible place instead of assuming the empty `EAN` column was a parsing bug:
+
+- `dlp_slozeni.csv` (19,7 MB) is `KOD_SUKL;KOD_LATKY;SQ;S;AMNT_OD;AMNT;UN` — only substances, no
+  barcode. `dlp_obaly.csv` is a *code list* of package types (`AMP`, `BAL`, …), not EANs.
+- The "Obaly – texty na obalu" dataset (`OBAL20261027.zip`, 21,2 MB) is a zip of **PDF leaflets**
+  (`OBAL231860.pdf`, …), one per package text — nothing machine-readable about barcodes.
+- The `EAN` column is blank in **every** row of the 2026-07, 2026-08 and 2026-10 DLP releases, and
+  the official interface sheet (`DLP_datove_rozhrani`, column 35) says it outright:
+  `EAN;VARCHAR2(13);Pole je prázdné, údaje již nejsou k dispozici`.
+- No other dataset in the SÚKL catalog (23 datasets: LEK-13, DIS-13, REG-13, dodávky, eRecept, …)
+  carries a GTIN/EAN either. The remaining GTIN↔SÚKL registries (GS1 GEPIR, PharmData PDK) are
+  commercial or web-only, so nothing can be downloaded and shipped inside the APK.
+
+So `SuklRepository.findByGtin` cannot be fed from a public source. Rather than leave a lookup that
+can never hit, the mapping is learned from the user and shared by both paths:
+
+- `domain/scanner/Gtin.kt` — one normaliser (`8..14` digits → 14-digit GTIN) and
+  `packagingVariants` (indicators 0–8), used by both `SuklRepository` and `DoseRepository`.
+  `DoseRepository.findByGtin` previously matched only the exact scanned string, so a multipack box
+  (indicator 1) of a medication the user already had did not match; it now uses `findByAnyGtin`
+  (`Daos.kt`, new medication query) over the same variants.
+- `ScannerViewModel.save` already wrote the scanned GTIN onto the medication, so the first scan of
+  an unknown box teaches the app: the second scan hits `SCAN_ALREADY_LISTED`.
+- `msg_scan_no_sukl_match` now says the code is not in SÚKL open data and that the package will be
+  remembered, instead of implying the user mistyped something.
+
+Tests: `SuklCsvParserTest` (real 41-column header, blank EAN → `gtin == null`, EAN-13 padded to 14),
+`GtinTest` (padding, identical variants for EAN-13 and GTIN-14, 9 indicators, rejects non-GTIN
+payloads), and a `DaoTest` case proving the multipack variant resolves the stored medication.
+
+## The Health Connect sheet closed before it could ask for anything
+
+Reported as "toggling Health Connect without permission should raise the system dialog". The toggle
+already launched `PermissionController.createRequestPermissionResultContract()`, and
+`HealthRationaleActivity` was already declared — but the sheet still vanished instantly. Logcat on
+an API 35 emulator showed why:
+
+```
+11-13 ... com.android.healthconnect.controller.permissions.request.PermissionsActivity
+E PermissionsActivity: App should support rationale intent, finishing!
+```
+
+`PermissionsActivity` finishes unless `HealthPermissionReader.isRationaleIntentDeclared(pkg)` is
+true, and on Android 14+ that helper no longer looks at
+`androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE`. It builds
+`Intent(Intent.ACTION_VIEW_PERMISSION_USAGE).addCategory(CATEGORY_HEALTH_PERMISSIONS)` and queries it
+with `MATCH_ALL`; with nothing answering, the sheet closes and the contract returns an empty set, so
+the switch stayed off. Fix in `app/src/main/AndroidManifest.xml`:
+
+- the legacy filter gained `android.intent.category.DEFAULT` (Health Connect still resolves that one
+  with `MATCH_DEFAULT_ONLY` on Android 13);
+- a new `<activity-alias android:name=".health.ViewPermissionUsageActivity"
+  android:targetActivity=".health.HealthRationaleActivity" android:exported="true"
+  android:permission="android.permission.START_VIEW_PERMISSION_USAGE">` answers
+  `VIEW_PERMISSION_USAGE` + `HEALTH_PERMISSIONS` for Android 14+.
+
+`SettingsViewModel.refreshHealthState()` is now called from the screen's `LifecycleResumeEffect`, so a
+grant or revocation made in the Health Connect app is reflected when the user comes back instead of
+only in `init`.
+
+Verified on `emulator-5554` (API 35), `cz.medsy.debug`:
+
+- `cmd package query-activities -a android.intent.action.VIEW_PERMISSION_USAGE -c
+  android.intent.category.HEALTH_PERMISSIONS` lists `cz.medsy.health.ViewPermissionUsageActivity`;
+- switching the row on opens the real sheet ("Povolit aplikaci Medsy přístup ke službě Health
+  Connect?"); "Povolit vše" + "Povolit" grants all four permissions and the row ends `checked=true`;
+- `pm revoke … android.permission.health.WRITE_HEART_RATE` then leaving and re-entering settings
+  turns the row back off.
+
+
+## The medication lookup is a waterfall, and it is ordered on purpose
+
+`MedicationLookupRepository` answers a scan or a query through four stages, and each stage exists
+because the previous one cannot answer that class of product:
+
+1. **SÚKL** (`data/local/datasource/SuklCatalogDataSource.kt`) — legal Czech metadata, already in the
+   local database, works offline. It reuses `sukl_medications` and `SuklDao` instead of a second
+   catalogue table: a parallel copy would double the sync cost and could disagree with the one the
+   settings screen reports.
+2. **Curated HRT/IPLP catalogue** (`assets/hrt_curated_catalog.json`, 39 entries) — compounded
+   capsules, creams and imported esters that SÚKL never lists, plus the PK metadata (half-life,
+   `defaultDeadSpaceMl`, site rotation) that makes a schedule meaningful. The same file is the PK
+   reference for SÚKL rows: the register knows "ESTROFEM 2 mg" but not that oral estradiol is ~16 h,
+   so `HrtCuratedCatalogDataSource.enrichment(atcCode, formHint, substanceHint)` fills the gap.
+3. **Open Food Facts** (`OpenFoodFactsApi`) — supplements that only exist as an EAN, and the only
+   source that can say "contains biotin". Wrapped in `withTimeoutOrNull(10_000)`; an `IOException`
+   means "we could not ask", which is the same answer as "unknown" for the waterfall, so it falls
+   through instead of failing the scan.
+4. **Manual entry** (`AtcFallbackDataSource`, `assets/atc_dictionary.json`) — never fails and keeps
+   interaction checking alive for everything else.
+
+Two things are deliberate and easy to mistake for omissions:
+
+- **The curated catalogue ships no GTINs.** SÚKL stopped publishing barcodes in 2026-07 and the
+  remaining registries are commercial, so any barcode there would be invented. `Entry.gtins` exists
+  and `findByBarcode` honours packaging variants (multipack indicator 1 matches the single box), but
+  it carries nothing until a user maps a package once — `ScannerViewModel.save` is that learning
+  path.
+- **The ATC dictionary is an asset, not a Room table.** It is immutable reference data; a table would
+  force a migration per ATC release and copy the same rows into the SQLCipher database.
+
+Details that were fixed while building it, each with a test:
+
+- `Gs1BarcodeParser` now caps variable-length AIs (10/21 ≤ 20 characters) — without the cap a
+  26-character lot number was stored in full and never matched the printed label.
+- A plain EAN-13 (no AIs at all) falls back to `parseEan`, so callers do not need to know which
+  symbology produced the string.
+- `MedicationFormMapper` is the single form mapping; the scanner, the waterfall and the importer had
+  three private copies that disagreed — "podjazyková tableta" was stored as a plain tablet, which
+  changed hold-time calculations.
+- Mineral detection folds Czech diacritics and matches the salt adjective, not the noun: packaging
+  says "uhličitan vápenatý" and "fumarát železnatý", never "vápník" or "železo".
+- ATC search gained `keywords` for lay Czech terms ("zelezo", "horecik", "cukrovka"), because the
+  dictionary stores INN wording.
+
+Tests: `Gs1BarcodeParserTest` (13), `OpenFoodFactsTest` (7), `HrtCuratedCatalogDataSourceTest` (7),
+`AtcFallbackDataSourceTest` (7), `MedicationLookupRepositoryImplTest` (10).
+
+## The scanner asks one question and the waterfall answers it
+
+`ScannerViewModel` no longer knows how medicines are found. It hands the raw string to
+`MedicationLookupRepository.resolveByBarcode` and renders whatever candidate comes back, so the four
+stages can be reordered without touching the UI. Scanning, typing and picking all converge on the
+same `applyCandidate`, which is what keeps the form consistent: the ATC code a user picks from a chip
+is the code that ends up on the saved medication, and therefore the one interaction checking uses.
+
+Three behaviours are deliberate:
+
+- **Typing searches the waterfall, ATC codes are a last resort.** `searchMedications` shows
+  `searchByQuery` results and only asks `suggestAtc` when no SÚKL row matched. Showing 96 ATC codes
+  next to three real products would bury the products.
+- **A failed lookup still keeps the symbol.** GTIN, batch and expiry are the part of a box that can
+  never be retyped correctly, so `manualCandidate` pre-fills them and the row is saved as
+  `MANUAL_ATC_FALLBACK` — "we know the package, we do not know the product".
+- **A QR code that is not a GS1 symbol is not a package.** `resolveBarcode` treats a fallback as
+  usable only when a symbol was decoded or the string yields a GTIN, so a poster's URL reports
+  "not a GS1 code" instead of offering an empty medication named after a link.
+
+The device run caught one bug the unit tests could not: picking an ATC code after picking a
+concentrated injection left "5 mg/mL" in the strength field, because `applyCandidate` fell back to
+the previous state for blank values. Strength and concentration now come strictly from the candidate
+(`formatStrength`, `formatConcentration`), and the regression is pinned in `ScannerLookupTest`.
+
+Tests: `ScannerLookupTest` (9) — real Room, real assets, only the Open Food Facts stage faked.
+
+The shelf card now shows the lot number next to the expiry of the box that will be opened next
+(`StockLine.nextBatch`, rendered through `BatchCaption`). Before that, a hand-added package showed
+only a quantity: the expiry appeared only when it was within 30 days, and the lot never appeared at
+all — which made a scanned-but-unmatched box impossible to check against the physical carton. The
+line is informational and always visible now, while the 30-day warning stays a separate signal.
