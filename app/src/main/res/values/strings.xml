@@ -624,6 +624,7 @@
     <string name="form_short_spray">Spray</string>
     <string name="form_short_sublingual">SL</string>
     <string name="form_short_drops">Drops</string>
+    <string name="form_short_supplement">Supplement</string>
 
     <!-- Backup and restore -->
     <string name="backup_title">Backup</string>

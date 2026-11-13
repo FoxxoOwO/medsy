@@ -354,6 +354,33 @@ interface SuklDao {
     @Query("SELECT * FROM sukl_medications WHERE name LIKE '%' || :query || '%' OR activeSubstance LIKE '%' || :query || '%' ORDER BY name LIMIT :limit")
     suspend fun search(query: String, limit: Int = 40): List<SuklMedicationEntity>
 
+    /**
+     * Catalog search for the lookup waterfall: the SÚKL code, the name and the substance are
+     * all searchable, and an exact code or a name prefix outranks a mid-word substance hit so
+     * typing "0012345" or "Estro" does not bury the intended product.
+     */
+    @Query(
+        """
+        SELECT * FROM sukl_medications
+        WHERE suklCode LIKE :like OR name LIKE :like OR activeSubstance LIKE :like
+        ORDER BY
+            CASE
+                WHEN suklCode = :exact THEN 0
+                WHEN name LIKE :prefix THEN 1
+                WHEN name LIKE :like THEN 2
+                ELSE 3
+            END,
+            name
+        LIMIT :limit
+        """,
+    )
+    suspend fun searchCatalog(
+        like: String,
+        prefix: String,
+        exact: String,
+        limit: Int,
+    ): List<SuklMedicationEntity>
+
     @Query("SELECT COUNT(*) FROM sukl_medications")
     suspend fun count(): Int
 

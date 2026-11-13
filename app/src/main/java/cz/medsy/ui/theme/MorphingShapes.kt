@@ -61,7 +61,7 @@ object MedsyMorph {
     )
 
     fun baseFor(form: MedicationForm): RoundedPolygon = when (form) {
-        MedicationForm.TABLET, MedicationForm.CAPSULE -> pill
+        MedicationForm.TABLET, MedicationForm.CAPSULE, MedicationForm.SUPPLEMENT -> pill
         MedicationForm.INJECTION_IM, MedicationForm.INJECTION_SUBQ -> hexagon
         MedicationForm.PATCH -> squircle
         MedicationForm.GEL, MedicationForm.SPRAY, MedicationForm.DROPS -> droplet

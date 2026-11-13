@@ -407,6 +407,7 @@ internal val MedicationForm.shortLabelRes: Int
         MedicationForm.SPRAY -> R.string.form_short_spray
         MedicationForm.SUBLINGUAL -> R.string.form_short_sublingual
         MedicationForm.DROPS -> R.string.form_short_drops
+        MedicationForm.SUPPLEMENT -> R.string.form_short_supplement
     }
 
 @Preview(name = "Scanner light")

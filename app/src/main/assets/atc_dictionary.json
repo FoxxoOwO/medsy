@@ -1,0 +1,725 @@
+{
+  "version": 1,
+  "updated": "2026-11-13",
+  "note": "Curated subset of the WHO ATC/DDD index: the codes a Czech HRT user actually meets, plus the minerals and vitamins that interact with thyroid hormones and lab assays. Codes are WHO ATC; names are Czech/Latin/English. The list is intentionally small — it is matched in memory, so a full import can be added later without a schema change.",
+  "entries": [
+    {
+      "code": "A02BC01",
+      "latin": "Omeprazolum",
+      "czech": "Omeprazol",
+      "english": "Omeprazole",
+      "keywords": [
+        "losek",
+        "omeprazol",
+        "omeprazole"
+      ]
+    },
+    {
+      "code": "A02BC02",
+      "latin": "Pantoprazolum",
+      "czech": "Pantoprazol",
+      "english": "Pantoprazole"
+    },
+    {
+      "code": "A02BC05",
+      "latin": "Esomeprazolum",
+      "czech": "Esomeprazol",
+      "english": "Esomeprazole"
+    },
+    {
+      "code": "A03FA01",
+      "latin": "Metoclopramidum",
+      "czech": "Metoklopramid",
+      "english": "Metoclopramide"
+    },
+    {
+      "code": "A04AA01",
+      "latin": "Ondansetronum",
+      "czech": "Ondansetron",
+      "english": "Ondansetron"
+    },
+    {
+      "code": "A10BA02",
+      "latin": "Metforminum",
+      "czech": "Metformin",
+      "english": "Metformin"
+    },
+    {
+      "code": "A11CA01",
+      "latin": "Retinolum",
+      "czech": "Retinol (vitamin A)",
+      "english": "Retinol (vitamin A)"
+    },
+    {
+      "code": "A11CC05",
+      "latin": "Cholecalciferolum",
+      "czech": "Cholekalciferol (vitamin D3)",
+      "english": "Cholecalciferol (vitamin D3)",
+      "keywords": [
+        "decko",
+        "déčko",
+        "vitamin d",
+        "vitamín d"
+      ]
+    },
+    {
+      "code": "A11GA01",
+      "latin": "Acidum ascorbicum",
+      "czech": "Kyselina askorbová (vitamin C)",
+      "english": "Ascorbic acid (vitamin C)",
+      "keywords": [
+        "cecko",
+        "céčko",
+        "vitamin c",
+        "vitamín c"
+      ]
+    },
+    {
+      "code": "A11HA02",
+      "latin": "Pyridoxinum",
+      "czech": "Pyridoxin (vitamin B6)",
+      "english": "Pyridoxine (vitamin B6)"
+    },
+    {
+      "code": "A11HA03",
+      "latin": "Tocopherolum",
+      "czech": "Tokoferol (vitamin E)",
+      "english": "Tocopherol (vitamin E)"
+    },
+    {
+      "code": "A11HA04",
+      "latin": "Riboflavinum",
+      "czech": "Riboflavin (vitamin B2)",
+      "english": "Riboflavin (vitamin B2)"
+    },
+    {
+      "code": "A11HA05",
+      "latin": "Biotinum",
+      "czech": "Biotin (vitamin B7)",
+      "english": "Biotin (vitamin B7)",
+      "note": "Interferes with streptavidin-biotin immunoassays for ~72 h.",
+      "keywords": [
+        "biotin",
+        "vitamin b7",
+        "vitamin h",
+        "vitamín b7"
+      ]
+    },
+    {
+      "code": "A12AA04",
+      "latin": "Calcii carbonas",
+      "czech": "Uhličitan vápenatý",
+      "english": "Calcium carbonate",
+      "note": "Divalent cation: chelates levothyroxine and tetracyclines.",
+      "keywords": [
+        "kalcium",
+        "vapnik",
+        "vápník"
+      ]
+    },
+    {
+      "code": "A12AA06",
+      "latin": "Calcii gluconas",
+      "czech": "Glukonan vápenatý",
+      "english": "Calcium gluconate",
+      "keywords": [
+        "kalcium",
+        "vapnik",
+        "vápník"
+      ]
+    },
+    {
+      "code": "A12BA01",
+      "latin": "Kalii chloridum",
+      "czech": "Chlorid draselný",
+      "english": "Potassium chloride"
+    },
+    {
+      "code": "A12CB01",
+      "latin": "Zinci sulfas",
+      "czech": "Síran zinečnatý",
+      "english": "Zinc sulfate",
+      "keywords": [
+        "zinc",
+        "zinek"
+      ]
+    },
+    {
+      "code": "A12CC04",
+      "latin": "Magnesii citras",
+      "czech": "Citronan hořečnatý",
+      "english": "Magnesium citrate",
+      "keywords": [
+        "horcik",
+        "hořčík",
+        "magnesium"
+      ]
+    },
+    {
+      "code": "A12CC10",
+      "latin": "Magnesii oxidum",
+      "czech": "Oxid hořečnatý",
+      "english": "Magnesium oxide",
+      "keywords": [
+        "horcik",
+        "hořčík",
+        "magnesium"
+      ]
+    },
+    {
+      "code": "B01AA03",
+      "latin": "Warfarinum",
+      "czech": "Warfarin",
+      "english": "Warfarin"
+    },
+    {
+      "code": "B01AC06",
+      "latin": "Acidum acetylsalicylicum",
+      "czech": "Kyselina acetylsalicylová",
+      "english": "Acetylsalicylic acid"
+    },
+    {
+      "code": "B01AF01",
+      "latin": "Rivaroxabanum",
+      "czech": "Rivaroxaban",
+      "english": "Rivaroxaban"
+    },
+    {
+      "code": "B01AF02",
+      "latin": "Apixabanum",
+      "czech": "Apixaban",
+      "english": "Apixaban"
+    },
+    {
+      "code": "B03AA02",
+      "latin": "Ferrosi fumaras",
+      "czech": "Fumarát železnatý",
+      "english": "Ferrous fumarate",
+      "note": "Iron: separate from levothyroxine by at least 4 h.",
+      "keywords": [
+        "iron",
+        "zelezo",
+        "železo"
+      ]
+    },
+    {
+      "code": "B03AA07",
+      "latin": "Ferrosi sulfas",
+      "czech": "Síran železnatý",
+      "english": "Ferrous sulfate",
+      "keywords": [
+        "iron",
+        "zelezo",
+        "železo"
+      ]
+    },
+    {
+      "code": "B03BA01",
+      "latin": "Cyanocobalaminum",
+      "czech": "Kyanokobalamin (vitamin B12)",
+      "english": "Cyanocobalamin (vitamin B12)",
+      "keywords": [
+        "b12",
+        "vitamin b12",
+        "vitamín b12"
+      ]
+    },
+    {
+      "code": "B03BA03",
+      "latin": "Hydroxocobalaminum",
+      "czech": "Hydroxokobalamin",
+      "english": "Hydroxocobalamin"
+    },
+    {
+      "code": "C01DA02",
+      "latin": "Glycerylis trinitras",
+      "czech": "Nitroglycerin",
+      "english": "Glyceryl trinitrate"
+    },
+    {
+      "code": "C03AA03",
+      "latin": "Hydrochlorothiazidum",
+      "czech": "Hydrochlorothiazid",
+      "english": "Hydrochlorothiazide"
+    },
+    {
+      "code": "C03CA01",
+      "latin": "Furosemidum",
+      "czech": "Furosemid",
+      "english": "Furosemide"
+    },
+    {
+      "code": "C03DA01",
+      "latin": "Spironolactonum",
+      "czech": "Spironolakton",
+      "english": "Spironolactone",
+      "keywords": [
+        "spiro",
+        "spironolakton",
+        "verospiron"
+      ]
+    },
+    {
+      "code": "C07AB07",
+      "latin": "Bisoprololum",
+      "czech": "Bisoprolol",
+      "english": "Bisoprolol",
+      "keywords": [
+        "bisoprolol",
+        "concor"
+      ]
+    },
+    {
+      "code": "C08CA01",
+      "latin": "Amlodipinum",
+      "czech": "Amlodipin",
+      "english": "Amlodipine"
+    },
+    {
+      "code": "C09AA05",
+      "latin": "Ramiprilum",
+      "czech": "Ramipril",
+      "english": "Ramipril",
+      "keywords": [
+        "ramipril",
+        "tritace"
+      ]
+    },
+    {
+      "code": "C09CA01",
+      "latin": "Losartanum",
+      "czech": "Losartan",
+      "english": "Losartan"
+    },
+    {
+      "code": "C09CA06",
+      "latin": "Candesartanum",
+      "czech": "Kandesartan",
+      "english": "Candesartan"
+    },
+    {
+      "code": "C10AA05",
+      "latin": "Atorvastatinum",
+      "czech": "Atorvastatin",
+      "english": "Atorvastatin",
+      "keywords": [
+        "atorvastatin",
+        "sortis"
+      ]
+    },
+    {
+      "code": "G03AA07",
+      "latin": "Levonorgestrelum et ethinylestradiolum",
+      "czech": "Levonorgestrel a ethinylestradiol",
+      "english": "Levonorgestrel and ethinylestradiol"
+    },
+    {
+      "code": "G03BA02",
+      "latin": "Methyltestosteronum",
+      "czech": "Methyltestosteron",
+      "english": "Methyltestosterone"
+    },
+    {
+      "code": "G03BA03",
+      "latin": "Testosteronum",
+      "czech": "Testosteron",
+      "english": "Testosterone",
+      "keywords": [
+        "nebid",
+        "testosteron",
+        "testosterone"
+      ]
+    },
+    {
+      "code": "G03CA01",
+      "latin": "Ethinylestradiolum",
+      "czech": "Ethinylestradiol",
+      "english": "Ethinylestradiol"
+    },
+    {
+      "code": "G03CA03",
+      "latin": "Estradiolum",
+      "czech": "Estradiol",
+      "english": "Estradiol",
+      "keywords": [
+        "estradiol",
+        "estrogen"
+      ]
+    },
+    {
+      "code": "G03CA04",
+      "latin": "Estriolum",
+      "czech": "Estriol",
+      "english": "Estriol"
+    },
+    {
+      "code": "G03DA04",
+      "latin": "Progesteronum",
+      "czech": "Progesteron",
+      "english": "Progesterone",
+      "keywords": [
+        "progesteron",
+        "progesterone",
+        "utrogestan"
+      ]
+    },
+    {
+      "code": "G03DB01",
+      "latin": "Dydrogesteronum",
+      "czech": "Dydrogesteron",
+      "english": "Dydrogesterone",
+      "keywords": [
+        "duphaston",
+        "dydrogesteron"
+      ]
+    },
+    {
+      "code": "G03HA01",
+      "latin": "Cyproteroni acetas",
+      "czech": "Cyproteron acetát",
+      "english": "Cyproterone acetate",
+      "keywords": [
+        "androcur",
+        "cpa",
+        "cyproteron",
+        "cyproterone"
+      ]
+    },
+    {
+      "code": "G03HB01",
+      "latin": "Cyproteronum et oestrogenum",
+      "czech": "Cyproteron a estrogen",
+      "english": "Cyproterone and estrogen"
+    },
+    {
+      "code": "G04CB01",
+      "latin": "Finasteridum",
+      "czech": "Finasterid",
+      "english": "Finasteride",
+      "keywords": [
+        "finasterid",
+        "finasteride",
+        "proscar"
+      ]
+    },
+    {
+      "code": "G04CB02",
+      "latin": "Dutasteridum",
+      "czech": "Dutasterid",
+      "english": "Dutasteride",
+      "keywords": [
+        "avodart",
+        "dutasterid",
+        "dutasteride"
+      ]
+    },
+    {
+      "code": "H02AB07",
+      "latin": "Prednisonum",
+      "czech": "Prednison",
+      "english": "Prednisone",
+      "keywords": [
+        "prednison",
+        "prednisone"
+      ]
+    },
+    {
+      "code": "H03AA01",
+      "latin": "Levothyroxinum",
+      "czech": "Levothyroxin",
+      "english": "Levothyroxine",
+      "note": "Take fasting, 30-60 min before food; separate from calcium, iron and magnesium.",
+      "keywords": [
+        "euthyrox",
+        "letrox",
+        "levothyroxin"
+      ]
+    },
+    {
+      "code": "H03AA02",
+      "latin": "Liothyroninum",
+      "czech": "Liothyronin",
+      "english": "Liothyronine"
+    },
+    {
+      "code": "J01CA04",
+      "latin": "Amoxicillinum",
+      "czech": "Amoxicilin",
+      "english": "Amoxicillin",
+      "keywords": [
+        "amoxicilin",
+        "amoxicillin",
+        "augmentin"
+      ]
+    },
+    {
+      "code": "J01CR02",
+      "latin": "Amoxicillinum et acidum clavulanicum",
+      "czech": "Amoxicilin a kyselina klavulanová",
+      "english": "Amoxicillin and clavulanic acid"
+    },
+    {
+      "code": "J01FA10",
+      "latin": "Azithromycinum",
+      "czech": "Azithromycin",
+      "english": "Azithromycin"
+    },
+    {
+      "code": "J01MA02",
+      "latin": "Ciprofloxacinum",
+      "czech": "Ciprofloxacin",
+      "english": "Ciprofloxacin"
+    },
+    {
+      "code": "J01XE01",
+      "latin": "Nitrofurantoinum",
+      "czech": "Nitrofurantoin",
+      "english": "Nitrofurantoin"
+    },
+    {
+      "code": "L02AE02",
+      "latin": "Leuprorelinum",
+      "czech": "Leuprorelin",
+      "english": "Leuprorelin"
+    },
+    {
+      "code": "L02AE03",
+      "latin": "Goserelinum",
+      "czech": "Goserelin",
+      "english": "Goserelin"
+    },
+    {
+      "code": "L02BB03",
+      "latin": "Bicalutamidum",
+      "czech": "Bikalutamid",
+      "english": "Bicalutamide",
+      "keywords": [
+        "bicalutamide",
+        "bikalutamid",
+        "casodex"
+      ]
+    },
+    {
+      "code": "M01AB05",
+      "latin": "Diclofenacum",
+      "czech": "Diklofenak",
+      "english": "Diclofenac"
+    },
+    {
+      "code": "M01AE01",
+      "latin": "Ibuprofenum",
+      "czech": "Ibuprofen",
+      "english": "Ibuprofen",
+      "keywords": [
+        "brufen",
+        "ibu",
+        "ibuprofen"
+      ]
+    },
+    {
+      "code": "M01AE02",
+      "latin": "Naproxenum",
+      "czech": "Naproxen",
+      "english": "Naproxen"
+    },
+    {
+      "code": "N02AA01",
+      "latin": "Morphinum",
+      "czech": "Morfin",
+      "english": "Morphine"
+    },
+    {
+      "code": "N02AX02",
+      "latin": "Tramadolum",
+      "czech": "Tramadol",
+      "english": "Tramadol",
+      "keywords": [
+        "tramadol"
+      ]
+    },
+    {
+      "code": "N02BE01",
+      "latin": "Paracetamolum",
+      "czech": "Paracetamol",
+      "english": "Paracetamol",
+      "keywords": [
+        "panadol",
+        "paracetamol",
+        "paralen"
+      ]
+    },
+    {
+      "code": "N03AX12",
+      "latin": "Gabapentinum",
+      "czech": "Gabapentin",
+      "english": "Gabapentin"
+    },
+    {
+      "code": "N03AX16",
+      "latin": "Pregabalinum",
+      "czech": "Pregabalin",
+      "english": "Pregabalin"
+    },
+    {
+      "code": "N04AA01",
+      "latin": "Trihexyphenidylum",
+      "czech": "Trihexyfenidyl",
+      "english": "Trihexyphenidyl"
+    },
+    {
+      "code": "N04AA02",
+      "latin": "Biperidenum",
+      "czech": "Biperiden",
+      "english": "Biperiden"
+    },
+    {
+      "code": "N05AH03",
+      "latin": "Olanzapinum",
+      "czech": "Olanzapin",
+      "english": "Olanzapine"
+    },
+    {
+      "code": "N05AH04",
+      "latin": "Quetiapinum",
+      "czech": "Kvetiapin",
+      "english": "Quetiapine"
+    },
+    {
+      "code": "N05AL05",
+      "latin": "Amisulpridum",
+      "czech": "Amisulprid",
+      "english": "Amisulpride"
+    },
+    {
+      "code": "N05AX08",
+      "latin": "Risperidonum",
+      "czech": "Risperidon",
+      "english": "Risperidone"
+    },
+    {
+      "code": "N05AX12",
+      "latin": "Aripiprazolum",
+      "czech": "Aripiprazol",
+      "english": "Aripiprazole"
+    },
+    {
+      "code": "N05BA01",
+      "latin": "Diazepamum",
+      "czech": "Diazepam",
+      "english": "Diazepam"
+    },
+    {
+      "code": "N05BA12",
+      "latin": "Alprazolamum",
+      "czech": "Alprazolam",
+      "english": "Alprazolam"
+    },
+    {
+      "code": "N05CD02",
+      "latin": "Nitrazepamum",
+      "czech": "Nitrazepam",
+      "english": "Nitrazepam"
+    },
+    {
+      "code": "N05CF02",
+      "latin": "Zolpidemum",
+      "czech": "Zolpidem",
+      "english": "Zolpidem"
+    },
+    {
+      "code": "N06AA04",
+      "latin": "Clomipraminum",
+      "czech": "Klomipramin",
+      "english": "Clomipramine"
+    },
+    {
+      "code": "N06AA09",
+      "latin": "Amitriptylinum",
+      "czech": "Amitriptylin",
+      "english": "Amitriptyline"
+    },
+    {
+      "code": "N06AB03",
+      "latin": "Fluoxetinum",
+      "czech": "Fluoxetin",
+      "english": "Fluoxetine"
+    },
+    {
+      "code": "N06AB04",
+      "latin": "Citalopramum",
+      "czech": "Citalopram",
+      "english": "Citalopram"
+    },
+    {
+      "code": "N06AB06",
+      "latin": "Sertralinum",
+      "czech": "Sertralin",
+      "english": "Sertraline"
+    },
+    {
+      "code": "N06AB10",
+      "latin": "Escitalopramum",
+      "czech": "Escitalopram",
+      "english": "Escitalopram"
+    },
+    {
+      "code": "N06AX12",
+      "latin": "Bupropionum",
+      "czech": "Bupropion",
+      "english": "Bupropion"
+    },
+    {
+      "code": "N06AX16",
+      "latin": "Venlafaxinum",
+      "czech": "Venlafaxin",
+      "english": "Venlafaxine"
+    },
+    {
+      "code": "N06AX21",
+      "latin": "Duloxetinum",
+      "czech": "Duloxetin",
+      "english": "Duloxetine"
+    },
+    {
+      "code": "N07BA03",
+      "latin": "Vareniclinum",
+      "czech": "Vareniklin",
+      "english": "Varenicline"
+    },
+    {
+      "code": "R03AC02",
+      "latin": "Salbutamolum",
+      "czech": "Salbutamol",
+      "english": "Salbutamol"
+    },
+    {
+      "code": "R03BA02",
+      "latin": "Budesonidum",
+      "czech": "Budesonid",
+      "english": "Budesonide"
+    },
+    {
+      "code": "R06AE07",
+      "latin": "Cetirizinum",
+      "czech": "Cetirizin",
+      "english": "Cetirizine",
+      "keywords": [
+        "cetirizin",
+        "cetirizine",
+        "zyrtec"
+      ]
+    },
+    {
+      "code": "R06AE09",
+      "latin": "Levocetirizinum",
+      "czech": "Levocetirizin",
+      "english": "Levocetirizine"
+    },
+    {
+      "code": "R06AX13",
+      "latin": "Loratadinum",
+      "czech": "Loratadin",
+      "english": "Loratadine"
+    }
+  ]
+}

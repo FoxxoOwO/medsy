@@ -13,7 +13,10 @@ enum class MedicationForm {
     GEL,
     SPRAY,
     SUBLINGUAL,
-    DROPS;
+    DROPS,
+
+    /** Vitamins, minerals, food supplements resolved through Open Food Facts. */
+    SUPPLEMENT;
 
     val isInjectable: Boolean
         get() = this == INJECTION_IM || this == INJECTION_SUBQ

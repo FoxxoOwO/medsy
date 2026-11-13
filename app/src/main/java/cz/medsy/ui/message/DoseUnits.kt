@@ -25,7 +25,9 @@ fun defaultUnitRes(form: MedicationForm): Int = when (form) {
     MedicationForm.SPRAY,
     -> R.string.dose_unit_dose
 
-    MedicationForm.CAPSULE -> R.string.dose_unit_capsule
+    MedicationForm.CAPSULE,
+    MedicationForm.SUPPLEMENT,
+    -> R.string.dose_unit_capsule
     MedicationForm.DROPS -> R.string.dose_unit_drop
     MedicationForm.SUBLINGUAL -> R.string.dose_unit_tablet
     MedicationForm.TABLET -> R.string.dose_unit_tablet

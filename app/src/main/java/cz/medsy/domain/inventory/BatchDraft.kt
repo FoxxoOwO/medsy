@@ -88,13 +88,14 @@ object BatchDraftValidator {
         MedicationForm.PATCH -> setOf("patch")
         MedicationForm.SUBLINGUAL -> setOf("tbl", "tablet")
         MedicationForm.DROPS -> setOf("ml", "drop")
-        MedicationForm.TABLET, MedicationForm.CAPSULE -> setOf("tbl", "tablet", "capsule")
+        MedicationForm.TABLET, MedicationForm.CAPSULE, MedicationForm.SUPPLEMENT ->
+            setOf("tbl", "tablet", "capsule")
     }
 
     private fun MedicationForm.label(): Message = message(
         when (this) {
             MedicationForm.TABLET -> MessageKey.BATCH_FORM_TABLET
-            MedicationForm.CAPSULE -> MessageKey.BATCH_FORM_CAPSULE
+            MedicationForm.CAPSULE, MedicationForm.SUPPLEMENT -> MessageKey.BATCH_FORM_CAPSULE
             MedicationForm.INJECTION_IM, MedicationForm.INJECTION_SUBQ -> MessageKey.BATCH_FORM_INJECTION
             MedicationForm.PATCH -> MessageKey.BATCH_FORM_PATCH
             MedicationForm.GEL, MedicationForm.SPRAY -> MessageKey.BATCH_FORM_GEL_OR_SPRAY
