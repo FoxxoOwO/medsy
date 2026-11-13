@@ -1,5 +1,7 @@
 # Medsy
 
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
+
 Offline-first Android app for tracking medication, HRT and bloodwork — no account, no cloud,
 no telemetry. Everything (medications, schedules, dose log, labs, inventory) lives in a
 SQLCipher-encrypted Room database on the device; the only network traffic is the optional
@@ -55,6 +57,21 @@ records implementation traps hit along the way.
 
 Medsy is a personal record-keeping tool, not a medical device. It does not give dosing advice
 and must not replace a prescription or a doctor's instructions.
+
+## License
+
+Medsy is free software: you can redistribute it and/or modify it under the terms of the GNU
+General Public License as published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+Medsy is distributed in the hope that it will be useful, but **without any warranty**; without
+even the implied warranty of merchantability or fitness for a particular purpose. See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with Medsy; it is in
+[`LICENSE`](LICENSE). If not, see <https://www.gnu.org/licenses/>.
+
+Copyright (C) 2026 TeresaPC
 
 ---
 
