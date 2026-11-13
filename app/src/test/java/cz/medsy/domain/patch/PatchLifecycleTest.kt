@@ -140,23 +140,32 @@ class PatchLifecycleTest {
 
     // --- descriptions ----------------------------------------------------------
 
+    // Fixed instants rather than Instant.now(): with a live clock the duration between two
+    // calls lands at 59m59s, which formats as DURATION_MINUTES and made this test fail on
+    // machines slow enough to cross a millisecond boundary.
+    private val describeNow = Instant.parse("2026-11-11T08:00:00Z")
+
     @Test
     fun `a worn patch describes the remaining time`() {
-        val until = Instant.now().plus(Duration.ofHours(30))
-        val text = PatchLifecycle.describe(PatchState.WORN, until, Instant.now())
+        val until = describeNow.plus(Duration.ofHours(30))
+        val text = PatchLifecycle.describe(PatchState.WORN, until, describeNow)
         assertEquals(MessageKey.PATCH_WORN_REMOVE_IN, text.key)
         assertEquals(MessageKey.DURATION_HOURS_MINUTES, text.nestedArg(0).key)
     }
 
     @Test
     fun `a due patch says removal is due`() {
-        val text = PatchLifecycle.describe(PatchState.REMOVAL_DUE, Instant.now(), Instant.now())
+        val text = PatchLifecycle.describe(PatchState.REMOVAL_DUE, describeNow, describeNow)
         assertEquals(MessageKey.PATCH_REMOVAL_DUE, text.key)
     }
 
     @Test
     fun `an applied patch reports its wear window`() {
-        val text = PatchLifecycle.describe(PatchState.APPLIED, Instant.now().plusSeconds(3600), Instant.now())
+        val text = PatchLifecycle.describe(
+            PatchState.APPLIED,
+            describeNow.plus(Duration.ofHours(1)),
+            describeNow,
+        )
         assertEquals(MessageKey.PATCH_APPLIED_UNTIL, text.key)
         assertEquals(MessageKey.DURATION_HOURS_MINUTES, text.nestedArg(0).key)
     }
