@@ -14,6 +14,7 @@ import cz.medsy.data.local.dao.ScheduleDao
 import cz.medsy.data.local.dao.PrescriptionDao
 import cz.medsy.data.local.dao.SuklDao
 import cz.medsy.data.local.dao.SymptomDao
+import cz.medsy.data.local.dao.TranslationDao
 import cz.medsy.security.DatabaseKeyStore
 import dagger.Module
 import dagger.Provides
@@ -50,4 +51,5 @@ object DatabaseModule {
     @Provides fun suklDao(db: MedsyDatabase): SuklDao = db.suklDao()
 
     @Provides fun prescriptionDao(db: MedsyDatabase): PrescriptionDao = db.prescriptionDao()
+    @Provides fun translationDao(db: MedsyDatabase): TranslationDao = db.translationDao()
 }

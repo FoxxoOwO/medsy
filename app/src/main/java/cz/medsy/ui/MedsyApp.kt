@@ -52,6 +52,7 @@ import cz.medsy.ui.reminders.ReminderPermissionViewModel
 import cz.medsy.ui.bloodwork.BloodworkRoute
 import cz.medsy.ui.dashboard.DashboardRoute
 import cz.medsy.ui.inventory.InventoryRoute
+import cz.medsy.ui.medications.MedicationDetailRoute
 import cz.medsy.ui.medications.MedicationsRoute
 import cz.medsy.ui.scanner.ScannerRoute
 import cz.medsy.ui.settings.SettingsRoute
@@ -202,6 +203,27 @@ private fun AppScaffold() {
                 composable(TopLevelDestination.MEDICATIONS.route) {
                     MedicationsRoute(
                         onAddMedication = { navController.navigate("scanner") },
+                        onOpenMedication = { medicationId ->
+                            navController.navigate("medication/$medicationId")
+                        },
+                        onEditSchedule = { medicationId, scheduleId ->
+                            navController.navigate("schedule/$medicationId/$scheduleId")
+                        },
+                        onNewSchedule = { medicationId ->
+                            navController.navigate("schedule/$medicationId/0")
+                        },
+                    )
+                }
+                composable(
+                    route = "medication/{medicationId}",
+                    arguments = listOf(
+                        androidx.navigation.navArgument("medicationId") {
+                            type = androidx.navigation.NavType.LongType
+                        },
+                    ),
+                ) {
+                    MedicationDetailRoute(
+                        onBack = { navController.popBackStack() },
                         onEditSchedule = { medicationId, scheduleId ->
                             navController.navigate("schedule/$medicationId/$scheduleId")
                         },

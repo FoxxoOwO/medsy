@@ -77,12 +77,43 @@ object MedsyMigrations {
         "ALTER TABLE medication_milestones ADD COLUMN message TEXT",
     )
 
+    /**
+     * v4 — cached translations of a medication's text.
+     *
+     * A cache table, not patient data: it follows the medication through CASCADE and the
+     * `(medicationId, language)` unique index keeps one row per language.
+     */
+    val MIGRATION_3_4 = Migration(3, 4) { db ->
+        statements3to4().forEach(db::execSQL)
+    }
+
+    fun statements3to4(): List<String> = listOf(
+        """
+        CREATE TABLE IF NOT EXISTS `medication_translations` (
+            `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            `medicationId` INTEGER NOT NULL,
+            `language` TEXT NOT NULL,
+            `sourceHash` TEXT NOT NULL,
+            `name` TEXT NOT NULL,
+            `activeSubstance` TEXT,
+            `notes` TEXT,
+            `engine` TEXT NOT NULL,
+            `translatedAt` INTEGER NOT NULL,
+            FOREIGN KEY(`medicationId`) REFERENCES `medications`(`id`)
+                ON UPDATE NO ACTION ON DELETE CASCADE
+        )
+        """.trimIndent(),
+        "CREATE UNIQUE INDEX IF NOT EXISTS `index_medication_translations_medicationId_language` " +
+            "ON `medication_translations` (`medicationId`, `language`)",
+    )
+
     /** Every migration, oldest first. Registered in `DatabaseModule`. */
-    val ALL: List<Migration> = listOf(MIGRATION_1_2, MIGRATION_2_3)
+    val ALL: List<Migration> = listOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
 
     /** Human-readable mirror used by `MigrationRegistryTest`. */
     val SQL: Map<String, List<String>> = mapOf(
         "1->2" to statements1to2(),
         "2->3" to statements2to3(),
+        "3->4" to statements3to4(),
     )
 }

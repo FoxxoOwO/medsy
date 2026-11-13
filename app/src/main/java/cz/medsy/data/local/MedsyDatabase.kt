@@ -13,6 +13,7 @@ import cz.medsy.data.local.dao.ScheduleDao
 import cz.medsy.data.local.dao.PrescriptionDao
 import cz.medsy.data.local.dao.SuklDao
 import cz.medsy.data.local.dao.SymptomDao
+import cz.medsy.data.local.dao.TranslationDao
 import cz.medsy.data.local.entity.BiomarkerValueEntity
 import cz.medsy.data.local.entity.BloodTestSessionEntity
 import cz.medsy.data.local.entity.ConsumableEntity
@@ -20,6 +21,7 @@ import cz.medsy.data.local.entity.DoseLogEntity
 import cz.medsy.data.local.entity.InventoryBatchEntity
 import cz.medsy.data.local.entity.MedicationEntity
 import cz.medsy.data.local.entity.MedicationMilestoneEntity
+import cz.medsy.data.local.entity.MedicationTranslationEntity
 import cz.medsy.data.local.entity.PrescriptionEntity
 import cz.medsy.data.local.entity.PrescriptionItemEntity
 import cz.medsy.data.local.entity.ReferenceRangeProfileEntity
@@ -42,8 +44,9 @@ import cz.medsy.data.local.entity.SymptomLogEntity
         SuklMedicationEntity::class,
         PrescriptionEntity::class,
         PrescriptionItemEntity::class,
+        MedicationTranslationEntity::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = true,
 )
 @TypeConverters(Converters::class)
@@ -59,12 +62,13 @@ abstract class MedsyDatabase : RoomDatabase() {
     abstract fun symptomDao(): SymptomDao
     abstract fun suklDao(): SuklDao
     abstract fun prescriptionDao(): PrescriptionDao
+    abstract fun translationDao(): TranslationDao
 
     companion object {
         const val NAME = "medsy.db"
 
         /** Bump together with `version` above. */
-        const val CURRENT_VERSION = 3
+        const val CURRENT_VERSION = 4
 
         val MIGRATIONS = MedsyMigrations.ALL
 

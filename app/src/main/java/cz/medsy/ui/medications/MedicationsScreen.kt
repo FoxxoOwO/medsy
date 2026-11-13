@@ -44,6 +44,7 @@ import cz.medsy.ui.message.asText
 @Composable
 fun MedicationsRoute(
     onAddMedication: () -> Unit,
+    onOpenMedication: (Long) -> Unit,
     onNewSchedule: (Long) -> Unit = {},
     onEditSchedule: (Long, Long) -> Unit = { _, _ -> },
     viewModel: MedicationsViewModel = hiltViewModel(),
@@ -60,7 +61,7 @@ fun MedicationsRoute(
         offsetNotices = offsetNotices,
         onDismissOffsetNotices = viewModel::dismissOffsetNotices,
         onAddMedication = onAddMedication,
-        onSelect = viewModel::select,
+        onOpenMedication = onOpenMedication,
         onNewSchedule = onNewSchedule,
         onEditSchedule = onEditSchedule,
     )
@@ -74,7 +75,7 @@ fun MedicationsScreen(
     offsetNotices: List<cz.medsy.domain.message.Message> = emptyList(),
     onDismissOffsetNotices: () -> Unit = {},
     onAddMedication: () -> Unit,
-    onSelect: (Medication) -> Unit,
+    onOpenMedication: (Long) -> Unit,
     onNewSchedule: (Long) -> Unit = {},
     onEditSchedule: (Long, Long) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier,
@@ -155,7 +156,7 @@ fun MedicationsScreen(
                 medication = medication,
                 alerts = alertsByMedication[medication.id].orEmpty(),
                 schedules = schedulesByMedication[medication.id].orEmpty(),
-                onClick = { onSelect(medication) },
+                onClick = { onOpenMedication(medication.id) },
                 onNewSchedule = { onNewSchedule(medication.id) },
                 onEditSchedule = { scheduleId -> onEditSchedule(medication.id, scheduleId) },
             )
@@ -306,7 +307,7 @@ private fun MedicationsPreview() {
             ),
             alertsByMedication = emptyMap(),
             onAddMedication = {},
-            onSelect = {},
+            onOpenMedication = {},
         )
     }
 }

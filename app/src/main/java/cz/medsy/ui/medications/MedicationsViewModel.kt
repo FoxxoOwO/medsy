@@ -96,24 +96,8 @@ class MedicationsViewModel @Inject constructor(
                 initialValue = emptyMap(),
             )
 
-    private val _selected = MutableStateFlow<Medication?>(null)
-    val selected: StateFlow<Medication?> = _selected.asStateFlow()
-
-    private val _schedules = MutableStateFlow<List<Schedule>>(emptyList())
-    val schedules: StateFlow<List<Schedule>> = _schedules.asStateFlow()
-
-    fun select(medication: Medication) {
-        _selected.value = medication
-        viewModelScope.launch {
-            repository.observeSchedules(medication.id).collect { _schedules.value = it }
-        }
-    }
-
     fun delete(medication: Medication) {
-        viewModelScope.launch {
-            repository.delete(medication.id)
-            _selected.value = null
-        }
+        viewModelScope.launch { repository.delete(medication.id) }
     }
 
     fun setScheduleActive(schedule: Schedule, active: Boolean) {
@@ -122,10 +106,5 @@ class MedicationsViewModel @Inject constructor(
 
     fun toggleArchive(medication: Medication) {
         viewModelScope.launch { repository.archive(medication.id) }
-    }
-
-    fun clearSelection() {
-        _selected.value = null
-        _schedules.update { emptyList() }
     }
 }

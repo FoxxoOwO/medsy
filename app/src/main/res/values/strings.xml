@@ -205,6 +205,37 @@
     <string name="scan_detail_expiry">Expiry: %1$s</string>
     <string name="scan_detail_format">Format: %1$s</string>
     <string name="scan_details">Details</string>
+
+    <!-- Medication detail -->
+    <string name="meds_detail_title">Medication</string>
+    <string name="meds_detail_edit_title">Edit medication</string>
+    <string name="meds_detail_form">Form</string>
+    <string name="meds_detail_concentration">Concentration (mg/mL)</string>
+    <string name="meds_detail_gtin">GTIN</string>
+    <string name="meds_detail_sukl">SÚKL code</string>
+    <string name="meds_detail_archive">Archive</string>
+    <string name="meds_detail_delete_title">Delete this medication?</string>
+    <string name="meds_detail_delete_body">Its schedules and stock batches are deleted with it. This cannot be undone.</string>
+    <string name="meds_detail_schedules">Schedules</string>
+    <string name="meds_detail_stock">Stock</string>
+    <string name="meds_detail_no_stock">No batch in stock.</string>
+    <string name="meds_detail_notes">Notes</string>
+    <string name="meds_detail_pil">Patient leaflet</string>
+    <string name="meds_detail_spc">Summary of product characteristics</string>
+    <string name="meds_detail_pause">Pause</string>
+    <string name="meds_detail_resume">Resume</string>
+
+    <!-- Machine translation of the medication text -->
+    <string name="translation_title">Translation</string>
+    <string name="translation_desc">Machine translation of the name, the substance and the notes.</string>
+    <string name="translation_action">Translate</string>
+    <string name="translation_refresh">Translate again</string>
+    <string name="translation_remove">Remove translation</string>
+    <string name="translation_notice">Automatic translation — may be imprecise. The original text stays authoritative.</string>
+    <string name="translation_failed">Translation failed. Check the connection and try again.</string>
+    <string name="translation_lang_en" translatable="false">English</string>
+    <string name="translation_lang_de" translatable="false">Deutsch</string>
+    <string name="translation_lang_sk" translatable="false">Slovenčina</string>
     <string name="scan_name">Name</string>
     <string name="scan_active_substance">Active substance</string>
     <string name="scan_atc">ATC</string>
