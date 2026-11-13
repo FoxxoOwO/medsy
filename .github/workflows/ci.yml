@@ -20,16 +20,20 @@ jobs:
     timeout-minutes: 45
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "21"
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          # The default install of "tools" no longer resolves with cmdline-tools 16+,
+          # which fails the whole action; the platform is installed in the next step.
+          packages: platform-tools
 
       # compileSdk 37 is newer than the platform image on the runner, so install it explicitly.
       - name: Install platform 37 and build tools
