@@ -594,7 +594,7 @@ fun SettingsScreen(
 }
 
 /** Where the project lives. A device with no browser must not crash the settings screen. */
-private const val GITHUB_URL = "https://github.com/FoxxoOwO"
+private const val GITHUB_URL = "https://github.com/FoxxoOwO/medsy"
 
 /** Last thing in the list: who made the app, and where to find it. */
 @Composable
