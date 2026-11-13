@@ -135,8 +135,8 @@ class EReceptParserTest {
         val prescription = EReceptParser.parse("vystaveno:2026-01-01 code=ABCD1234EFGH")
         assertNotNull(prescription)
         val days = java.time.temporal.ChronoUnit.DAYS.between(
-            prescription!!.issuedAt!!.atZone(java.time.ZoneId.systemDefault()).toLocalDate(),
-            prescription.validUntil!!.atZone(java.time.ZoneId.systemDefault()).toLocalDate(),
+            prescription!!.issuedAt!!.atZone(EReceptParser.CZECH_ZONE).toLocalDate(),
+            prescription.validUntil!!.atZone(EReceptParser.CZECH_ZONE).toLocalDate(),
         )
         assertEquals(14L, days)
     }
@@ -146,7 +146,7 @@ class EReceptParserTest {
         val prescription = EReceptParser.parse(
             "vystaveno:2026-01-01 platnost:2026-02-15 code=ABCD1234EFGH",
         )
-        val localValid = prescription!!.validUntil!!.atZone(java.time.ZoneId.systemDefault()).toLocalDate()
+        val localValid = prescription!!.validUntil!!.atZone(EReceptParser.CZECH_ZONE).toLocalDate()
         assertEquals(LocalDate.of(2026, 2, 15), localValid)
     }
 
