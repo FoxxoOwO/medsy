@@ -72,6 +72,14 @@ class PrescriptionExpiryTest {
     }
 
     @Test
+    fun `validity is anchored to Czech local time, not the device zone`() {
+        val parsed = EReceptParser.parse("vystaveno:2026-05-20 code=ABCD1234EFGH")!!
+
+        assertEquals(Instant.parse("2026-05-19T22:00:00Z"), parsed.issuedAt)
+        assertEquals(Instant.parse("2026-06-03T21:59:59Z"), parsed.validUntil)
+    }
+
+    @Test
     fun `an expired prescription is expired and never warns`() {
         val item = queued(Instant.parse("2026-05-30T21:59:59Z"))
 

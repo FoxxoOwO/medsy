@@ -32,15 +32,27 @@ object EReceptParser {
 
     const val DEFAULT_VALIDITY_DAYS = 14L
 
-    fun parse(raw: String, now: Instant = Instant.now()): Prescription? {
+    /**
+     * eRecept prints plain dates and its "valid until 23:59" is Czech local time, so the
+     * instants must be anchored there and not in the device zone of a user who happens to be
+     * abroad: a Prague timestamp read in Tokyo would move the expiry by up to nine hours and
+     * could flip the "expires today" answer.
+     */
+    val CZECH_ZONE: ZoneId = ZoneId.of("Europe/Prague")
+
+    fun parse(
+        raw: String,
+        now: Instant = Instant.now(),
+        zone: ZoneId = CZECH_ZONE,
+    ): Prescription? {
         val jsonCode = if (raw.trim().startsWith("{")) extractJsonCode(raw) else null
         val code = jsonCode ?: extractCode(raw) ?: return null
         val issued = extractDate(ISSUED_DATE, raw)
         val validityEnd = extractDate(VALID_UNTIL, raw)
         val validUntil = validityEnd ?: issued?.plusDays(DEFAULT_VALIDITY_DAYS)
 
-        val zonedIssued = issued?.atStartOfDay(ZoneId.systemDefault())?.toInstant()
-        val zonedValid = validUntil?.atTime(23, 59, 59)?.atZone(ZoneId.systemDefault())?.toInstant()
+        val zonedIssued = issued?.atStartOfDay(zone)?.toInstant()
+        val zonedValid = validUntil?.atTime(23, 59, 59)?.atZone(zone)?.toInstant()
 
         return Prescription(
             code = code,
