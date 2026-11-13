@@ -1,6 +1,7 @@
 # Medsy
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
+[![CI](https://github.com/FoxxoOwO/medsy/actions/workflows/ci.yml/badge.svg)](https://github.com/FoxxoOwO/medsy/actions/workflows/ci.yml)
 
 Offline-first Android app for tracking medication, HRT and bloodwork — no account, no cloud,
 no telemetry. Everything (medications, schedules, dose log, labs, inventory) lives in a
