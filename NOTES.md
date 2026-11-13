@@ -1704,3 +1704,37 @@ report) follow it. Two manifest entries are load-bearing — `android:localeConf
 system knows what may be picked, and `AppLocalesMetadataHolderService` with `autoStoreLocales` keeps
 the choice across cold starts on Android 12 and below, where AppCompat stores it itself. Removing
 either makes the switch look broken in a way that only shows up after a restart.
+
+## A medication, opened
+
+Tapping a card on the list now opens `medication/{medicationId}` instead of selecting it in place.
+The old selection state (a `MutableStateFlow<Medication?>` fed by `select()`) is gone; a real screen
+owns its own `MedicationDetailViewModel` and observes one medication by id. That matters for the
+detail screen's own actions: archiving from there cannot leave a stale copy in a list tab, because
+`gone` flips and a `LaunchedEffect` pops the screen.
+
+Deleting asks first and says what goes with it. The foreign keys do the rest — schedules, doses,
+batches and now translations all cascade off `medications.id`.
+
+## Translating what the leaflet says
+
+The card translates the name, the active substance and the notes into English, German or Slovak
+through MyMemory. It is the only free service that answers anonymous GETs, which is the deciding
+property: the app has no backend and must not ship an API key, so DeepL/Google would mean asking the
+user for one and LibreTranslate would mean hosting something. Everything else in the design follows
+from "a translation is a convenience on top of Czech text that is already complete":
+
+- **The cache is the product.** `medication_translations` (v4) stores one row per medication and
+  language, keyed by `sourceHash` — a SHA-256 of name, substance and notes. Reopening a medication
+  costs one query, not one request; editing the note changes the hash, so the old row stops matching
+  without anything having to delete it. Verified on the emulator: kill the app, turn off Wi-Fi and
+  mobile data, cold start — "Testing" still renders from disk.
+- **Failures degrade, they do not error.** A missing translation shows the Czech text and one notice.
+  The substance is allowed to fail without losing the name, because the name is what the user asked
+  for.
+- **The notice stays visible.** "Automatic translation — may be imprecise. The original text stays
+  authoritative." is the honest framing for a medical app, and the device run showed why: MyMemory
+  rendered "Testovaci" as "Test-" in German. A user must never mistake the card for the leaflet.
+
+The API's ~500-byte limit is handled by chunking on sentence boundaries; each chunk is its own
+request and a single failed chunk fails the whole translation rather than producing half a sentence.
