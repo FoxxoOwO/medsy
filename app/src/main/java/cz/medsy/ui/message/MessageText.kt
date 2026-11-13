@@ -1,0 +1,297 @@
+package cz.medsy.ui.message
+
+import android.content.Context
+import androidx.annotation.PluralsRes
+import androidx.annotation.StringRes
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import cz.medsy.R
+import cz.medsy.domain.message.Message
+import cz.medsy.domain.message.MessageArg
+import cz.medsy.domain.message.MessageKey
+
+/**
+ * The only place that knows which resource a [MessageKey] maps to.
+ *
+ * The `when` is exhaustive on purpose: adding a key without a resource is a compile error, and
+ * [MessageLocalisationTest] additionally checks that no key maps to resource id 0 and that this
+ * file has no `else` branch that could swallow a new key.
+ */
+internal data class Res(@StringRes val string: Int = 0, @PluralsRes val plural: Int = 0)
+
+internal fun MessageKey.res(): Res = when (this) {
+    MessageKey.SCAN_NOT_GS1 -> Res(string = R.string.msg_scan_not_gs1)
+    MessageKey.SCAN_DATAMATRIX_DECODED -> Res(string = R.string.msg_scan_datamatrix_decoded)
+    MessageKey.SCAN_EAN_INVALID -> Res(string = R.string.msg_scan_ean_invalid)
+    MessageKey.SCAN_EAN_DECODED -> Res(string = R.string.msg_scan_ean_decoded)
+    MessageKey.SCAN_RX_SAVED -> Res(plural = R.plurals.msg_scan_rx_saved)
+    MessageKey.SCAN_RX_DUPLICATE -> Res(string = R.string.msg_scan_rx_duplicate)
+    MessageKey.SCAN_ALREADY_LISTED -> Res(string = R.string.msg_scan_already_listed)
+    MessageKey.SCAN_MATCHED_SUKL -> Res(string = R.string.msg_scan_matched_sukl)
+    MessageKey.SCAN_NO_SUKL_MATCH -> Res(string = R.string.msg_scan_no_sukl_match)
+    MessageKey.SCAN_NAME_REQUIRED -> Res(string = R.string.msg_scan_name_required)
+    MessageKey.SCAN_SAVED -> Res(string = R.string.msg_scan_saved)
+
+    MessageKey.RX_DISPENSED -> Res(string = R.string.rx_state_dispensed)
+    MessageKey.RX_NO_EXPIRY -> Res(string = R.string.rx_state_no_expiry)
+    MessageKey.RX_EXPIRED -> Res(string = R.string.rx_state_expired)
+    MessageKey.RX_EXPIRES_TODAY -> Res(string = R.string.rx_state_today)
+    MessageKey.RX_EXPIRES_TOMORROW -> Res(string = R.string.rx_state_tomorrow)
+    MessageKey.RX_EXPIRES_IN_DAYS -> Res(plural = R.plurals.rx_state_in_days)
+    MessageKey.RX_REMINDER_ONE -> Res(string = R.string.msg_rx_reminder_one)
+    MessageKey.RX_REMINDER_MORE -> Res(plural = R.plurals.msg_rx_reminder_more)
+
+    MessageKey.MS_STARTED -> Res(string = R.string.msg_ms_started)
+    MessageKey.MS_DOSE_CHANGED -> Res(string = R.string.msg_ms_dose_changed)
+    MessageKey.MS_SCHEDULE_CHANGED -> Res(string = R.string.msg_ms_schedule_changed)
+    MessageKey.MS_PAUSED -> Res(string = R.string.msg_ms_paused)
+    MessageKey.MS_RESUMED -> Res(string = R.string.msg_ms_resumed)
+    MessageKey.MS_STOPPED -> Res(string = R.string.msg_ms_stopped)
+    MessageKey.SCHEDULE_DAILY -> Res(string = R.string.msg_schedule_daily)
+    MessageKey.SCHEDULE_EVERY_DAYS -> Res(plural = R.plurals.msg_schedule_every_days)
+    MessageKey.SCHEDULE_EVERY_HOURS -> Res(plural = R.plurals.msg_schedule_every_hours)
+    MessageKey.SCHEDULE_CYCLICAL -> Res(string = R.string.msg_schedule_cyclical)
+    MessageKey.SCHEDULE_TAPERING -> Res(string = R.string.msg_schedule_tapering)
+    MessageKey.SCHEDULE_AS_NEEDED -> Res(string = R.string.msg_schedule_as_needed)
+    MessageKey.SCHEDULE_SUMMARY -> Res(string = R.string.msg_schedule_summary)
+    MessageKey.SCHEDULE_SUMMARY_AT_TIMES -> Res(string = R.string.msg_schedule_summary_at_times)
+
+    MessageKey.PATCH_APPLIED_UNTIL -> Res(string = R.string.msg_patch_applied_until)
+    MessageKey.PATCH_WORN_REMOVE_IN -> Res(string = R.string.msg_patch_worn_remove_in)
+    MessageKey.PATCH_WORN -> Res(string = R.string.msg_patch_worn)
+    MessageKey.PATCH_REMOVAL_DUE -> Res(string = R.string.msg_patch_removal_due)
+    MessageKey.PATCH_REMOVED -> Res(string = R.string.msg_patch_removed)
+    MessageKey.DURATION_NOW -> Res(string = R.string.msg_duration_now)
+    MessageKey.DURATION_HOURS_MINUTES -> Res(string = R.string.msg_duration_hours_minutes)
+    MessageKey.DURATION_MINUTES -> Res(string = R.string.msg_duration_minutes)
+
+    MessageKey.PRN_WOULD_EXCEED -> Res(string = R.string.msg_prn_would_exceed)
+
+    MessageKey.NOTIFY_EXPIRED_DISCARD -> Res(string = R.string.msg_notify_expired_discard)
+    MessageKey.NOTIFY_DISCARD_AFTER_BUD -> Res(string = R.string.msg_notify_discard_after_bud)
+    MessageKey.NOTIFY_LOW_STOCK -> Res(plural = R.plurals.msg_notify_low_stock)
+    MessageKey.NOTIFY_EXPIRES -> Res(string = R.string.msg_notify_expires)
+    MessageKey.NOTIFY_LIMIT_TITLE -> Res(string = R.string.msg_notify_limit_title)
+    MessageKey.NOTIFY_LIMIT_DEFAULT -> Res(string = R.string.msg_notify_limit_default)
+    MessageKey.NOTIFY_LIMIT_MESSAGE -> Res(string = R.string.msg_notify_limit_message)
+    MessageKey.HEALTH_SYNC_DISABLED -> Res(string = R.string.msg_health_sync_disabled)
+    MessageKey.HEALTH_SYNC_NOTHING -> Res(string = R.string.msg_health_sync_nothing)
+    MessageKey.HEALTH_SYNC_FAILED -> Res(string = R.string.msg_health_sync_failed)
+    MessageKey.SAVE_TARGET_FAILED -> Res(string = R.string.msg_save_target_failed)
+    MessageKey.SAVE_SCHEDULE_FAILED -> Res(string = R.string.msg_save_schedule_failed)
+    MessageKey.TARGET_MIN_UNREADABLE -> Res(string = R.string.msg_target_min_unreadable)
+    MessageKey.TARGET_MAX_UNREADABLE -> Res(string = R.string.msg_target_max_unreadable)
+    MessageKey.SCHEDULE_MEDICATION_MISSING -> Res(string = R.string.msg_schedule_medication_missing)
+    MessageKey.UV_EXPOSURE -> Res(string = R.string.msg_uv_exposure)
+    MessageKey.UV_EXPOSURE_ONE -> Res(string = R.string.msg_uv_exposure_one)
+    MessageKey.UV_EXPOSURE_TWO -> Res(string = R.string.msg_uv_exposure_two)
+    MessageKey.UV_EXPOSURE_MANY -> Res(plural = R.plurals.msg_uv_exposure_many)
+    MessageKey.INTERACTION_WARFARIN_ASPIRIN_NSAID_TITLE -> Res(string = R.string.interaction_warfarin_aspirin_nsaid_title)
+    MessageKey.INTERACTION_WARFARIN_ASPIRIN_NSAID_DETAIL -> Res(string = R.string.interaction_warfarin_aspirin_nsaid_detail)
+    MessageKey.INTERACTION_SPIRONOLACTONE_ACE_ARB_TITLE -> Res(string = R.string.interaction_spironolactone_ace_arb_title)
+    MessageKey.INTERACTION_SPIRONOLACTONE_ACE_ARB_DETAIL -> Res(string = R.string.interaction_spironolactone_ace_arb_detail)
+    MessageKey.INTERACTION_SPIRONOLACTONE_LOOP_TITLE -> Res(string = R.string.interaction_spironolactone_loop_title)
+    MessageKey.INTERACTION_SPIRONOLACTONE_LOOP_DETAIL -> Res(string = R.string.interaction_spironolactone_loop_detail)
+    MessageKey.INTERACTION_ESTRADIOL_SPIRONOLACTONE_TITLE -> Res(string = R.string.interaction_estradiol_spironolactone_title)
+    MessageKey.INTERACTION_ESTRADIOL_SPIRONOLACTONE_DETAIL -> Res(string = R.string.interaction_estradiol_spironolactone_detail)
+    MessageKey.INTERACTION_LEVOTHYROXINE_PPI_TITLE -> Res(string = R.string.interaction_levothyroxine_ppi_title)
+    MessageKey.INTERACTION_LEVOTHYROXINE_PPI_DETAIL -> Res(string = R.string.interaction_levothyroxine_ppi_detail)
+    MessageKey.INTERACTION_LEVOTHYROXINE_MINERALS_TITLE -> Res(string = R.string.interaction_levothyroxine_minerals_title)
+    MessageKey.INTERACTION_LEVOTHYROXINE_MINERALS_DETAIL -> Res(string = R.string.interaction_levothyroxine_minerals_detail)
+    MessageKey.INTERACTION_IRON_ANTACID_TITLE -> Res(string = R.string.interaction_iron_antacid_title)
+    MessageKey.INTERACTION_IRON_ANTACID_DETAIL -> Res(string = R.string.interaction_iron_antacid_detail)
+    MessageKey.INTERACTION_OESTROGEN_WARFARIN_TITLE -> Res(string = R.string.interaction_oestrogen_warfarin_title)
+    MessageKey.INTERACTION_OESTROGEN_WARFARIN_DETAIL -> Res(string = R.string.interaction_oestrogen_warfarin_detail)
+    MessageKey.INTERACTION_STATIN_AZOLE_TITLE -> Res(string = R.string.interaction_statin_azole_title)
+    MessageKey.INTERACTION_STATIN_AZOLE_DETAIL -> Res(string = R.string.interaction_statin_azole_detail)
+    MessageKey.INTERACTION_ANTIVIRAL_STEROID_TITLE -> Res(string = R.string.interaction_antiviral_steroid_title)
+    MessageKey.INTERACTION_ANTIVIRAL_STEROID_DETAIL -> Res(string = R.string.interaction_antiviral_steroid_detail)
+    MessageKey.INTERACTION_STEROID_POTASSIUM_TITLE -> Res(string = R.string.interaction_steroid_potassium_title)
+    MessageKey.INTERACTION_STEROID_POTASSIUM_DETAIL -> Res(string = R.string.interaction_steroid_potassium_detail)
+    MessageKey.INTERACTION_SPIRO_POTASSIUM_TITLE -> Res(string = R.string.interaction_spiro_potassium_title)
+    MessageKey.INTERACTION_SPIRO_POTASSIUM_DETAIL -> Res(string = R.string.interaction_spiro_potassium_detail)
+    MessageKey.INTERACTION_STATIN_GRAPEFRUIT_TITLE -> Res(string = R.string.interaction_statin_grapefruit_title)
+    MessageKey.INTERACTION_STATIN_GRAPEFRUIT_DETAIL -> Res(string = R.string.interaction_statin_grapefruit_detail)
+    MessageKey.INTERACTION_ANTIANDROGEN_PHOTO_TITLE -> Res(string = R.string.interaction_antiandrogen_photo_title)
+    MessageKey.INTERACTION_ANTIANDROGEN_PHOTO_DETAIL -> Res(string = R.string.interaction_antiandrogen_photo_detail)
+    MessageKey.INTERACTION_ALCOHOL_SEDATION_TITLE -> Res(string = R.string.interaction_alcohol_sedation_title)
+    MessageKey.INTERACTION_ALCOHOL_SEDATION_DETAIL -> Res(string = R.string.interaction_alcohol_sedation_detail)
+    MessageKey.INTERACTION_ALCOHOL_PARACETAMOL_TITLE -> Res(string = R.string.interaction_alcohol_paracetamol_title)
+    MessageKey.INTERACTION_ALCOHOL_PARACETAMOL_DETAIL -> Res(string = R.string.interaction_alcohol_paracetamol_detail)
+    MessageKey.INTERACTION_WARFARIN_STJOHNS_TITLE -> Res(string = R.string.interaction_warfarin_stjohns_title)
+    MessageKey.INTERACTION_WARFARIN_STJOHNS_DETAIL -> Res(string = R.string.interaction_warfarin_stjohns_detail)
+    MessageKey.INTERACTION_CALCIUM_DAIRY_TITLE -> Res(string = R.string.interaction_calcium_dairy_title)
+    MessageKey.INTERACTION_CALCIUM_DAIRY_DETAIL -> Res(string = R.string.interaction_calcium_dairy_detail)
+    MessageKey.INTERACTION_MAGNESIUM_DAIRY_TITLE -> Res(string = R.string.interaction_magnesium_dairy_title)
+    MessageKey.INTERACTION_MAGNESIUM_DAIRY_DETAIL -> Res(string = R.string.interaction_magnesium_dairy_detail)
+    MessageKey.INTERACTION_IRON_COFFEE_TITLE -> Res(string = R.string.interaction_iron_coffee_title)
+    MessageKey.INTERACTION_IRON_COFFEE_DETAIL -> Res(string = R.string.interaction_iron_coffee_detail)
+    MessageKey.INTERACTION_OESTROGEN_STJOHNS_TITLE -> Res(string = R.string.interaction_oestrogen_stjohns_title)
+    MessageKey.INTERACTION_OESTROGEN_STJOHNS_DETAIL -> Res(string = R.string.interaction_oestrogen_stjohns_detail)
+    MessageKey.INTERACTION_OESTROGEN_SMOKING_TITLE -> Res(string = R.string.interaction_oestrogen_smoking_title)
+    MessageKey.INTERACTION_OESTROGEN_SMOKING_DETAIL -> Res(string = R.string.interaction_oestrogen_smoking_detail)
+    MessageKey.INTERACTION_SEPARATE_INTAKE -> Res(string = R.string.interaction_separate_intake)
+    MessageKey.INTERACTION_ABSORPTION_IRON_CALCIUM -> Res(string = R.string.interaction_absorption_iron_calcium)
+    MessageKey.INTERACTION_ABSORPTION_LEVOTHYROXINE -> Res(string = R.string.interaction_absorption_levothyroxine)
+    MessageKey.SEVERITY_SEVERE -> Res(string = R.string.severity_severe)
+    MessageKey.SEVERITY_MODERATE -> Res(string = R.string.severity_moderate)
+    MessageKey.SEVERITY_MINOR -> Res(string = R.string.severity_minor)
+    MessageKey.SEVERITY_PREFIX -> Res(string = R.string.severity_prefix)
+    MessageKey.ABSORPTION_ONLY_ONE_SCHEDULE -> Res(string = R.string.absorption_only_one_schedule)
+    MessageKey.ABSORPTION_OFFSET_ALREADY_SET -> Res(string = R.string.absorption_offset_already_set)
+    MessageKey.ABSORPTION_NO_SCHEDULE_TO_MOVE -> Res(string = R.string.absorption_no_schedule_to_move)
+    MessageKey.ABSORPTION_EXPLANATION -> Res(string = R.string.absorption_explanation)
+    MessageKey.BLOODWORK_NO_PRIOR_DOSE -> Res(string = R.string.bloodwork_no_prior_dose)
+    MessageKey.BLOODWORK_DRAW_BEFORE_DOSE -> Res(string = R.string.bloodwork_draw_before_dose)
+    MessageKey.BLOODWORK_TRUE_TROUGH -> Res(string = R.string.bloodwork_trough_after_dose)
+    MessageKey.BLOODWORK_NEAR_PEAK -> Res(string = R.string.bloodwork_near_peak)
+    MessageKey.BLOODWORK_MID_CYCLE -> Res(string = R.string.bloodwork_mid_cycle)
+    MessageKey.BLOODWORK_DRAWN_AFTER_DOSE -> Res(string = R.string.bloodwork_drawn_after_dose)
+    MessageKey.BLOODWORK_HOLD_MORNING_TITLE -> Res(string = R.string.bloodwork_hold_morning_title)
+    MessageKey.BLOODWORK_HOLD_MORNING_DETAIL -> Res(string = R.string.bloodwork_hold_morning_detail)
+    MessageKey.BLOODWORK_FAST_TITLE -> Res(string = R.string.bloodwork_fast_title)
+    MessageKey.BLOODWORK_FAST_DETAIL -> Res(string = R.string.bloodwork_fast_detail)
+    MessageKey.BLOODWORK_BIOTIN_TITLE -> Res(string = R.string.bloodwork_biotin_title)
+    MessageKey.BLOODWORK_BIOTIN_DETAIL -> Res(string = R.string.bloodwork_biotin_detail)
+    MessageKey.BLOODWORK_WARNING_SENTENCE -> Res(string = R.string.bloodwork_warning_sentence)
+    // Short domain labels.
+    MessageKey.PROFILE_HRT_FEMINIZING -> Res(string = R.string.profile_hrt_feminizing)
+    MessageKey.PROFILE_HRT_MASCULINIZING -> Res(string = R.string.profile_hrt_masculinizing)
+    MessageKey.PROFILE_CIS_FEMALE -> Res(string = R.string.profile_cis_female)
+    MessageKey.PROFILE_CIS_MALE -> Res(string = R.string.profile_cis_male)
+    MessageKey.PROFILE_DOCTOR_TARGET -> Res(string = R.string.profile_doctor_target)
+    MessageKey.PROFILE_LAB_PRINTED -> Res(string = R.string.profile_lab_printed)
+    MessageKey.CONSUMABLE_SYRINGES -> Res(string = R.string.consumable_syringes)
+    MessageKey.CONSUMABLE_DRAW_NEEDLES -> Res(string = R.string.consumable_draw_needles)
+    MessageKey.CONSUMABLE_INJECTION_NEEDLES -> Res(string = R.string.consumable_injection_needles)
+    MessageKey.CONSUMABLE_ALCOHOL_SWABS -> Res(string = R.string.consumable_alcohol_swabs)
+    MessageKey.BATCH_CHOOSE_MEDICATION -> Res(string = R.string.batch_choose_medication)
+    MessageKey.BATCH_QUANTITY_POSITIVE -> Res(string = R.string.batch_quantity_positive)
+    MessageKey.BATCH_UNIT_REQUIRED -> Res(string = R.string.batch_unit_required)
+    MessageKey.BATCH_THRESHOLD_NEGATIVE -> Res(string = R.string.batch_threshold_negative)
+    MessageKey.BATCH_BEYOND_USE_MIN -> Res(string = R.string.batch_beyond_use_min)
+    MessageKey.BATCH_DEAD_SPACE_NEGATIVE -> Res(string = R.string.batch_dead_space_negative)
+    MessageKey.BATCH_DEAD_SPACE_INJECTABLE_ONLY -> Res(string = R.string.batch_dead_space_injectable_only)
+    MessageKey.BATCH_UNUSUAL_UNIT -> Res(string = R.string.batch_unusual_unit)
+    MessageKey.BATCH_EXPIRED -> Res(string = R.string.batch_expired)
+    MessageKey.BATCH_EXPIRES_TODAY -> Res(string = R.string.batch_expires_today)
+    MessageKey.BATCH_FORM_TABLET -> Res(string = R.string.form_a_tablet)
+    MessageKey.BATCH_FORM_CAPSULE -> Res(string = R.string.form_a_capsule)
+    MessageKey.BATCH_FORM_INJECTION -> Res(string = R.string.form_an_injection)
+    MessageKey.BATCH_FORM_PATCH -> Res(string = R.string.form_a_patch)
+    MessageKey.BATCH_FORM_GEL_OR_SPRAY -> Res(string = R.string.form_a_gel_or_spray)
+    MessageKey.BATCH_FORM_SUBLINGUAL -> Res(string = R.string.form_a_sublingual_tablet)
+    MessageKey.BATCH_FORM_DROPS -> Res(string = R.string.form_drops)
+    MessageKey.VIAL_NEVER_USED -> Res(string = R.string.vial_never_used)
+    MessageKey.VIAL_ROTATE_FURTHER -> Res(string = R.string.vial_rotate_further)
+    MessageKey.VIAL_LEAST_RECENT -> Res(string = R.string.vial_least_recent)
+    MessageKey.INVENTORY_PRN_MANUAL -> Res(string = R.string.inventory_prn_manual)
+    MessageKey.INVENTORY_GET_MORE -> Res(string = R.string.inventory_get_more)
+    MessageKey.INVENTORY_ENOUGH_DAYS -> Res(plural = R.plurals.inventory_enough_days)
+    MessageKey.DASHBOARD_GREETING_MORNING -> Res(string = R.string.dashboard_greeting_morning)
+    MessageKey.DASHBOARD_GREETING_AFTERNOON -> Res(string = R.string.dashboard_greeting_afternoon)
+    MessageKey.DASHBOARD_GREETING_EVENING -> Res(string = R.string.dashboard_greeting_evening)
+    MessageKey.BLOODWORK_NO_RESULTS -> Res(string = R.string.bloodwork_no_results)
+    MessageKey.SCHEDULE_TYPE_FIXED_DAILY -> Res(string = R.string.schedule_type_fixed_daily)
+    MessageKey.SCHEDULE_TYPE_INTERVAL_HOURS -> Res(string = R.string.schedule_type_interval_hours)
+    MessageKey.SCHEDULE_TYPE_INTERVAL_DAYS -> Res(string = R.string.schedule_type_interval_days)
+    MessageKey.SCHEDULE_TYPE_CYCLICAL -> Res(string = R.string.schedule_type_cyclical)
+    MessageKey.SCHEDULE_TYPE_TAPERING -> Res(string = R.string.schedule_type_tapering)
+    MessageKey.SCHEDULE_TYPE_PRN -> Res(string = R.string.schedule_type_prn)
+    MessageKey.MEAL_RELATION_NONE -> Res(string = R.string.meal_relation_none)
+    MessageKey.MEAL_RELATION_FASTING_BEFORE -> Res(string = R.string.meal_relation_fasting_before)
+    MessageKey.MEAL_RELATION_WITH_MEAL -> Res(string = R.string.meal_relation_with_meal)
+    MessageKey.MEAL_RELATION_AFTER_MEAL -> Res(string = R.string.meal_relation_after_meal)
+    MessageKey.PROFILE_PRIMARY_SUFFIX -> Res(string = R.string.profile_primary_suffix)
+    // Schedule editor validation.
+    MessageKey.SCHEDULE_DOSE_POSITIVE -> Res(string = R.string.schedule_dose_positive)
+    MessageKey.SCHEDULE_DOSE_UNIT_REQUIRED -> Res(string = R.string.schedule_dose_unit_required)
+    MessageKey.SCHEDULE_INTERVAL_POSITIVE -> Res(string = R.string.schedule_interval_positive)
+    MessageKey.SCHEDULE_INTERVAL_MAX_DAYS -> Res(string = R.string.schedule_interval_max_days)
+    MessageKey.SCHEDULE_INTERVAL_MAX_HOURS -> Res(string = R.string.schedule_interval_max_hours)
+    MessageKey.SCHEDULE_CYCLICAL_RANGE -> Res(string = R.string.schedule_cyclical_range)
+    MessageKey.SCHEDULE_NO_TIME -> Res(string = R.string.schedule_time_required)
+    MessageKey.SCHEDULE_TOO_MANY_TIMES -> Res(string = R.string.schedule_too_many_times)
+    MessageKey.SCHEDULE_TAPER_EMPTY -> Res(string = R.string.schedule_taper_empty)
+    MessageKey.SCHEDULE_TAPER_DOSE -> Res(string = R.string.schedule_taper_dose)
+    MessageKey.SCHEDULE_TAPER_DAYS -> Res(string = R.string.schedule_taper_days)
+    MessageKey.SCHEDULE_ACTUATIONS -> Res(string = R.string.schedule_actuations)
+    MessageKey.SCHEDULE_HOLD_RANGE -> Res(string = R.string.schedule_hold_range)
+    MessageKey.SCHEDULE_MAX_DAILY_NUMBER -> Res(string = R.string.schedule_max_daily_number)
+    MessageKey.SCHEDULE_MAX_DAILY_ABOVE_DOSE -> Res(string = R.string.schedule_max_daily_above_dose)
+    // Backup and restore.
+    MessageKey.BACKUP_UNREADABLE -> Res(string = R.string.backup_unreadable)
+    MessageKey.BACKUP_NEWER_VERSION -> Res(string = R.string.backup_newer_version)
+    MessageKey.BACKUP_PASSWORD_REQUIRED -> Res(string = R.string.backup_password_required)
+    MessageKey.BACKUP_WRONG_PASSWORD -> Res(string = R.string.backup_wrong_password)
+    MessageKey.BACKUP_READ_FAILED -> Res(string = R.string.backup_read_failed)
+    MessageKey.BACKUP_WRITE_FAILED -> Res(string = R.string.backup_write_failed)
+    MessageKey.BACKUP_EXPORTED -> Res(string = R.string.backup_exported)
+    MessageKey.BACKUP_RESTORED -> Res(plural = R.plurals.backup_restored)
+    MessageKey.SITE_LEFT_VASTUS_LATERALIS -> Res(string = R.string.site_left_vastus_lateralis)
+    MessageKey.SITE_RIGHT_VASTUS_LATERALIS -> Res(string = R.string.site_right_vastus_lateralis)
+    MessageKey.SITE_LEFT_VENTROGLUTEAL -> Res(string = R.string.site_left_ventrogluteal)
+    MessageKey.SITE_RIGHT_VENTROGLUTEAL -> Res(string = R.string.site_right_ventrogluteal)
+    MessageKey.SITE_LEFT_DELTOID -> Res(string = R.string.site_left_deltoid)
+    MessageKey.SITE_RIGHT_DELTOID -> Res(string = R.string.site_right_deltoid)
+    MessageKey.SITE_ABDOMEN_UPPER_LEFT -> Res(string = R.string.site_abdomen_upper_left)
+    MessageKey.SITE_ABDOMEN_UPPER_RIGHT -> Res(string = R.string.site_abdomen_upper_right)
+    MessageKey.SITE_ABDOMEN_LOWER_LEFT -> Res(string = R.string.site_abdomen_lower_left)
+    MessageKey.SITE_ABDOMEN_LOWER_RIGHT -> Res(string = R.string.site_abdomen_lower_right)
+    MessageKey.SITE_LEFT_GLUTE -> Res(string = R.string.site_left_glute)
+    MessageKey.SITE_RIGHT_GLUTE -> Res(string = R.string.site_right_glute)
+    MessageKey.SITE_LEFT_THIGH -> Res(string = R.string.site_left_thigh)
+    MessageKey.SITE_RIGHT_THIGH -> Res(string = R.string.site_right_thigh)
+    MessageKey.SITE_FOREARM_LEFT -> Res(string = R.string.site_forearm_left)
+    MessageKey.SITE_FOREARM_RIGHT -> Res(string = R.string.site_forearm_right)
+    MessageKey.SITE_SCAPULA_LEFT -> Res(string = R.string.site_scapula_left)
+    MessageKey.SITE_SCAPULA_RIGHT -> Res(string = R.string.site_scapula_right)
+    MessageKey.SITE_HYPOTHENAR_LEFT -> Res(string = R.string.site_hypothenar_left)
+    MessageKey.SITE_HYPOTHENAR_RIGHT -> Res(string = R.string.site_hypothenar_right)
+    MessageKey.BODYMAP_AGE_DAYS -> Res(plural = R.plurals.bodymap_age_days)
+    MessageKey.BODYMAP_AGE_TODAY -> Res(string = R.string.bodymap_age_today)
+    MessageKey.BODYMAP_EMPTY -> Res(string = R.string.bodymap_empty)
+    MessageKey.BODYMAP_SITE_NEVER_USED -> Res(string = R.string.bodymap_site_never_used)
+    MessageKey.BODYMAP_SITE_USED_AGO -> Res(string = R.string.bodymap_site_used_ago)
+    MessageKey.BODYMAP_A11Y -> Res(string = R.string.bodymap_a11y)
+    MessageKey.LAB_SCAN_CAMERA_UNAVAILABLE -> Res(string = R.string.lab_scan_camera_unavailable)
+    MessageKey.LAB_SCAN_CAPTURE_FAILED -> Res(string = R.string.lab_scan_capture_failed)
+}
+
+/** Renders the message in a composable, recursively for nested arguments. */
+@Composable
+fun Message.asText(): String {
+    val rendered = mutableListOf<Any>()
+    for (arg in args) {
+        rendered += when (arg) {
+            is MessageArg.Text -> arg.value
+            is MessageArg.Number -> arg.value
+            is MessageArg.Nested -> arg.message.asText()
+        }
+    }
+    val res = key.res()
+    return if (count != null) {
+        pluralStringResource(res.plural, count, *rendered.toTypedArray())
+    } else {
+        stringResource(res.string, *rendered.toTypedArray())
+    }
+}
+
+/** Renders the message outside composition: notifications, workers, dialogs built in Kotlin. */
+fun Message.asText(context: Context): String {
+    val rendered = mutableListOf<Any>()
+    for (arg in args) {
+        rendered += when (arg) {
+            is MessageArg.Text -> arg.value
+            is MessageArg.Number -> arg.value
+            is MessageArg.Nested -> arg.message.asText(context)
+        }
+    }
+    val res = key.res()
+    return if (count != null) {
+        context.resources.getQuantityString(res.plural, count, *rendered.toTypedArray())
+    } else {
+        context.getString(res.string, *rendered.toTypedArray())
+    }
+}

@@ -1,0 +1,19 @@
+*.iml
+.gradle/
+.kotlin/
+/local.properties
+/.idea/
+.DS_Store
+build/
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+/repo/
+
+# Debug leftovers: emulator screenshots, UI dumps and a personal seed backup
+# (it holds real medication data and must never be published).
+_*.png
+_u.xml
+_ui.sh
+_seed_backup.json

@@ -1,0 +1,1024 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "9e731b363ebfe130928e25919c932997",
+    "entities": [
+      {
+        "tableName": "medications",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `suklCode` TEXT, `gtin` TEXT, `name` TEXT NOT NULL, `activeSubstance` TEXT, `atcCode` TEXT, `form` TEXT NOT NULL, `strengthValue` REAL, `strengthUnit` TEXT, `concentrationMgPerMl` REAL, `pilUrl` TEXT, `spcUrl` TEXT, `notes` TEXT, `colorHex` TEXT, `shapeType` TEXT, `isHrt` INTEGER NOT NULL, `isArchived` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "suklCode",
+            "columnName": "suklCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "gtin",
+            "columnName": "gtin",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "activeSubstance",
+            "columnName": "activeSubstance",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "atcCode",
+            "columnName": "atcCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "form",
+            "columnName": "form",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "strengthValue",
+            "columnName": "strengthValue",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "strengthUnit",
+            "columnName": "strengthUnit",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "concentrationMgPerMl",
+            "columnName": "concentrationMgPerMl",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "pilUrl",
+            "columnName": "pilUrl",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "spcUrl",
+            "columnName": "spcUrl",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "colorHex",
+            "columnName": "colorHex",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "shapeType",
+            "columnName": "shapeType",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "isHrt",
+            "columnName": "isHrt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isArchived",
+            "columnName": "isArchived",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_medications_suklCode",
+            "unique": false,
+            "columnNames": [
+              "suklCode"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_medications_suklCode` ON `${TABLE_NAME}` (`suklCode`)"
+          },
+          {
+            "name": "index_medications_gtin",
+            "unique": false,
+            "columnNames": [
+              "gtin"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_medications_gtin` ON `${TABLE_NAME}` (`gtin`)"
+          },
+          {
+            "name": "index_medications_atcCode",
+            "unique": false,
+            "columnNames": [
+              "atcCode"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_medications_atcCode` ON `${TABLE_NAME}` (`atcCode`)"
+          }
+        ]
+      },
+      {
+        "tableName": "schedules",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `medicationId` INTEGER NOT NULL, `scheduleType` TEXT NOT NULL, `intervalValue` REAL, `daysOfWeekBitmask` INTEGER, `timesOfDayJson` TEXT NOT NULL, `doseAmount` REAL NOT NULL, `doseUnit` TEXT NOT NULL, `mealRelation` TEXT NOT NULL, `offsetMinutes` INTEGER NOT NULL, `requireSiteRotation` INTEGER NOT NULL, `isActive` INTEGER NOT NULL, `startDateEpochDay` INTEGER NOT NULL, `taperStepsJson` TEXT, `maxDailyDose` REAL, `note` TEXT, FOREIGN KEY(`medicationId`) REFERENCES `medications`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "medicationId",
+            "columnName": "medicationId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "scheduleType",
+            "columnName": "scheduleType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "intervalValue",
+            "columnName": "intervalValue",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "daysOfWeekBitmask",
+            "columnName": "daysOfWeekBitmask",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "timesOfDayJson",
+            "columnName": "timesOfDayJson",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "doseAmount",
+            "columnName": "doseAmount",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "doseUnit",
+            "columnName": "doseUnit",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mealRelation",
+            "columnName": "mealRelation",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "offsetMinutes",
+            "columnName": "offsetMinutes",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "requireSiteRotation",
+            "columnName": "requireSiteRotation",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isActive",
+            "columnName": "isActive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startDateEpochDay",
+            "columnName": "startDateEpochDay",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "taperStepsJson",
+            "columnName": "taperStepsJson",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "maxDailyDose",
+            "columnName": "maxDailyDose",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "note",
+            "columnName": "note",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_schedules_medicationId",
+            "unique": false,
+            "columnNames": [
+              "medicationId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_schedules_medicationId` ON `${TABLE_NAME}` (`medicationId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "medications",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "medicationId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "dose_logs",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `medicationId` INTEGER NOT NULL, `scheduleId` INTEGER NOT NULL, `scheduledTimestamp` INTEGER NOT NULL, `actualTimestamp` INTEGER, `status` TEXT NOT NULL, `actualDoseAmount` REAL, `actualVolumeMl` REAL, `applicationSite` TEXT, `notes` TEXT, `batchId` INTEGER, `isPrn` INTEGER NOT NULL, FOREIGN KEY(`medicationId`) REFERENCES `medications`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "medicationId",
+            "columnName": "medicationId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "scheduleId",
+            "columnName": "scheduleId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "scheduledTimestamp",
+            "columnName": "scheduledTimestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "actualTimestamp",
+            "columnName": "actualTimestamp",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "actualDoseAmount",
+            "columnName": "actualDoseAmount",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "actualVolumeMl",
+            "columnName": "actualVolumeMl",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "applicationSite",
+            "columnName": "applicationSite",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "batchId",
+            "columnName": "batchId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "isPrn",
+            "columnName": "isPrn",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_dose_logs_medicationId",
+            "unique": false,
+            "columnNames": [
+              "medicationId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_dose_logs_medicationId` ON `${TABLE_NAME}` (`medicationId`)"
+          },
+          {
+            "name": "index_dose_logs_scheduleId",
+            "unique": false,
+            "columnNames": [
+              "scheduleId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_dose_logs_scheduleId` ON `${TABLE_NAME}` (`scheduleId`)"
+          },
+          {
+            "name": "index_dose_logs_scheduledTimestamp",
+            "unique": false,
+            "columnNames": [
+              "scheduledTimestamp"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_dose_logs_scheduledTimestamp` ON `${TABLE_NAME}` (`scheduledTimestamp`)"
+          },
+          {
+            "name": "index_dose_logs_medicationId_scheduledTimestamp",
+            "unique": false,
+            "columnNames": [
+              "medicationId",
+              "scheduledTimestamp"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_dose_logs_medicationId_scheduledTimestamp` ON `${TABLE_NAME}` (`medicationId`, `scheduledTimestamp`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "medications",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "medicationId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "inventory_batches",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `medicationId` INTEGER NOT NULL, `batchNumber` TEXT, `expirationDateEpochDay` INTEGER, `firstPuncturedDateEpochDay` INTEGER, `beyondUseDaysLimit` INTEGER, `initialQuantity` REAL NOT NULL, `remainingQuantity` REAL NOT NULL, `unit` TEXT NOT NULL, `deadSpaceMlPerDose` REAL, `lowStockThresholdDays` INTEGER NOT NULL, FOREIGN KEY(`medicationId`) REFERENCES `medications`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "medicationId",
+            "columnName": "medicationId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "batchNumber",
+            "columnName": "batchNumber",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "expirationDateEpochDay",
+            "columnName": "expirationDateEpochDay",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "firstPuncturedDateEpochDay",
+            "columnName": "firstPuncturedDateEpochDay",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "beyondUseDaysLimit",
+            "columnName": "beyondUseDaysLimit",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "initialQuantity",
+            "columnName": "initialQuantity",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "remainingQuantity",
+            "columnName": "remainingQuantity",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "unit",
+            "columnName": "unit",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deadSpaceMlPerDose",
+            "columnName": "deadSpaceMlPerDose",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "lowStockThresholdDays",
+            "columnName": "lowStockThresholdDays",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_inventory_batches_medicationId",
+            "unique": false,
+            "columnNames": [
+              "medicationId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_inventory_batches_medicationId` ON `${TABLE_NAME}` (`medicationId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "medications",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "medicationId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "consumables",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `remainingCount` INTEGER NOT NULL, `lowStockAlertCount` INTEGER NOT NULL, `deductPerMedicationId` INTEGER, `deductPerDose` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "remainingCount",
+            "columnName": "remainingCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lowStockAlertCount",
+            "columnName": "lowStockAlertCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deductPerMedicationId",
+            "columnName": "deductPerMedicationId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "deductPerDose",
+            "columnName": "deductPerDose",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "blood_test_sessions",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `timestamp` INTEGER NOT NULL, `labName` TEXT, `fastingStatus` INTEGER NOT NULL, `calculatedHoursSinceLastHrtDose` REAL, `isTroughLevel` INTEGER NOT NULL, `notes` TEXT, `attachmentUri` TEXT, `source` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "labName",
+            "columnName": "labName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "fastingStatus",
+            "columnName": "fastingStatus",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "calculatedHoursSinceLastHrtDose",
+            "columnName": "calculatedHoursSinceLastHrtDose",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "isTroughLevel",
+            "columnName": "isTroughLevel",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "attachmentUri",
+            "columnName": "attachmentUri",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "source",
+            "columnName": "source",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_blood_test_sessions_timestamp",
+            "unique": false,
+            "columnNames": [
+              "timestamp"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_blood_test_sessions_timestamp` ON `${TABLE_NAME}` (`timestamp`)"
+          }
+        ]
+      },
+      {
+        "tableName": "biomarker_values",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sessionId` INTEGER NOT NULL, `biomarkerCode` TEXT NOT NULL, `rawValue` REAL NOT NULL, `rawUnit` TEXT NOT NULL, `normalizedSiValue` REAL NOT NULL, `normalizedSiUnit` TEXT NOT NULL, `labMin` REAL, `labMax` REAL, FOREIGN KEY(`sessionId`) REFERENCES `blood_test_sessions`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sessionId",
+            "columnName": "sessionId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "biomarkerCode",
+            "columnName": "biomarkerCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rawValue",
+            "columnName": "rawValue",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rawUnit",
+            "columnName": "rawUnit",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "normalizedSiValue",
+            "columnName": "normalizedSiValue",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "normalizedSiUnit",
+            "columnName": "normalizedSiUnit",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "labMin",
+            "columnName": "labMin",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "labMax",
+            "columnName": "labMax",
+            "affinity": "REAL"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_biomarker_values_sessionId",
+            "unique": false,
+            "columnNames": [
+              "sessionId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_biomarker_values_sessionId` ON `${TABLE_NAME}` (`sessionId`)"
+          },
+          {
+            "name": "index_biomarker_values_biomarkerCode",
+            "unique": false,
+            "columnNames": [
+              "biomarkerCode"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_biomarker_values_biomarkerCode` ON `${TABLE_NAME}` (`biomarkerCode`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "blood_test_sessions",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "sessionId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "reference_ranges",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `biomarkerCode` TEXT NOT NULL, `profileType` TEXT NOT NULL, `targetMinSi` REAL, `targetMaxSi` REAL, `optimalMinSi` REAL, `optimalMaxSi` REAL, `warningHighSi` REAL, `warningLowSi` REAL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "biomarkerCode",
+            "columnName": "biomarkerCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "profileType",
+            "columnName": "profileType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "targetMinSi",
+            "columnName": "targetMinSi",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "targetMaxSi",
+            "columnName": "targetMaxSi",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "optimalMinSi",
+            "columnName": "optimalMinSi",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "optimalMaxSi",
+            "columnName": "optimalMaxSi",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "warningHighSi",
+            "columnName": "warningHighSi",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "warningLowSi",
+            "columnName": "warningLowSi",
+            "affinity": "REAL"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_reference_ranges_biomarkerCode_profileType",
+            "unique": true,
+            "columnNames": [
+              "biomarkerCode",
+              "profileType"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_reference_ranges_biomarkerCode_profileType` ON `${TABLE_NAME}` (`biomarkerCode`, `profileType`)"
+          }
+        ]
+      },
+      {
+        "tableName": "medication_milestones",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `medicationId` INTEGER NOT NULL, `timestamp` INTEGER NOT NULL, `changeType` TEXT NOT NULL, `description` TEXT NOT NULL, FOREIGN KEY(`medicationId`) REFERENCES `medications`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "medicationId",
+            "columnName": "medicationId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "changeType",
+            "columnName": "changeType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_medication_milestones_medicationId",
+            "unique": false,
+            "columnNames": [
+              "medicationId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_medication_milestones_medicationId` ON `${TABLE_NAME}` (`medicationId`)"
+          },
+          {
+            "name": "index_medication_milestones_timestamp",
+            "unique": false,
+            "columnNames": [
+              "timestamp"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_medication_milestones_timestamp` ON `${TABLE_NAME}` (`timestamp`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "medications",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "medicationId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "symptom_logs",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `timestamp` INTEGER NOT NULL, `symptomCode` TEXT NOT NULL, `severity` INTEGER NOT NULL, `note` TEXT, `systolic` INTEGER, `diastolic` INTEGER, `heartRate` INTEGER)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "symptomCode",
+            "columnName": "symptomCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "severity",
+            "columnName": "severity",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "note",
+            "columnName": "note",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "systolic",
+            "columnName": "systolic",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "diastolic",
+            "columnName": "diastolic",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "heartRate",
+            "columnName": "heartRate",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_symptom_logs_timestamp",
+            "unique": false,
+            "columnNames": [
+              "timestamp"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_symptom_logs_timestamp` ON `${TABLE_NAME}` (`timestamp`)"
+          },
+          {
+            "name": "index_symptom_logs_symptomCode",
+            "unique": false,
+            "columnNames": [
+              "symptomCode"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_symptom_logs_symptomCode` ON `${TABLE_NAME}` (`symptomCode`)"
+          }
+        ]
+      },
+      {
+        "tableName": "sukl_medications",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`suklCode` TEXT NOT NULL, `gtin` TEXT, `name` TEXT NOT NULL, `activeSubstance` TEXT, `atcCode` TEXT, `strength` TEXT, `formName` TEXT, `holder` TEXT, `syncedAt` INTEGER NOT NULL, PRIMARY KEY(`suklCode`))",
+        "fields": [
+          {
+            "fieldPath": "suklCode",
+            "columnName": "suklCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "gtin",
+            "columnName": "gtin",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "activeSubstance",
+            "columnName": "activeSubstance",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "atcCode",
+            "columnName": "atcCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "strength",
+            "columnName": "strength",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "formName",
+            "columnName": "formName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "holder",
+            "columnName": "holder",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "syncedAt",
+            "columnName": "syncedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "suklCode"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_sukl_medications_suklCode",
+            "unique": true,
+            "columnNames": [
+              "suklCode"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_sukl_medications_suklCode` ON `${TABLE_NAME}` (`suklCode`)"
+          },
+          {
+            "name": "index_sukl_medications_gtin",
+            "unique": false,
+            "columnNames": [
+              "gtin"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_sukl_medications_gtin` ON `${TABLE_NAME}` (`gtin`)"
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9e731b363ebfe130928e25919c932997')"
+    ]
+  }
+}
