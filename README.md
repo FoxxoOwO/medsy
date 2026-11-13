@@ -77,3 +77,5 @@ Copyright (C) 2026 TeresaPC
 ---
 
 Created by [FoxxoOwO](https://github.com/FoxxoOwO) ❤️
+
+Trans rights are human rights 🏳️‍⚧️
