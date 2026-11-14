@@ -263,6 +263,8 @@
     <string name="meds_paused_suffix"> (pozastaveno)</string>
     <string name="rx_title">Recepty</string>
     <string name="rx_empty_hint">Naskenujte QR kód z eReceptu a recept tu bude čekat, dokud si ho nevyzvednete.</string>
+    <string name="rx_import_button">Načíst PDF nebo fotku</string>
+    <string name="rx_import_hint">PDF eReceptu z lékárny, nebo fotka vytištěného papíru.</string>
     <string name="scan_camera_required">Pro skenování krabiček je potřeba přístup ke kamerě.</string>
     <string name="scan_sukl_matches">Shody — klepněte pro použití</string>
     <string name="scan_atc_matches">Kódy látek — klepněte pro přiřazení</string>
@@ -355,6 +357,9 @@
     <string name="msg_scan_ean_invalid">Kontrolní číslice EAN-13 nesouhlasí — naskenujte krabičku znovu</string>
     <string name="msg_scan_ean_decoded">EAN-13 načten</string>
     <string name="msg_scan_rx_duplicate">eRecept %1$s je už uložen</string>
+    <string name="msg_rx_import_no_code">Soubor obsahuje text, ale žádný kód eReceptu</string>
+    <string name="msg_rx_import_no_text_layer">Toto PDF je sken — není v něm žádný text. Zkuste papír vyfotit</string>
+    <string name="msg_rx_import_unreadable">Soubor se nepodařilo přečíst</string>
     <string name="msg_scan_already_listed">Už máte v seznamu: %1$s</string>
     <string name="msg_scan_matched_sukl">Nalezeno v SÚKL: %1$s</string>
     <string name="msg_scan_no_sukl_match">Pro GTIN %1$s není shoda v SÚKL — vyplňte název ručně, balení si pak zapamatujeme</string>

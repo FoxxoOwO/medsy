@@ -187,4 +187,48 @@ class EReceptParserTest {
         val expired = EReceptParser.parse("vystaveno:2020-01-01 code=ABCD1234EFGH")
         assertEquals(0L, EReceptParser.daysRemaining(expired!!))
     }
+
+    /** The text PDFBox returns for a printed eRecept handed out by a pharmacy. */
+    private val printedPdf = """
+        eRecept — Recept
+        Kód receptu: 7A2B9C4D1E6F
+        Vystaveno: 20. 5. 2026
+        Platnost do: 3. 6. 2026
+        Pacient: Jan Novák
+        Pojišťovna: 111
+        Předepsal: MUDr. Eva Pokorná, IČO: 12345678
+        Estradiol 2 mg, 84 tbl
+        Spironolacton 50 mg 2x
+    """.trimIndent()
+
+    @Test
+    fun `a printed pdf reads czech dates`() {
+        val prescription = EReceptParser.parse(printedPdf)
+        assertNotNull(prescription)
+        val issued = prescription!!.issuedAt!!.atZone(EReceptParser.CZECH_ZONE).toLocalDate()
+        val valid = prescription.validUntil!!.atZone(EReceptParser.CZECH_ZONE).toLocalDate()
+        assertEquals(LocalDate.of(2026, 5, 20), issued)
+        assertEquals(LocalDate.of(2026, 6, 3), valid)
+    }
+
+    @Test
+    fun `a labelled code wins over an earlier twelve character token`() {
+        val text = """
+            Číslo dokladu: AB12CD34EF56
+            Kód receptu: 7A2B9C4D1E6F
+        """.trimIndent()
+        assertEquals("7A2B9C4D1E6F", EReceptParser.parse(text)!!.code)
+    }
+
+    @Test
+    fun `patient and prescriber lines are not medications`() {
+        val names = EReceptParser.parse(printedPdf)!!.medications.map { it.name }
+        assertEquals(listOf("Estradiol 2 mg", "Spironolacton 50 mg"), names)
+    }
+
+    @Test
+    fun `the prescriber ico is not the prescription code`() {
+        val text = "Předepsal: MUDr. Eva Pokorná\nIČO: 12345678"
+        assertNull(EReceptParser.extractCode(text))
+    }
 }

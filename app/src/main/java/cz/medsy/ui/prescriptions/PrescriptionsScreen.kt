@@ -1,5 +1,7 @@
 package cz.medsy.ui.prescriptions
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,25 +14,29 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import cz.medsy.R
+import cz.medsy.domain.message.Message
 import cz.medsy.domain.model.PrescriptionItem
 import cz.medsy.domain.prescription.QueuedPrescription
+import cz.medsy.ui.message.asText
 import cz.medsy.ui.theme.BentoMedium
 import cz.medsy.ui.theme.MedsyTheme
 import java.time.Instant
 import androidx.compose.ui.res.stringResource
-import cz.medsy.R
 
 @Composable
 fun PrescriptionsRoute(
@@ -39,12 +45,25 @@ fun PrescriptionsRoute(
     viewModel: PrescriptionsViewModel = hiltViewModel(),
 ) {
     val items by viewModel.items.collectAsStateWithLifecycle()
+    val importStatus by viewModel.importStatus.collectAsStateWithLifecycle()
+
+    // One picker for both shapes: a PDF cannot come out of the photo picker, and the importer
+    // decides from the MIME type whether the file needs OCR or a text layer.
+    val pickFile = rememberLauncherForActivityResult(
+        contract = remember { ActivityResultContracts.OpenDocument() },
+    ) { uri -> uri?.let(viewModel::import) }
+
     PrescriptionsScreen(
         items = items,
         onBack = onBack,
         onMarkDispensed = viewModel::markDispensed,
         onDelete = viewModel::delete,
         onCreateMedication = onCreateMedication,
+        importStatus = importStatus,
+        onImport = {
+            viewModel.clearImportStatus()
+            pickFile.launch(arrayOf("application/pdf", "image/*"))
+        },
     )
 }
 
@@ -55,6 +74,8 @@ fun PrescriptionsScreen(
     onMarkDispensed: (Long) -> Unit = {},
     onDelete: (Long) -> Unit = {},
     onCreateMedication: (String) -> Unit = {},
+    importStatus: Message? = null,
+    onImport: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val now = Instant.now()
@@ -71,6 +92,30 @@ fun PrescriptionsScreen(
                     modifier = Modifier.weight(1f),
                 )
                 TextButton(onClick = onBack) { Text(stringResource(R.string.common_back)) }
+            }
+        }
+
+        item {
+            Column {
+                FilledTonalButton(onClick = onImport) {
+                    Text(stringResource(R.string.rx_import_button))
+                }
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    text = stringResource(R.string.rx_import_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                // The outcome stays until the next import: "no code in this file" is the only
+                // thing telling the user why nothing appeared in the list.
+                importStatus?.let { status ->
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        text = status.asText(),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
             }
         }
 

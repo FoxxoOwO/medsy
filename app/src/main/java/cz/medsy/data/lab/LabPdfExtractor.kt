@@ -14,14 +14,14 @@ import javax.inject.Singleton
 @Singleton
 class LabPdfExtractor @Inject constructor(
     @ApplicationContext private val context: Context,
-) {
+) : PdfTextExtractor {
 
     /**
      * Extracts text from a PDF picked through the Storage Access Framework.
      * Encrypted or image-only PDFs return an empty string so the caller can fall
      * back to OCR of a photographed report.
      */
-    suspend fun extractText(uri: Uri): Result<String> = withContext(Dispatchers.IO) {
+    override suspend fun extractText(uri: Uri): Result<String> = withContext(Dispatchers.IO) {
         runCatching {
             PDFBoxResourceLoader.init(context)
             val stream = context.contentResolver.openInputStream(uri)
@@ -42,7 +42,7 @@ class LabPdfExtractor @Inject constructor(
         }
     }
 
-    fun isLikelyScanned(text: String): Boolean = text.trim().length < MIN_TEXT_LENGTH
+    override fun isLikelyScanned(text: String): Boolean = text.trim().length < MIN_TEXT_LENGTH
 
     private companion object {
         const val MIN_TEXT_LENGTH = 40

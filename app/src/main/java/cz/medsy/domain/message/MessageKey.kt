@@ -16,6 +16,10 @@ enum class MessageKey {
     SCAN_EAN_DECODED,
     SCAN_RX_SAVED,
     SCAN_RX_DUPLICATE,
+    // Importing an eRecept from a PDF or a photo instead of a QR code.
+    RX_IMPORT_NO_CODE,
+    RX_IMPORT_NO_TEXT_LAYER,
+    RX_IMPORT_UNREADABLE,
     SCAN_ALREADY_LISTED,
     SCAN_MATCHED_SUKL,
     SCAN_NO_SUKL_MATCH,

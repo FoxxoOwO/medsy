@@ -22,13 +22,46 @@ import java.time.ZoneId
  *
  * Prescriptions are valid 14 days from issue unless the prescriber specifies
  * otherwise, which is the default applied here.
+ *
+ * A printed eRecept (PDF from the pharmacy or a photograph of the paper) spells its dates the
+ * Czech way — `20. 5. 2026` — while the QR payload uses ISO. Both shapes are accepted, because
+ * importing the PDF is exactly the case where the user cannot retype the code.
  */
 object EReceptParser {
 
     private val CODE_REGEX = Regex("\\b([A-Za-z0-9]{12})\\b")
     private val URL_CODE_PARAM = Regex("[?&](?:code|kod|recept|prescription)=([^&#]+)", RegexOption.IGNORE_CASE)
-    private val ISSUED_DATE = Regex("(?:vystaveno|issued)[:= ]*(\\d{4}-\\d{2}-\\d{2})", RegexOption.IGNORE_CASE)
-    private val VALID_UNTIL = Regex("(?:platnost|valid)[:= ]*(\\d{4}-\\d{2}-\\d{2})", RegexOption.IGNORE_CASE)
+
+    /**
+     * A labelled code beats the first 12-character token on the page: a PDF also carries the
+     * prescriber's own identifiers, and picking whichever came first silently queued the wrong
+     * prescription.
+     */
+    private val LABELLED_CODE = Regex(
+        "(?:k[óo]d(?:\\s+receptu)?|code|recept|prescription)[:=\\s]*([A-Za-z0-9]{8,16})",
+        RegexOption.IGNORE_CASE,
+    )
+
+    private const val DATE_PATTERN = "(?:\\d{4}-\\d{1,2}-\\d{1,2}|\\d{1,2}\\.\\s?\\d{1,2}\\.\\s?\\d{4})"
+
+    private val ISSUED_DATE = Regex(
+        "(?:vystaveno|vystaven[íi]|datum\\s+vystaven[íi]|issued)[:=\\s]*($DATE_PATTERN)",
+        RegexOption.IGNORE_CASE,
+    )
+    private val VALID_UNTIL = Regex(
+        "(?:platnost(?:\\s+do)?|plat[íi]\\s+do|platn[éý]\\s+do|valid(?:\\s+until)?)[:=\\s]*($DATE_PATTERN)",
+        RegexOption.IGNORE_CASE,
+    )
+
+    /**
+     * Lines a printed prescription puts around the medication list. Without this the patient's
+     * name and the prescriber's IČO arrived in the queue as if they were medicines.
+     */
+    private val METADATA_LINE = Regex(
+        "^(k[óo]d|code|vystaveno|vystaven[íi]|platnost|plat[íi]|platn[éý]|valid|pacient|rodn[ée]|"
+            + "poji[šs][ťt]ovna|l[ée]ka[řr]|p[řr]edepsal|i[čc]o|datum|[čc][íi]slo|recept|di[čc])\\b",
+        RegexOption.IGNORE_CASE,
+    )
 
     const val DEFAULT_VALIDITY_DAYS = 14L
 
@@ -65,10 +98,14 @@ object EReceptParser {
     fun extractCode(raw: String): String? {
         val trimmed = raw.trim()
         URL_CODE_PARAM.find(trimmed)?.let { match ->
-            val decoded = runCatching { URLDecoder.decode(match.groupValues[1], "UTF-8") }.getOrDefault(match.groupValues[1])
+            val decoded = runCatching { URLDecoder.decode(match.groupValues[1], "UTF-8") }
+                .getOrDefault(match.groupValues[1])
             normalizeCode(decoded)?.let { return it }
         }
         if (trimmed.length == 12 && trimmed.all(Char::isLetterOrDigit)) return trimmed.uppercase()
+        LABELLED_CODE.find(trimmed)?.groupValues?.get(1)?.let { candidate ->
+            normalizeCode(candidate)?.takeIf(::looksLikeCode)?.let { return it }
+        }
         return CODE_REGEX.findAll(trimmed)
             .map { it.groupValues[1] }
             .firstOrNull(::looksLikeCode)
@@ -121,6 +158,7 @@ object EReceptParser {
         val lineItems = trimmed.lines()
             .map(String::trim)
             .filter { it.length > 2 && !it.startsWith("http", ignoreCase = true) }
+            .filterNot { METADATA_LINE.containsMatchIn(it) }
             .mapNotNull { line ->
                 val quantityMatch = Regex("(\\d+)\\s*(?:x|ks|tbl|bal)", RegexOption.IGNORE_CASE).find(line)
                 val name = line.substringBefore(quantityMatch?.value.orEmpty()).trim().trimEnd(',', ';', '-')
@@ -146,5 +184,17 @@ object EReceptParser {
     }.getOrNull()
 
     private fun extractDate(regex: Regex, raw: String): LocalDate? =
-        regex.find(raw)?.groupValues?.get(1)?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+        regex.find(raw)?.groupValues?.get(1)?.let(::parseDate)
+
+    /** Accepts both `2026-05-20` and the printed Czech `20. 5. 2026` form. */
+    internal fun parseDate(value: String): LocalDate? {
+        val trimmed = value.trim()
+        if ('-' in trimmed) return runCatching { LocalDate.parse(trimmed) }.getOrNull()
+        val parts = trimmed.split('.').map(String::trim).filter(String::isNotEmpty)
+        if (parts.size != 3) return null
+        val day = parts[0].toIntOrNull() ?: return null
+        val month = parts[1].toIntOrNull() ?: return null
+        val year = parts[2].toIntOrNull() ?: return null
+        return runCatching { LocalDate.of(year, month, day) }.getOrNull()
+    }
 }

@@ -200,6 +200,8 @@
     <string name="rx_expiring">Expiring</string>
     <string name="rx_mark_dispensed">Mark dispensed</string>
     <string name="rx_create_medication">Create medication</string>
+    <string name="rx_import_button">Import PDF or photo</string>
+    <string name="rx_import_hint">The eRecept PDF from the pharmacy, or a photo of the printed paper.</string>
     <string name="scan_detail_gtin">GTIN: %1$s</string>
     <string name="scan_detail_batch">Batch: %1$s</string>
     <string name="scan_detail_expiry">Expiry: %1$s</string>
@@ -382,6 +384,9 @@
     <string name="msg_scan_ean_invalid">EAN-13 check digit is invalid — rescan the box</string>
     <string name="msg_scan_ean_decoded">EAN-13 decoded</string>
     <string name="msg_scan_rx_duplicate">eRecept %1$s is already saved</string>
+    <string name="msg_rx_import_no_code">The file has text, but nothing in it looks like an eRecept code</string>
+    <string name="msg_rx_import_no_text_layer">This PDF is a scan — there is no text to read. Try a photo of the paper instead</string>
+    <string name="msg_rx_import_unreadable">The file could not be read</string>
     <string name="msg_scan_already_listed">Already in your list: %1$s</string>
     <string name="msg_scan_matched_sukl">Matched SÚKL %1$s</string>
     <string name="msg_scan_no_sukl_match">No SÚKL match for GTIN %1$s — enter the name manually, we will remember this package</string>
