@@ -279,6 +279,27 @@ interface BloodTestDao {
     @Query("DELETE FROM biomarker_values WHERE sessionId = :sessionId AND biomarkerCode = :code")
     suspend fun deleteValue(sessionId: Long, code: String)
 
+    @Update
+    suspend fun updateValue(entity: BiomarkerValueEntity)
+
+    @Query("DELETE FROM biomarker_values WHERE id = :id")
+    suspend fun deleteValueById(id: Long)
+
+    /**
+     * One edit is one transaction: a session whose timestamp moved but whose values did not
+     * arrive would chart the old numbers on the new date until the next write.
+     */
+    @Transaction
+    suspend fun applyScanEdit(
+        session: BloodTestSessionEntity,
+        values: List<BiomarkerValueEntity>,
+        removedValueIds: List<Long>,
+    ) {
+        updateSession(session)
+        values.forEach { updateValue(it) }
+        removedValueIds.forEach { deleteValueById(it) }
+    }
+
     @Transaction
     suspend fun saveSessionWithValues(
         session: BloodTestSessionEntity,

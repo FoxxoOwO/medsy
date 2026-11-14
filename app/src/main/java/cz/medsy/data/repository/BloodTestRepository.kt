@@ -62,6 +62,23 @@ class BloodTestRepository @Inject constructor(
     suspend fun valuesForSessions(ids: List<Long>): List<BiomarkerValue> =
         bloodTestDao.valuesForSessions(ids).map { it.toDomain() }
 
+    suspend fun session(id: Long): BloodTestSession? = bloodTestDao.getSession(id)?.toDomain()
+
+    /**
+     * Rewrites one imported report: its draw metadata plus the values that were corrected,
+     * minus the ones the user removed. Values already stored keep their identity, so an edit
+     * does not shift the session id every chart point is keyed on.
+     */
+    suspend fun applyScanEdit(
+        session: BloodTestSession,
+        values: List<BiomarkerValue>,
+        removedValueIds: List<Long>,
+    ) = bloodTestDao.applyScanEdit(
+        session = session.toEntity(),
+        values = values.map { it.toEntity() },
+        removedValueIds = removedValueIds,
+    )
+
     suspend fun recentSessions(limit: Int = 12): List<BloodTestSession> =
         bloodTestDao.recentSessions(limit).map { it.toDomain() }
 

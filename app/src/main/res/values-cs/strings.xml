@@ -502,6 +502,27 @@
         <item quantity="many">Zkontrolujte %1$d načteného výsledku</item>
         <item quantity="other">Zkontrolujte %1$d načtených výsledků</item>
     </plurals>
+    <string name="labs_history_title">Historie skenů</string>
+    <string name="labs_history_empty">Zatím nic načteného. Sken nebo PDF se objeví tady a zůstane upravitelný.</string>
+    <plurals name="labs_history_values">
+        <item quantity="one">%1$d hodnota</item>
+        <item quantity="few">%1$d hodnoty</item>
+        <item quantity="many">%1$d hodnoty</item>
+        <item quantity="other">%1$d hodnot</item>
+    </plurals>
+    <string name="labs_history_source_pdf">Import z PDF</string>
+    <string name="labs_history_source_photo">Vyfocený report</string>
+    <string name="labs_history_source_manual">Zadáno ručně</string>
+    <string name="labs_history_delete_title">Smazat tento sken?</string>
+    <string name="labs_history_delete_body">Odběr z %1$s zmizí z grafu i se svými hodnotami. Toto nelze vrátit.</string>
+    <string name="labs_edit_title">Upravit sken</string>
+    <string name="labs_edit_date">Datum odběru</string>
+    <string name="labs_edit_lab">Laboratoř</string>
+    <string name="labs_edit_fasting">Odběr na lačno</string>
+    <string name="labs_edit_values">Hodnoty</string>
+    <string name="labs_edit_no_values">Nezůstaly žádné hodnoty. Uložením zůstane datum a zbytek se smaže.</string>
+    <string name="labs_edit_value_invalid">To není číslo</string>
+    <string name="labs_edit_remove_value">Odebrat hodnotu</string>
     <string name="bodymap_never_used">zatím nepoužito</string>
     <string name="bodymap_used_ago">použito před %1$s</string>
     <string name="bodymap_chip_suggested">%1$s · doporučeno</string>

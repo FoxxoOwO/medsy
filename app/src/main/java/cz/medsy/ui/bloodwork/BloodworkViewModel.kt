@@ -14,6 +14,7 @@ import cz.medsy.domain.calc.RangeBands
 import cz.medsy.domain.calc.RangeStatus
 import cz.medsy.domain.model.BiomarkerValue
 import cz.medsy.domain.model.BloodTestSession
+import cz.medsy.domain.model.LabImportSource
 import cz.medsy.domain.model.MedicationMilestone
 import cz.medsy.domain.model.ProfileType
 import cz.medsy.domain.model.ReferenceRangeProfile
@@ -63,8 +64,65 @@ data class BloodworkUiState(
     val isReadingPhoto: Boolean = false,
     /** Milestone pins for the selected biomarker's chart. */
     val milestones: List<MilestonePin> = emptyList(),
+    /** Every imported report, newest first: one import is one draw. */
+    val history: List<ScanHistoryRow> = emptyList(),
+    /** The report being corrected, or null when the editor is closed. */
+    val editing: ScanDraft? = null,
+    /** The report a confirmation dialog is asking about. */
+    val pendingDelete: ScanHistoryRow? = null,
     val isLoading: Boolean = true,
 )
+
+/** A row of the history list: what was imported, when, and how many values it brought. */
+data class ScanHistoryRow(
+    val sessionId: Long,
+    val timestamp: Instant,
+    val labName: String?,
+    val source: LabImportSource,
+    val valueCount: Int,
+) {
+    companion object {
+        /**
+         * One import is one draw, so the history is the session list — the values only add
+         * the count. Draws without values are still shown: an import that matched nothing
+         * is exactly the one worth deleting.
+         */
+        fun from(sessions: List<BloodTestSession>, values: List<BiomarkerValue>): List<ScanHistoryRow> {
+            val counts = values.groupingBy { it.sessionId }.eachCount()
+            return sessions
+                .sortedByDescending { it.timestamp }
+                .map { session ->
+                    ScanHistoryRow(
+                        sessionId = session.id,
+                        timestamp = session.timestamp,
+                        labName = session.labName,
+                        source = session.source,
+                        valueCount = counts[session.id] ?: 0,
+                    )
+                }
+        }
+    }
+}
+
+/** One editable value row; [text] is what the lab printed, not the stored SI number. */
+data class ScanValueDraft(
+    val id: Long,
+    val code: String,
+    val displayName: String,
+    val text: String,
+    val unit: String,
+    val invalid: Boolean = false,
+)
+
+data class ScanDraft(
+    val sessionId: Long,
+    val timestamp: Instant,
+    val labName: String,
+    val fasting: Boolean,
+    val values: List<ScanValueDraft>,
+) {
+    val hasInvalidValues: Boolean get() = values.any { it.invalid }
+}
 
 @HiltViewModel
 class BloodworkViewModel @Inject constructor(
@@ -102,7 +160,14 @@ class BloodworkViewModel @Inject constructor(
             repository.observeSessions().collect { sessions ->
                 val ids = sessions.map { it.id }
                 val values = if (ids.isEmpty()) emptyList() else repository.valuesForSessions(ids)
-                _state.update { it.copy(sessions = sessions, values = values, isLoading = false) }
+                _state.update {
+                    it.copy(
+                        sessions = sessions,
+                        values = values,
+                        history = ScanHistoryRow.from(sessions, values),
+                        isLoading = false,
+                    )
+                }
                 rebuildSeries()
             }
         }
@@ -276,4 +341,126 @@ class BloodworkViewModel @Inject constructor(
     }
 
     fun discardImport() = _state.update { it.copy(pendingImport = null) }
+
+    // The history list is the session list: every import landed as one draw, so correcting
+    // a report means correcting a session and its values, not re-importing the file.
+
+    fun editScan(sessionId: Long) {
+        val current = _state.value
+        val session = current.sessions.firstOrNull { it.id == sessionId } ?: return
+        val values = current.values
+            .filter { it.sessionId == sessionId }
+            .sortedBy { Biomarkers.find(it.biomarkerCode)?.displayName ?: it.biomarkerCode }
+            .map { value ->
+                ScanValueDraft(
+                    id = value.id,
+                    code = value.biomarkerCode,
+                    displayName = Biomarkers.find(value.biomarkerCode)?.displayName
+                        ?: value.biomarkerCode,
+                    text = value.rawValue.stripTrailingZeros().toPlainString(),
+                    unit = value.rawUnit,
+                )
+            }
+        _state.update {
+            it.copy(
+                pendingDelete = null,
+                editing = ScanDraft(
+                    sessionId = session.id,
+                    timestamp = session.timestamp,
+                    labName = session.labName.orEmpty(),
+                    fasting = session.fastingStatus,
+                    values = values,
+                ),
+            )
+        }
+    }
+
+    fun setDraftTimestamp(timestamp: Instant) = updateDraft { it.copy(timestamp = timestamp) }
+
+    fun setDraftLabName(name: String) = updateDraft { it.copy(labName = name) }
+
+    fun setDraftFasting(fasting: Boolean) = updateDraft { it.copy(fasting = fasting) }
+
+    fun setDraftValue(id: Long, text: String) = updateDraft { draft ->
+        draft.copy(
+            values = draft.values.map { row ->
+                if (row.id != id) {
+                    row
+                } else {
+                    // A cleared field is an unfinished deletion, not a typo; only text that
+                    // was meant as a number can be wrong.
+                    row.copy(text = text, invalid = text.isNotBlank() && parseValue(text) == null)
+                }
+            },
+        )
+    }
+
+    fun removeDraftValue(id: Long) = updateDraft { draft ->
+        draft.copy(values = draft.values.filterNot { it.id == id })
+    }
+
+    private fun updateDraft(transform: (ScanDraft) -> ScanDraft) {
+        _state.update { current ->
+            current.editing?.let { current.copy(editing = transform(it)) } ?: current
+        }
+    }
+
+    fun saveScan() {
+        val current = _state.value
+        val draft = current.editing ?: return
+        if (draft.hasInvalidValues) return
+        val session = current.sessions.firstOrNull { it.id == draft.sessionId } ?: return
+        val originals = current.values
+            .filter { it.sessionId == draft.sessionId }
+            .associateBy { it.id }
+        val kept = draft.values.mapNotNull { row ->
+            val original = originals[row.id] ?: return@mapNotNull null
+            val raw = parseValue(row.text) ?: return@mapNotNull null
+            if (raw.compareTo(original.rawValue) == 0) return@mapNotNull original
+            // The edited number is the one the lab printed, so it goes back through the same
+            // unit conversion the import used instead of overwriting the SI column directly.
+            val converted = repository.normalize(row.code, raw, original.rawUnit)
+                ?: return@mapNotNull null
+            original.copy(
+                rawValue = raw,
+                normalizedSiValue = converted.first,
+                normalizedSiUnit = converted.second,
+            )
+        }
+        val removed = originals.keys - draft.values.map { it.id }.toSet()
+        viewModelScope.launch {
+            repository.applyScanEdit(
+                session = session.copy(
+                    timestamp = draft.timestamp,
+                    labName = draft.labName.trim().ifEmpty { null },
+                    fastingStatus = draft.fasting,
+                ),
+                values = kept,
+                removedValueIds = removed.toList(),
+            )
+            _state.update { it.copy(editing = null) }
+        }
+    }
+
+    fun cancelScanEdit() = _state.update { it.copy(editing = null) }
+
+    fun askDelete(sessionId: Long) = _state.update { current ->
+        current.copy(pendingDelete = current.history.firstOrNull { it.sessionId == sessionId })
+    }
+
+    fun cancelDelete() = _state.update { it.copy(pendingDelete = null) }
+
+    fun confirmDelete() {
+        val row = _state.value.pendingDelete ?: return
+        viewModelScope.launch {
+            // The values go with the session: the foreign key cascades, so there is no
+            // second delete to forget.
+            repository.deleteSession(row.sessionId)
+            _state.update { it.copy(pendingDelete = null) }
+        }
+    }
+
+    /** Comma decimals are what Czech labs print, so both separators have to parse. */
+    private fun parseValue(text: String): BigDecimal? =
+        text.trim().replace(',', '.').toBigDecimalOrNull()
 }

@@ -1842,3 +1842,39 @@ provider, and the branch that matters is which reader receives the file.
 Tests: `PrescriptionImporterTest` (7) — the four outcomes plus a photo read through OCR and a
 PDF with an unknown MIME type; four new cases in `EReceptParserTest` for the printed shape,
 the labelled code winning over an earlier token, the metadata filter and the IČO.
+
+## A scan you can correct afterwards
+
+A report read from a PDF or a photo is a first draft — the parser guesses the draw date from the
+page, and a lab prints units in whatever order it likes. Until now the only way to fix a wrong
+number was to delete the whole draw, which also deleted the twelve correct values next to it.
+
+The Bloodwork screen now lists every import newest first (date, laboratory, how it arrived, how
+many values it brought). Editing opens `ScanEditDialog`: the draw date through a date picker, the
+laboratory name, fasting, and each value as the number the lab printed. Clearing a field removes
+that value; a row that is not a number marks itself and blocks the save instead of silently
+keeping the old one. Deleting asks first, then takes the draw and its values away together.
+
+Deliberate choices:
+
+- **The history is the session list, not a new table.** One import already is one draw
+  (`blood_test_sessions` + `biomarker_values`), so the section needed no migration and cannot
+  disagree with the chart. An import that recognised nothing has zero values and is still listed —
+  that is exactly the row worth deleting.
+- **The editor edits the printed number.** `BloodTestRepository.normalize` runs again on save, so
+  `500,5` pg/mL becomes 1837.3 pmol/L. Storing the typed number as SI would have been shorter and
+  would have made "pg/mL" mean something else the moment the user typed in a different unit.
+- **A picked date keeps the time of the draw.** `mergePickedDate` replaces the local date only —
+  the picker speaks UTC midnight, and a 07:40 venipuncture must not become 02:00 because the
+  timezone got applied twice.
+- **One transaction per edit.** `BloodTestDao.applyScanEdit` writes the session and its values
+  together; a session that moved without its values would chart old numbers on the new date.
+- **Eleven callbacks became one object.** `ScanHistoryActions` carries edit/delete/draft intents
+  so `BloodworkScreen` gained a single parameter, and `NoScanHistoryActions` keeps previews and
+  tests free of a view model.
+
+Tests: `ScanHistoryTest` (11) — ordering and value counts, an empty import still listed, the editor
+showing the printed number, a moved date reaching both the session and the chart, comma-decimal
+correction converting to SI, deleting one value, refusing `420 mg`, a cleared field not counting as
+an error, deleting a draw with its values and chart point, cancelling a delete, and the picked date
+keeping local time.

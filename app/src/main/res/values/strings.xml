@@ -527,6 +527,25 @@
         <item quantity="one">Review %1$d parsed result</item>
         <item quantity="other">Review %1$d parsed results</item>
     </plurals>
+    <string name="labs_history_title">Scan history</string>
+    <string name="labs_history_empty">Nothing imported yet. A scanned or PDF report lands here, and stays editable.</string>
+    <plurals name="labs_history_values">
+        <item quantity="one">%1$d value</item>
+        <item quantity="other">%1$d values</item>
+    </plurals>
+    <string name="labs_history_source_pdf">Imported PDF</string>
+    <string name="labs_history_source_photo">Photographed report</string>
+    <string name="labs_history_source_manual">Entered by hand</string>
+    <string name="labs_history_delete_title">Delete this scan?</string>
+    <string name="labs_history_delete_body">The draw from %1$s leaves the chart together with its values. This cannot be undone.</string>
+    <string name="labs_edit_title">Edit scan</string>
+    <string name="labs_edit_date">Draw date</string>
+    <string name="labs_edit_lab">Laboratory</string>
+    <string name="labs_edit_fasting">Fasting draw</string>
+    <string name="labs_edit_values">Values</string>
+    <string name="labs_edit_no_values">No values left. Saving keeps the date and deletes the rest.</string>
+    <string name="labs_edit_value_invalid">Not a number</string>
+    <string name="labs_edit_remove_value">Remove value</string>
     <string name="bodymap_never_used">never used</string>
     <string name="bodymap_used_ago">used %1$s ago</string>
     <string name="bodymap_chip_suggested">%1$s · suggested</string>

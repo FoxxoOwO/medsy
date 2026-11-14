@@ -93,6 +93,21 @@ fun BloodworkRoute(
         onSaveImport = viewModel::saveImport,
         onDiscardImport = viewModel::discardImport,
         onEditCustomTarget = onEditCustomTarget,
+        // One object instead of eleven callbacks: the editor is a single unit of intent, and
+        // the view model is the only thing that can carry it out.
+        scanActions = object : ScanHistoryActions {
+            override fun edit(sessionId: Long) = viewModel.editScan(sessionId)
+            override fun delete(sessionId: Long) = viewModel.askDelete(sessionId)
+            override fun draftDate(timestamp: Instant) = viewModel.setDraftTimestamp(timestamp)
+            override fun draftLabName(name: String) = viewModel.setDraftLabName(name)
+            override fun draftFasting(fasting: Boolean) = viewModel.setDraftFasting(fasting)
+            override fun draftValue(id: Long, text: String) = viewModel.setDraftValue(id, text)
+            override fun draftRemoveValue(id: Long) = viewModel.removeDraftValue(id)
+            override fun save() = viewModel.saveScan()
+            override fun cancelEdit() = viewModel.cancelScanEdit()
+            override fun confirmDelete() = viewModel.confirmDelete()
+            override fun cancelDelete() = viewModel.cancelDelete()
+        },
     )
 }
 
@@ -108,6 +123,7 @@ fun BloodworkScreen(
     onDiscardImport: () -> Unit,
     onEditCustomTarget: (String) -> Unit = {},
     modifier: Modifier = Modifier,
+    scanActions: ScanHistoryActions = NoScanHistoryActions,
 ) {
     val selected = state.series.firstOrNull { it.code == state.selectedCode } ?: state.series.firstOrNull()
 
@@ -367,9 +383,16 @@ fun BloodworkScreen(
         }
 
         item {
-            Text(stringResource(R.string.labs_biomarkers), style = MaterialTheme.typography.headlineSmall)
+            ScanHistorySection(
+                history = state.history,
+                onEdit = scanActions::edit,
+                onDelete = scanActions::delete,
+            )
         }
 
+        item {
+            Text(stringResource(R.string.labs_biomarkers), style = MaterialTheme.typography.headlineSmall)
+        }
         state.series.forEach { series ->
             item(key = series.code) {
                 Surface(
@@ -472,6 +495,29 @@ fun BloodworkScreen(
                 }
             }
         }
+    }
+
+    // Dialogs sit outside the list: they must survive a scroll, and a dialog inside a
+    // LazyColumn item would be composed and disposed with the row.
+    state.editing?.let { draft ->
+        ScanEditDialog(
+            draft = draft,
+            onTimestamp = scanActions::draftDate,
+            onLabName = scanActions::draftLabName,
+            onFasting = scanActions::draftFasting,
+            onValue = scanActions::draftValue,
+            onRemoveValue = scanActions::draftRemoveValue,
+            onSave = scanActions::save,
+            onDismiss = scanActions::cancelEdit,
+        )
+    }
+
+    state.pendingDelete?.let { row ->
+        ScanDeleteDialog(
+            row = row,
+            onConfirm = scanActions::confirmDelete,
+            onDismiss = scanActions::cancelDelete,
+        )
     }
 }
 
