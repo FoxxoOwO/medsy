@@ -4,12 +4,10 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import cz.medsy.data.local.MedsyDatabase
+import cz.medsy.data.local.datasource.SideEffectCatalog
 import cz.medsy.data.local.entity.MedicationEntity
-import cz.medsy.data.remote.TranslationService
 import cz.medsy.data.repository.InventoryRepository
 import cz.medsy.data.repository.MedicationRepository
-import cz.medsy.data.repository.TranslationRepository
-import cz.medsy.data.repository.TranslationRepositoryImpl
 import cz.medsy.domain.model.MedicationForm
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -34,7 +32,7 @@ import org.robolectric.RobolectricTestRunner
 
 /**
  * The detail screen's job is to keep several observations in step — the row, its schedules, its
- * stock, its cached translations — and to close itself only when the row is genuinely gone.
+ * stock, its side-effect profile — and to close itself only when the row is genuinely gone.
  *
  * These tests keep a collector alive and wait on it. `stateIn(WhileSubscribed)` stops recomputing
  * when nobody listens, so reading `state.value` between calls would return a stale snapshot, and
@@ -47,18 +45,11 @@ class MedicationDetailViewModelTest {
     private lateinit var db: MedsyDatabase
     private lateinit var repository: MedicationRepository
     private lateinit var inventoryRepository: InventoryRepository
-    private lateinit var service: FakeTranslationService
-    private lateinit var translations: TranslationRepository
+    private lateinit var sideEffects: SideEffectCatalog
     private var medicationId: Long = 0
 
     /** Collectors live outside `runBlocking`, which would otherwise wait for them forever. */
     private val watchers = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
-
-    private class FakeTranslationService : TranslationService {
-        var fail = false
-        override suspend fun translate(text: String, target: String): String? =
-            if (fail) null else "[$target] $text"
-    }
 
     @Before
     fun setUp() {
@@ -74,13 +65,13 @@ class MedicationDetailViewModelTest {
             db.medicationDao(),
             db.scheduleDao(),
         )
-        service = FakeTranslationService()
-        translations = TranslationRepositoryImpl(db.translationDao(), service)
+        sideEffects = SideEffectCatalog(context)
         medicationId = runBlocking {
             db.medicationDao().insert(
                 MedicationEntity(
                     name = "Testovaci",
                     activeSubstance = "Estradiolum valeras",
+                    atcCode = "G03CA03",
                     form = MedicationForm.INJECTION_IM.name,
                     notes = "Ráno",
                 ),
@@ -107,7 +98,7 @@ class MedicationDetailViewModelTest {
     private fun viewModel() = MedicationDetailViewModel(
         repository = repository,
         inventoryRepository = inventoryRepository,
-        translations = translations,
+        sideEffectCatalog = sideEffects,
         savedStateHandle = SavedStateHandle(mapOf("medicationId" to medicationId)),
     )
 
@@ -163,32 +154,59 @@ class MedicationDetailViewModelTest {
     }
 
     @Test
-    fun `a translation is stored, shown and removable`() = watching { viewModel ->
+    fun `the side effects follow the substance`() = watching { viewModel ->
         val state = watch(viewModel)
         viewModel.state.first { it.medication != null }
 
-        viewModel.translate("en")
-        viewModel.state.first { it.translations.isNotEmpty() }
+        viewModel.state.first { it.sideEffects != null }
 
-        assertEquals("[en] Testovaci", state().translations.single().name)
-        assertNull(state().translating)
-        assertFalse(state().translationFailed)
-
-        viewModel.removeTranslation("en")
-        viewModel.state.first { it.translations.isEmpty() }
+        val profile = state().sideEffects!!
+        assertEquals("G03CA03", profile.atcCode)
+        assertEquals("Estradiol", profile.substance)
+        assertFalse(profile.isGroupLevel)
+        assertTrue(profile.effects.isNotEmpty())
+        assertTrue(profile.byFrequency().first().second.isNotEmpty())
     }
 
     @Test
-    fun `a failed translation is reported, not silently dropped`() = watching { viewModel ->
+    fun `a substance outside the asset falls back to its group`() = watching { viewModel ->
         val state = watch(viewModel)
         viewModel.state.first { it.medication != null }
-        service.fail = true
 
-        viewModel.translate("en")
-        viewModel.state.first { it.translationFailed }
+        repository.getById(medicationId)!!.let { row ->
+            viewModel.save(row, MedicationEdit.of(row).copy(atcCode = "G03CA09"))
+        }
+        viewModel.state.first { it.sideEffects?.atcCode == "G03CA" }
 
-        assertTrue(state().translationFailed)
-        assertTrue(state().translations.isEmpty())
-        assertNull(state().translating)
+        assertTrue(state().sideEffects!!.isGroupLevel)
+        assertEquals("Estrogeny", state().sideEffects!!.substance)
+    }
+
+    @Test
+    fun `no code means no card`() = watching { viewModel ->
+        val state = watch(viewModel)
+        viewModel.state.first { it.medication != null }
+
+        repository.getById(medicationId)!!.let { row ->
+            viewModel.save(row, MedicationEdit.of(row).copy(atcCode = ""))
+        }
+        viewModel.state.first { it.medication?.atcCode == null }
+
+        assertNull(state().sideEffects)
+    }
+
+    @Test
+    fun `an unknown code does not invent effects`() = watching { viewModel ->
+        val state = watch(viewModel)
+        viewModel.state.first { it.medication != null }
+
+        repository.getById(medicationId)!!.let { row ->
+            viewModel.save(row, MedicationEdit.of(row).copy(atcCode = "Z99ZZ99"))
+        }
+        viewModel.state.first { it.medication?.atcCode == "Z99ZZ99" }
+        // The profile is computed off the medication flow; give the lookup a moment and assert.
+        runBlocking { kotlinx.coroutines.delay(50) }
+
+        assertNull(state().sideEffects)
     }
 }

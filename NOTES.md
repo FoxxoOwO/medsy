@@ -1713,28 +1713,39 @@ owns its own `MedicationDetailViewModel` and observes one medication by id. That
 detail screen's own actions: archiving from there cannot leave a stale copy in a list tab, because
 `gone` flips and a `LaunchedEffect` pops the screen.
 
-Deleting asks first and says what goes with it. The foreign keys do the rest — schedules, doses,
-batches and now translations all cascade off `medications.id`.
+Deleting asks first and says what goes with it. The foreign keys do the rest — schedules, doses and
+batches all cascade off `medications.id`.
 
-## Translating what the leaflet says
+## The side effects on the detail screen
 
-The card translates the name, the active substance and the notes into English, German or Slovak
-through MyMemory. It is the only free service that answers anonymous GETs, which is the deciding
-property: the app has no backend and must not ship an API key, so DeepL/Google would mean asking the
-user for one and LibreTranslate would mean hosting something. Everything else in the design follows
-from "a translation is a convenience on top of Czech text that is already complete":
+The detail screen lists the common undesirable effects, grouped by the frequency bands the SPC uses
+(very common, common, uncommon, rare, very rare), for the medication's ATC code. The data is a
+bundled asset (`app/src/main/assets/side_effects.json`, ~50 substance and group rows) read by
+`SideEffectCatalog`.
 
-- **The cache is the product.** `medication_translations` (v4) stores one row per medication and
-  language, keyed by `sourceHash` — a SHA-256 of name, substance and notes. Reopening a medication
-  costs one query, not one request; editing the note changes the hash, so the old row stops matching
-  without anything having to delete it. Verified on the emulator: kill the app, turn off Wi-Fi and
-  mobile data, cold start — "Testing" still renders from disk.
-- **Failures degrade, they do not error.** A missing translation shows the Czech text and one notice.
-  The substance is allowed to fail without losing the name, because the name is what the user asked
-  for.
-- **The notice stays visible.** "Automatic translation — may be imprecise. The original text stays
-  authoritative." is the honest framing for a medical app, and the device run showed why: MyMemory
-  rendered "Testovaci" as "Test-" in German. A user must never mistake the card for the leaflet.
+Why not from the network, and not from SÚKL: the open data publishes the leaflet as a PDF
+(`PIL…pdf`) and nothing structured, so there is no side-effect field to read. A server-side
+extraction would mean a backend and an API key, which this app does not have. Condensing the SPCs
+once into an asset also buys the property that matters most here — the card renders on a train with
+no signal, exactly when a user is holding a box and wondering whether the nausea is expected.
 
-The API's ~500-byte limit is handled by chunking on sentence boundaries; each chunk is its own
-request and a single failed chunk fails the whole translation rather than producing half a sentence.
+Two things make the lookup honest rather than merely convenient:
+
+- **The group fallback is visible.** A medication whose exact substance is not in the asset falls back
+  `G03CA09` → `G03CA` → `G03`, and `SideEffectProfile.isGroupLevel` (true whenever the matched code
+  is shorter than the seven-character substance level) makes the card say "these are the effects of
+  the whole group; the particular product may differ" instead of pretending the text describes this
+  product.
+- **The card clears before it fills.** `transformLatest` emits `null`, then the profile, so a change of
+  ATC code never leaves the previous substance's effects on screen. Without that first emission the
+  card showed the old medicine's effects for as long as the asset read took — the wrong medicine's
+  side effects, which for a medical app is worse than showing nothing.
+
+The disclaimer is part of the card, not a dialog: "An overview of known effects, not a substitute
+for the patient leaflet. Whether an effect matters for you is a question for your doctor." The
+leaflet button sits directly above it, so the claim and its limit are read together.
+
+A machine-translation card (MyMemory, cached in `medication_translations`) lived here for one
+evening and was removed on request. The table went with it in migration 4→5: every row was a copy of
+text that still exists on the medication, so nothing of the patient's own was lost. The migration
+itself stays — a database created by that build must still reach v5.

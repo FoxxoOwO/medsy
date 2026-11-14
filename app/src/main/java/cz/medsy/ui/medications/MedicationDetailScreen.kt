@@ -81,8 +81,6 @@ fun MedicationDetailRoute(
         onDelete = viewModel::delete,
         onSetScheduleActive = viewModel::setScheduleActive,
         onDeleteSchedule = viewModel::deleteSchedule,
-        onTranslate = viewModel::translate,
-        onRemoveTranslation = viewModel::removeTranslation,
         onEditSchedule = onEditSchedule,
         onNewSchedule = { state.medication?.let { onNewSchedule(it.id) } },
     )
@@ -97,8 +95,6 @@ fun MedicationDetailScreen(
     onDelete: () -> Unit = {},
     onSetScheduleActive: (Schedule, Boolean) -> Unit = { _, _ -> },
     onDeleteSchedule: (Schedule) -> Unit = {},
-    onTranslate: (String) -> Unit = {},
-    onRemoveTranslation: (String) -> Unit = {},
     onEditSchedule: (Long, Long) -> Unit = { _, _ -> },
     onNewSchedule: () -> Unit = {},
     modifier: Modifier = Modifier,
@@ -205,13 +201,7 @@ fun MedicationDetailScreen(
         }
 
         item {
-            MedicationTranslationCard(
-                translations = state.translations,
-                translating = state.translating,
-                failed = state.translationFailed,
-                onTranslate = onTranslate,
-                onRemove = onRemoveTranslation,
-            )
+            SideEffectCard(profile = state.sideEffects)
         }
 
         item {

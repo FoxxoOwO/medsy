@@ -224,18 +224,15 @@
     <string name="meds_detail_spc">Summary of product characteristics</string>
     <string name="meds_detail_pause">Pause</string>
     <string name="meds_detail_resume">Resume</string>
-
-    <!-- Machine translation of the medication text -->
-    <string name="translation_title">Translation</string>
-    <string name="translation_desc">Machine translation of the name, the substance and the notes.</string>
-    <string name="translation_action">Translate</string>
-    <string name="translation_refresh">Translate again</string>
-    <string name="translation_remove">Remove translation</string>
-    <string name="translation_notice">Automatic translation — may be imprecise. The original text stays authoritative.</string>
-    <string name="translation_failed">Translation failed. Check the connection and try again.</string>
-    <string name="translation_lang_en" translatable="false">English</string>
-    <string name="translation_lang_de" translatable="false">Deutsch</string>
-    <string name="translation_lang_sk" translatable="false">Slovenčina</string>
+    <string name="meds_detail_side_effects">Side effects</string>
+    <string name="meds_detail_side_effects_source">Common effects of %1$s (%2$s), after the SPC.</string>
+    <string name="meds_detail_side_effects_group">This is the group %1$s, so the individual product may differ.</string>
+    <string name="meds_detail_side_effects_disclaimer">An overview of known effects, not a substitute for the patient leaflet. Whether an effect matters for you is a question for your doctor.</string>
+    <string name="side_effect_very_common">Very common</string>
+    <string name="side_effect_common">Common</string>
+    <string name="side_effect_uncommon">Uncommon</string>
+    <string name="side_effect_rare">Rare</string>
+    <string name="side_effect_very_rare">Very rare</string>
     <string name="scan_name">Name</string>
     <string name="scan_active_substance">Active substance</string>
     <string name="scan_atc">ATC</string>

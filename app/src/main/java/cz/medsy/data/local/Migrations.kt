@@ -107,13 +107,31 @@ object MedsyMigrations {
             "ON `medication_translations` (`medicationId`, `language`)",
     )
 
+    /**
+     * v5 — drops the translation cache.
+     *
+     * v4 added `medication_translations` for the machine translation of a medication's text. That
+     * feature is gone, and a cache table that nothing reads is dead weight inside the encrypted
+     * database, so the table goes too. Nothing of the patient's own is lost: every row was a copy of
+     * text that still exists on the medication itself.
+     */
+    val MIGRATION_4_5 = Migration(4, 5) { db ->
+        statements4to5().forEach(db::execSQL)
+    }
+
+    fun statements4to5(): List<String> = listOf(
+        "DROP TABLE IF EXISTS `medication_translations`",
+    )
+
     /** Every migration, oldest first. Registered in `DatabaseModule`. */
-    val ALL: List<Migration> = listOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+    val ALL: List<Migration> =
+        listOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
 
     /** Human-readable mirror used by `MigrationRegistryTest`. */
     val SQL: Map<String, List<String>> = mapOf(
         "1->2" to statements1to2(),
         "2->3" to statements2to3(),
         "3->4" to statements3to4(),
+        "4->5" to statements4to5(),
     )
 }

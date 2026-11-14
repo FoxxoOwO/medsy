@@ -758,12 +758,14 @@
     <string name="meds_detail_pause">Pozastavit</string>
     <string name="meds_detail_resume">Obnovit</string>
 
-    <!-- Machine translation of the medication text -->
-    <string name="translation_title">Překlad</string>
-    <string name="translation_desc">Strojový překlad názvu, účinné látky a poznámek.</string>
-    <string name="translation_action">Přeložit</string>
-    <string name="translation_refresh">Přeložit znovu</string>
-    <string name="translation_remove">Odstranit překlad</string>
-    <string name="translation_notice">Automatický překlad — může být nepřesný. Rozhodující je původní text.</string>
-    <string name="translation_failed">Překlad se nepodařil. Zkontrolujte připojení a zkuste to znovu.</string>
+    <!-- Vedlejší účinky, zkráceno ze SPC; viz assets/side_effects.json -->
+    <string name="meds_detail_side_effects">Vedlejší účinky</string>
+    <string name="meds_detail_side_effects_source">Běžné účinky %1$s (%2$s) podle SPC.</string>
+    <string name="meds_detail_side_effects_group">Jde o skupinu %1$s, konkrétní přípravek se může lišit.</string>
+    <string name="meds_detail_side_effects_disclaimer">Přehled známých účinků, ne náhrada příbalového letáku. Zda je účinek závažný, posoudí lékař.</string>
+    <string name="side_effect_very_common">Velmi časté</string>
+    <string name="side_effect_common">Časté</string>
+    <string name="side_effect_uncommon">Méně časté</string>
+    <string name="side_effect_rare">Vzácné</string>
+    <string name="side_effect_very_rare">Velmi vzácné</string>
 </resources>

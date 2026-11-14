@@ -1,11 +1,7 @@
 package cz.medsy.di
 
-import cz.medsy.data.remote.TranslationApi
-import cz.medsy.data.remote.TranslationService
 import cz.medsy.data.remote.datasource.OpenFoodFactsRemoteDataSource
 import cz.medsy.data.repository.MedicationLookupRepositoryImpl
-import cz.medsy.data.repository.TranslationRepository
-import cz.medsy.data.repository.TranslationRepositoryImpl
 import cz.medsy.domain.repository.SupplementLookup
 import cz.medsy.domain.repository.MedicationLookupRepository
 import dagger.Binds
@@ -28,12 +24,4 @@ abstract class LookupModule {
     @Binds
     @Singleton
     abstract fun bindSupplementLookup(impl: OpenFoodFactsRemoteDataSource): SupplementLookup
-
-    @Binds
-    @Singleton
-    abstract fun bindTranslationService(impl: TranslationApi): TranslationService
-
-    @Binds
-    @Singleton
-    abstract fun bindTranslationRepository(impl: TranslationRepositoryImpl): TranslationRepository
 }

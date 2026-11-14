@@ -3,15 +3,15 @@ package cz.medsy.ui.medications
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import cz.medsy.data.local.datasource.SideEffectCatalog
 import cz.medsy.data.repository.InventoryRepository
 import cz.medsy.data.repository.MedicationRepository
-import cz.medsy.data.repository.TranslationRepository
 import cz.medsy.domain.calc.InteractionAlert
 import cz.medsy.domain.calc.InteractionEngine
 import cz.medsy.domain.model.InventoryBatch
 import cz.medsy.domain.model.Medication
-import cz.medsy.domain.model.MedicationTranslation
 import cz.medsy.domain.model.Schedule
+import cz.medsy.domain.model.SideEffectProfile
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -19,7 +19,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -30,11 +33,8 @@ data class MedicationDetailUi(
     val batches: List<InventoryBatch> = emptyList(),
     val alerts: List<InteractionAlert> = emptyList(),
     val gone: Boolean = false,
-    /** Cached translations, one row per language, as stored on disk. */
-    val translations: List<MedicationTranslation> = emptyList(),
-    /** Language tag currently being translated, so the card can show progress per chip. */
-    val translating: String? = null,
-    val translationFailed: Boolean = false,
+    /** Common effects of the medication's substance, or of its ATC group when unknown. */
+    val sideEffects: SideEffectProfile? = null,
 )
 
 /**
@@ -46,7 +46,7 @@ data class MedicationDetailUi(
 class MedicationDetailViewModel @Inject constructor(
     private val repository: MedicationRepository,
     private val inventoryRepository: InventoryRepository,
-    private val translations: TranslationRepository,
+    private val sideEffectCatalog: SideEffectCatalog,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -54,8 +54,6 @@ class MedicationDetailViewModel @Inject constructor(
 
     private val gone = MutableStateFlow(false)
     private val loaded = MutableStateFlow(false)
-    private val translating = MutableStateFlow<String?>(null)
-    private val translationFailed = MutableStateFlow(false)
 
     private val identity = combine(
         repository.observeById(medicationId).onEach { loaded.value = true },
@@ -68,8 +66,7 @@ class MedicationDetailViewModel @Inject constructor(
         repository.observeActive(),
         gone,
         loaded,
-        translations.observeFor(medicationId),
-    ) { (medication, schedules, batches), active, isGone, isLoaded, translated ->
+    ) { (medication, schedules, batches), active, isGone, isLoaded ->
         MedicationDetailUi(
             medication = medication,
             schedules = schedules,
@@ -77,56 +74,30 @@ class MedicationDetailViewModel @Inject constructor(
             alerts = MedicationAlerts.of(active, medicationId),
             // A row that disappears on its own was deleted elsewhere; the screen must not linger.
             gone = isGone || (isLoaded && medication == null),
-            translations = translated,
         )
     }
 
     /**
-     * Progress and failure are their own sources. Reading them inside the combine above would leave
-     * the spinner and the error banner frozen until some unrelated row changed — a translation that
-     * fails before touching the disk would never be reported at all.
+     * The asset lookup is keyed by the ATC code, so it re-runs only when that code changes — not on
+     * every dose or batch update. [transformLatest] clears the card and then fills it: without that
+     * first `emit(null)` the previous substance's effects stay on screen while the new code is being
+     * looked up, which on a slow read is the wrong medicine's side effects.
      */
-    private val translationStatus = combine(translating, translationFailed) { language, failed ->
-        language to failed
-    }
+    private val sideEffects: Flow<SideEffectProfile?> = core
+        .map { it.medication?.atcCode }
+        .distinctUntilChanged()
+        .transformLatest { code ->
+            emit(null)
+            emit(sideEffectCatalog.profileFor(code))
+        }
 
-    val state: StateFlow<MedicationDetailUi> = combine(core, translationStatus) { ui, (language, failed) ->
-        ui.copy(translating = language, translationFailed = failed)
+    val state: StateFlow<MedicationDetailUi> = combine(core, sideEffects) { ui, profile ->
+        ui.copy(sideEffects = profile)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = MedicationDetailUi(),
     )
-
-    /**
-     * Translates the medication into [language]. The previous translation for that language stays
-     * on screen until the new one lands, so the card never blinks to empty while the request runs.
-     */
-    fun translate(language: String) {
-        val medication = state.value.medication ?: return
-        if (translating.value == language) return
-        translating.value = language
-        translationFailed.value = false
-        viewModelScope.launch {
-            try {
-                translations.translate(medication, language)
-                    .onFailure { translationFailed.value = true }
-            } finally {
-                translating.value = null
-            }
-        }
-    }
-
-    fun removeTranslation(language: String) {
-        viewModelScope.launch {
-            translations.remove(medicationId, language)
-            translationFailed.value = false
-        }
-    }
-
-    fun dismissTranslationError() {
-        translationFailed.value = false
-    }
 
     /**
      * Saves an edit of [medication]. The row is passed in rather than read back from [state]: the

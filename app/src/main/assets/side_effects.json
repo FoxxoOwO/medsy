@@ -1,0 +1,502 @@
+{
+  "version": 1,
+  "note": "Common undesirable effects, condensed from the SPC of the Czech products. Frequencies follow the SPC convention: very common >=1/10, common >=1/100, uncommon >=1/1000, rare >=1/10000, very rare <1/10000. Seven-character codes are substances, three- and five-character codes are the group they stand for; a substance row wins over a group row.",
+  "entries": [
+    {
+      "atc": "G03CA03",
+      "substance": "Estradiol",
+      "effects": [
+        { "frequency": "VERY_COMMON", "text": "Citlivost nebo napětí prsou" },
+        { "frequency": "COMMON", "text": "Bolest hlavy, nevolnost, nadýmání" },
+        { "frequency": "COMMON", "text": "Zadržování vody, otoky kotníků" },
+        { "frequency": "COMMON", "text": "Špinění nebo nepravidelné krvácení z rodidel" },
+        { "frequency": "UNCOMMON", "text": "Změny nálady, úzkost, pokles libida" },
+        { "frequency": "UNCOMMON", "text": "Křeče v lýtkách, pocit těžkých nohou" },
+        { "frequency": "RARE", "text": "Žilní trombóza, plicní embolie" },
+        { "frequency": "RARE", "text": "Vysoký krevní tlak, onemocnění žlučníku" }
+      ]
+    },
+    {
+      "atc": "G03CA01",
+      "substance": "Ethinylestradiol",
+      "effects": [
+        { "frequency": "COMMON", "text": "Nevolnost, bolest hlavy, citlivost prsou" },
+        { "frequency": "COMMON", "text": "Přibývání na váze, změny nálady" },
+        { "frequency": "UNCOMMON", "text": "Špinění mezi cykly, zvracení" },
+        { "frequency": "RARE", "text": "Žilní trombóza, arteriální trombóza" },
+        { "frequency": "RARE", "text": "Cholestáza, onemocnění žlučníku" }
+      ]
+    },
+    {
+      "atc": "G03CA04",
+      "substance": "Estriol",
+      "effects": [
+        { "frequency": "COMMON", "text": "Citlivost prsou, nevolnost" },
+        { "frequency": "COMMON", "text": "Bolest hlavy, zadržování vody" },
+        { "frequency": "UNCOMMON", "text": "Krvácení z rodidel, vaginální kandidóza" }
+      ]
+    },
+    {
+      "atc": "G03CA",
+      "substance": "Estrogeny",
+      "effects": [
+        { "frequency": "COMMON", "text": "Citlivost prsou, nevolnost, zvracení" },
+        { "frequency": "COMMON", "text": "Zadržování tekutin, otoky, přibývání na váze" },
+        { "frequency": "COMMON", "text": "Bolest hlavy, migréna" },
+        { "frequency": "UNCOMMON", "text": "Změny nálady, podrážděnost, nespavost" },
+        { "frequency": "RARE", "text": "Trombóza, vysoký krevní tlak, žlučníkové onemocnění" }
+      ]
+    },
+    {
+      "atc": "G03DA04",
+      "substance": "Progesteron",
+      "effects": [
+        { "frequency": "COMMON", "text": "Ospalost, závrať, bolest hlavy" },
+        { "frequency": "COMMON", "text": "Nadýmání, nevolnost, citlivost prsou" },
+        { "frequency": "COMMON", "text": "Špinění, změny menstruačního cyklu" },
+        { "frequency": "UNCOMMON", "text": "Depresivní nálada, snížené libido" },
+        { "frequency": "UNCOMMON", "text": "Alergické kožní reakce v místě podání" }
+      ]
+    },
+    {
+      "atc": "G03DB01",
+      "substance": "Dydrogesteron",
+      "effects": [
+        { "frequency": "COMMON", "text": "Migréna, bolest hlavy" },
+        { "frequency": "COMMON", "text": "Nevolnost, nadýmání, citlivost prsou" },
+        { "frequency": "UNCOMMON", "text": "Depresivní nálada, nespavost" },
+        { "frequency": "RARE", "text": "Hemolytická anemie, alergická reakce" }
+      ]
+    },
+    {
+      "atc": "G03D",
+      "substance": "Progestiny",
+      "effects": [
+        { "frequency": "COMMON", "text": "Nepravidelné krvácení nebo špinění" },
+        { "frequency": "COMMON", "text": "Nadýmání, nevolnost, bolest hlavy" },
+        { "frequency": "COMMON", "text": "Citlivost prsou, změny nálady" },
+        { "frequency": "UNCOMMON", "text": "Akné, suchost kůže, ospalost" }
+      ]
+    },
+    {
+      "atc": "G03HA01",
+      "substance": "Cyproteron acetát",
+      "effects": [
+        { "frequency": "COMMON", "text": "Pokles libida, erektilní dysfunkce" },
+        { "frequency": "COMMON", "text": "Depresivní nálada, únava" },
+        { "frequency": "COMMON", "text": "Přibývání na váze, zadržování tekutin" },
+        { "frequency": "UNCOMMON", "text": "Jaterní enzymy zvýšené, žloutenka" },
+        { "frequency": "RARE", "text": "Benigní meningeom, trombóza" }
+      ]
+    },
+    {
+      "atc": "G03H",
+      "substance": "Antiandrogeny",
+      "effects": [
+        { "frequency": "COMMON", "text": "Pokles libida, únava, návaly" },
+        { "frequency": "COMMON", "text": "Přibývání na váze, citlivost prsou" },
+        { "frequency": "UNCOMMON", "text": "Depresivní nálada, suchost kůže" },
+        { "frequency": "UNCOMMON", "text": "Zvýšené jaterní enzymy" }
+      ]
+    },
+    {
+      "atc": "G03BA03",
+      "substance": "Testosteron",
+      "effects": [
+        { "frequency": "COMMON", "text": "Reakce v místě vpichu nebo aplikace" },
+        { "frequency": "COMMON", "text": "Akné, mastná kůže, růst ochlupení" },
+        { "frequency": "COMMON", "text": "Zvýšený hematokrit a hemoglobin" },
+        { "frequency": "UNCOMMON", "text": "Zadržování tekutin, otoky, zvýšený krevní tlak" },
+        { "frequency": "UNCOMMON", "text": "Změny nálady, agresivita, nespavost" },
+        { "frequency": "RARE", "text": "Trombóza, dyslipidemie, hepatální léze" }
+      ]
+    },
+    {
+      "atc": "G03AA07",
+      "substance": "Levonorgestrel a ethinylestradiol",
+      "effects": [
+        { "frequency": "COMMON", "text": "Nevolnost, bolest hlavy, citlivost prsou" },
+        { "frequency": "COMMON", "text": "Přibývání na váze, změny nálady" },
+        { "frequency": "UNCOMMON", "text": "Špinění, zvracení, migréna" },
+        { "frequency": "RARE", "text": "Žilní trombóza, arteriální trombóza" }
+      ]
+    },
+    {
+      "atc": "C03DA01",
+      "substance": "Spironolakton",
+      "effects": [
+        { "frequency": "COMMON", "text": "Hyperkalemie, zvýšená hladina kreatininu" },
+        { "frequency": "COMMON", "text": "Gynekomastie, citlivost prsou, poruchy menstruace" },
+        { "frequency": "COMMON", "text": "Nevolnost, průjem, bolest břicha" },
+        { "frequency": "UNCOMMON", "text": "Závrať, bolest hlavy, svalové křeče" },
+        { "frequency": "RARE", "text": "Agranulocytóza, alergická kožní reakce" }
+      ]
+    },
+    {
+      "atc": "G04CB01",
+      "substance": "Finasterid",
+      "effects": [
+        { "frequency": "COMMON", "text": "Snížené libido, erektilní dysfunkce" },
+        { "frequency": "UNCOMMON", "text": "Depresivní nálada, citlivost prsou" },
+        { "frequency": "UNCOMMON", "text": "Gynekomastie, snížený objem ejakulátu" },
+        { "frequency": "RARE", "text": "Alergická reakce, zvýšené jaterní enzymy" }
+      ]
+    },
+    {
+      "atc": "G04CB02",
+      "substance": "Dutasterid",
+      "effects": [
+        { "frequency": "COMMON", "text": "Snížené libido, erektilní dysfunkce" },
+        { "frequency": "COMMON", "text": "Citlivost nebo zvětšení prsou" },
+        { "frequency": "UNCOMMON", "text": "Depresivní nálada, únava" },
+        { "frequency": "RARE", "text": "Alergická reakce včetně angioedému" }
+      ]
+    },
+    {
+      "atc": "L02BB03",
+      "substance": "Bikalutamid",
+      "effects": [
+        { "frequency": "COMMON", "text": "Citlivost a zvětšení prsou, návaly horka" },
+        { "frequency": "COMMON", "text": "Snížené libido, únava, suchost kůže" },
+        { "frequency": "COMMON", "text": "Zvýšené jaterní enzymy, průjem" },
+        { "frequency": "UNCOMMON", "text": "Depresivní nálada, ospalost" },
+        { "frequency": "RARE", "text": "Intersticiální plicní onemocnění, hepatotoxita" }
+      ]
+    },
+    {
+      "atc": "L02AE02",
+      "substance": "Leuprorelin",
+      "effects": [
+        { "frequency": "VERY_COMMON", "text": "Návaly horka, pocení" },
+        { "frequency": "COMMON", "text": "Bolest hlavy, změny nálady, únava" },
+        { "frequency": "COMMON", "text": "Reakce v místě vpichu, otok" },
+        { "frequency": "COMMON", "text": "Snížené libido, erektilní dysfunkce" },
+        { "frequency": "UNCOMMON", "text": "Bolesti kloubů a svalů, snížená hustota kostí" }
+      ]
+    },
+    {
+      "atc": "L02AE",
+      "substance": "Analoga GnRH",
+      "effects": [
+        { "frequency": "VERY_COMMON", "text": "Návaly horka, pocení, změny nálady" },
+        { "frequency": "COMMON", "text": "Únava, bolest hlavy, snížené libido" },
+        { "frequency": "COMMON", "text": "Reakce v místě vpichu" },
+        { "frequency": "UNCOMMON", "text": "Bolesti kloubů, úbytek kostní hmoty" }
+      ]
+    },
+    {
+      "atc": "A02BC01",
+      "substance": "Omeprazol",
+      "effects": [
+        { "frequency": "COMMON", "text": "Bolest hlavy, bolest břicha, průjem nebo zácpa" },
+        { "frequency": "COMMON", "text": "Nadýmání, nevolnost, zvracení" },
+        { "frequency": "UNCOMMON", "text": "Závrať, poruchy spánku, zvýšené jaterní enzymy" },
+        { "frequency": "RARE", "text": "Hypomagnesemie, nedostatek vitaminu B12" }
+      ]
+    },
+    {
+      "atc": "A02BC",
+      "substance": "Inhibitory protonové pumpy",
+      "effects": [
+        { "frequency": "COMMON", "text": "Bolest hlavy, bolest břicha, průjem" },
+        { "frequency": "COMMON", "text": "Nadýmání, nevolnost, plynatost" },
+        { "frequency": "UNCOMMON", "text": "Závrať, zvýšené jaterní enzymy, vyrážka" },
+        { "frequency": "RARE", "text": "Hypomagnesemie, nedostatek vitaminu B12, fraktury" }
+      ]
+    },
+    {
+      "atc": "A10BA02",
+      "substance": "Metformin",
+      "effects": [
+        { "frequency": "VERY_COMMON", "text": "Nevolnost, průjem, bolest břicha, nechutenství" },
+        { "frequency": "COMMON", "text": "Kovová pachuť v ústech, plynatost" },
+        { "frequency": "UNCOMMON", "text": "Snížení vitaminu B12 při dlouhodobém užívání" },
+        { "frequency": "RARE", "text": "Laktátová acidóza, kožní reakce" }
+      ]
+    },
+    {
+      "atc": "M01AE01",
+      "substance": "Ibuprofen",
+      "effects": [
+        { "frequency": "COMMON", "text": "Nevolnost, pálení žáhy, bolest břicha" },
+        { "frequency": "COMMON", "text": "Bolest hlavy, závrať, zadržování vody" },
+        { "frequency": "UNCOMMON", "text": "Průjem, vředy v ústech, kožní vyrážka" },
+        { "frequency": "RARE", "text": "Žaludeční vřed nebo krvácení do trávicího traktu" },
+        { "frequency": "RARE", "text": "Poškození ledvin, bronchospasmus u astmatu" }
+      ]
+    },
+    {
+      "atc": "M01AB05",
+      "substance": "Diklofenak",
+      "effects": [
+        { "frequency": "COMMON", "text": "Bolest břicha, nevolnost, průjem" },
+        { "frequency": "COMMON", "text": "Bolest hlavy, závrať, zvýšené jaterní enzymy" },
+        { "frequency": "UNCOMMON", "text": "Zadržování tekutin, vysoký krevní tlak" },
+        { "frequency": "RARE", "text": "Vřed nebo krvácení do trávicího traktu, kardiovaskulární příhoda" }
+      ]
+    },
+    {
+      "atc": "M01A",
+      "substance": "Nesteroidní antirevmatika",
+      "effects": [
+        { "frequency": "COMMON", "text": "Nevolnost, pálení žáhy, bolest břicha" },
+        { "frequency": "COMMON", "text": "Zadržování vody, otoky, zvýšený krevní tlak" },
+        { "frequency": "UNCOMMON", "text": "Vyrážka, závrať, poruchy vidění" },
+        { "frequency": "RARE", "text": "Vřed nebo krvácení do trávicího traktu, poškození ledvin" }
+      ]
+    },
+    {
+      "atc": "N02BE01",
+      "substance": "Paracetamol",
+      "effects": [
+        { "frequency": "UNCOMMON", "text": "Nevolnost, bolest břicha, kožní vyrážka" },
+        { "frequency": "RARE", "text": "Poškození jater při předávkování" },
+        { "frequency": "VERY_RARE", "text": "Závažná kožní reakce, trombocytopenie" }
+      ]
+    },
+    {
+      "atc": "B01AA03",
+      "substance": "Warfarin",
+      "effects": [
+        { "frequency": "COMMON", "text": "Krvácení z nosu, dásní nebo do moči" },
+        { "frequency": "COMMON", "text": "Modřiny bez zjevné příčiny" },
+        { "frequency": "UNCOMMON", "text": "Vyrážka, vypadávání vlasů, nevolnost" },
+        { "frequency": "RARE", "text": "Závažné krvácení, kožní nekróza" }
+      ]
+    },
+    {
+      "atc": "B01AF",
+      "substance": "Přímá perorální antikoagulancia",
+      "effects": [
+        { "frequency": "COMMON", "text": "Krvácení z nosu, modřiny, krvácení z dásní" },
+        { "frequency": "COMMON", "text": "Anemie, nevolnost, zvýšené jaterní enzymy" },
+        { "frequency": "UNCOMMON", "text": "Závažné krvácení do trávicího traktu" },
+        { "frequency": "RARE", "text": "Intrakraniální krvácení, alergická reakce" }
+      ]
+    },
+    {
+      "atc": "B03AA02",
+      "substance": "Fumarát železnatý",
+      "effects": [
+        { "frequency": "COMMON", "text": "Zácpa, nevolnost, tmavá stolice" },
+        { "frequency": "COMMON", "text": "Bolest břicha, kovová pachuť" },
+        { "frequency": "UNCOMMON", "text": "Průjem, pálení žáhy" }
+      ]
+    },
+    {
+      "atc": "B03AA07",
+      "substance": "Síran železnatý",
+      "effects": [
+        { "frequency": "COMMON", "text": "Zácpa, nevolnost, tmavá stolice" },
+        { "frequency": "COMMON", "text": "Bolest břicha, pocit plnosti" },
+        { "frequency": "UNCOMMON", "text": "Průjem, zvracení" }
+      ]
+    },
+    {
+      "atc": "C03CA01",
+      "substance": "Furosemid",
+      "effects": [
+        { "frequency": "COMMON", "text": "Časté močení, žízeň, suchost v ústech" },
+        { "frequency": "COMMON", "text": "Snížená hladina draslíku a sodíku" },
+        { "frequency": "UNCOMMON", "text": "Závrať při postavení, svalové křeče" },
+        { "frequency": "RARE", "text": "Poruchy sluchu, zánět slinivky" }
+      ]
+    },
+    {
+      "atc": "C03AA03",
+      "substance": "Hydrochlorothiazid",
+      "effects": [
+        { "frequency": "COMMON", "text": "Snížená hladina draslíku, zvýšená kyselina močová" },
+        { "frequency": "COMMON", "text": "Závrať, bolest hlavy, časté močení" },
+        { "frequency": "UNCOMMON", "text": "Zvýšená hladina cukru a cholesterolu" },
+        { "frequency": "RARE", "text": "Fotosenzitivita, pankreatitida" }
+      ]
+    },
+    {
+      "atc": "C09AA05",
+      "substance": "Ramipril",
+      "effects": [
+        { "frequency": "COMMON", "text": "Suchý dráždivý kašel" },
+        { "frequency": "COMMON", "text": "Závrať, bolest hlavy, únava" },
+        { "frequency": "UNCOMMON", "text": "Zvýšený krevní tlak pokles, angioedém" },
+        { "frequency": "RARE", "text": "Hyperkalemie, poškození ledvin" }
+      ]
+    },
+    {
+      "atc": "C09CA01",
+      "substance": "Losartan",
+      "effects": [
+        { "frequency": "COMMON", "text": "Závrať, bolest hlavy, únava" },
+        { "frequency": "UNCOMMON", "text": "Hyperkalemie, zvýšený kreatinin" },
+        { "frequency": "RARE", "text": "Angioedém, rabdomyolýza" }
+      ]
+    },
+    {
+      "atc": "C08CA01",
+      "substance": "Amlodipin",
+      "effects": [
+        { "frequency": "VERY_COMMON", "text": "Otoky kotníků" },
+        { "frequency": "COMMON", "text": "Bolest hlavy, návaly, palpitace, závrať" },
+        { "frequency": "UNCOMMON", "text": "Nevolnost, bolest břicha, změny nálady" },
+        { "frequency": "RARE", "text": "Angioedém, hepatitida" }
+      ]
+    },
+    {
+      "atc": "C07AB07",
+      "substance": "Bisoprolol",
+      "effects": [
+        { "frequency": "COMMON", "text": "Únava, závrať, pomalá srdeční frekvence" },
+        { "frequency": "COMMON", "text": "Studené končetiny, nevolnost" },
+        { "frequency": "UNCOMMON", "text": "Zhroucení srdce při vysazení, bronchospasmus" },
+        { "frequency": "RARE", "text": "Depresivní nálada, poruchy spánku" }
+      ]
+    },
+    {
+      "atc": "C10AA05",
+      "substance": "Atorvastatin",
+      "effects": [
+        { "frequency": "COMMON", "text": "Bolest svalů, bolest kloubů" },
+        { "frequency": "COMMON", "text": "Zvýšené jaterní enzymy, průjem, nevolnost" },
+        { "frequency": "UNCOMMON", "text": "Bolest hlavy, poruchy spánku, vyrážka" },
+        { "frequency": "RARE", "text": "Rabdomyolýza, autoimunitní myopatie" }
+      ]
+    },
+    {
+      "atc": "H03AA01",
+      "substance": "Levothyroxin",
+      "effects": [
+        { "frequency": "COMMON", "text": "Palpitace, třes, nespavost při příliš vysoké dávce" },
+        { "frequency": "COMMON", "text": "Nervozita, pocení, úbytek na váze" },
+        { "frequency": "UNCOMMON", "text": "Bolest hlavy, průjem, svalová slabost" },
+        { "frequency": "RARE", "text": "Angina pectoris, osteoporóza při dlouhodobém předávkování" }
+      ]
+    },
+    {
+      "atc": "H02AB07",
+      "substance": "Prednison",
+      "effects": [
+        { "frequency": "COMMON", "text": "Zvýšená chuť k jídlu, přibývání na váze" },
+        { "frequency": "COMMON", "text": "Nespavost, změny nálady, zvýšený krevní tlak" },
+        { "frequency": "COMMON", "text": "Zvýšená hladina cukru, zadržování vody" },
+        { "frequency": "UNCOMMON", "text": "Svalová slabost, řídnutí kostí, vznik modřin" },
+        { "frequency": "RARE", "text": "Suprese nadledvin, žaludeční vřed, psychóza" }
+      ]
+    },
+    {
+      "atc": "J01CA04",
+      "substance": "Amoxicilin",
+      "effects": [
+        { "frequency": "COMMON", "text": "Průjem, nevolnost, kožní vyrážka" },
+        { "frequency": "UNCOMMON", "text": "Zvracení, kandidóza, zvýšené jaterní enzymy" },
+        { "frequency": "RARE", "text": "Anafylaxe, pseudomembranózní kolitida" }
+      ]
+    },
+    {
+      "atc": "J01FA10",
+      "substance": "Azithromycin",
+      "effects": [
+        { "frequency": "COMMON", "text": "Průjem, nevolnost, bolest břicha" },
+        { "frequency": "UNCOMMON", "text": "Bolest hlavy, závrať, prodloužení QT intervalu" },
+        { "frequency": "RARE", "text": "Závažná kožní reakce, hepatitida" }
+      ]
+    },
+    {
+      "atc": "N06AB",
+      "substance": "Selektivní inhibitory zpětného vychytávání serotoninu",
+      "effects": [
+        { "frequency": "COMMON", "text": "Nevolnost, průjem, nechutenství" },
+        { "frequency": "COMMON", "text": "Nespavost nebo ospalost, pocení, bolest hlavy" },
+        { "frequency": "UNCOMMON", "text": "Snížené libido, poruchy erekce, úzkost" },
+        { "frequency": "UNCOMMON", "text": "Hyponatremie u starších pacientů" },
+        { "frequency": "RARE", "text": "Serotoninový syndrom, krvácení do trávicího traktu" }
+      ]
+    },
+    {
+      "atc": "N03AX",
+      "substance": "Gabapentinoidy",
+      "effects": [
+        { "frequency": "VERY_COMMON", "text": "Ospalost, závrať" },
+        { "frequency": "COMMON", "text": "Ataxie, rozmazané vidění, otoky" },
+        { "frequency": "COMMON", "text": "Přibývání na váze, nevolnost" },
+        { "frequency": "RARE", "text": "Závislost, respirační deprese" }
+      ]
+    },
+    {
+      "atc": "N05BA",
+      "substance": "Benzodiazepiny",
+      "effects": [
+        { "frequency": "COMMON", "text": "Ospalost, svalová slabost, závrať" },
+        { "frequency": "COMMON", "text": "Zhoršená paměť a pozornost" },
+        { "frequency": "UNCOMMON", "text": "Závislost, abstinenční syndrom při vysazení" }
+      ]
+    },
+    {
+      "atc": "N02AX02",
+      "substance": "Tramadol",
+      "effects": [
+        { "frequency": "COMMON", "text": "Nevolnost, závrať, ospalost" },
+        { "frequency": "COMMON", "text": "Bolest hlavy, zácpa, sucho v ústech" },
+        { "frequency": "UNCOMMON", "text": "Zvracení, pocení, palpitace" },
+        { "frequency": "RARE", "text": "Křeče, serotoninový syndrom, respirační deprese" }
+      ]
+    },
+    {
+      "atc": "A04AA01",
+      "substance": "Ondansetron",
+      "effects": [
+        { "frequency": "COMMON", "text": "Zácpa, bolest hlavy" },
+        { "frequency": "UNCOMMON", "text": "Návaly, palpitace, prodloužení QT intervalu" },
+        { "frequency": "RARE", "text": "Závažná kožní reakce, alergická reakce" }
+      ]
+    },
+    {
+      "atc": "R06AE07",
+      "substance": "Cetirizin",
+      "effects": [
+        { "frequency": "COMMON", "text": "Ospalost, únava" },
+        { "frequency": "UNCOMMON", "text": "Sucho v ústech, bolest hlavy, závrať" },
+        { "frequency": "RARE", "text": "Anafylaxe, hepatitida" }
+      ]
+    },
+    {
+      "atc": "A12AA04",
+      "substance": "Uhličitan vápenatý",
+      "effects": [
+        { "frequency": "COMMON", "text": "Zácpa, nadýmání, bolest břicha" },
+        { "frequency": "UNCOMMON", "text": "Nevolnost, hyperkalcemie při předávkování" }
+      ]
+    },
+    {
+      "atc": "A12CC10",
+      "substance": "Oxid hořečnatý",
+      "effects": [
+        { "frequency": "COMMON", "text": "Průjem, bolest břicha" },
+        { "frequency": "UNCOMMON", "text": "Nevolnost, nadýmání" }
+      ]
+    },
+    {
+      "atc": "A12CB01",
+      "substance": "Síran zinečnatý",
+      "effects": [
+        { "frequency": "COMMON", "text": "Nevolnost, kovová pachuť" },
+        { "frequency": "UNCOMMON", "text": "Bolest břicha, průjem" }
+      ]
+    },
+    {
+      "atc": "A11HA05",
+      "substance": "Biotin",
+      "effects": [
+        { "frequency": "UNCOMMON", "text": "Kožní vyrážka, nevolnost" },
+        { "frequency": "RARE", "text": "Rušení laboratorních testů štítné žlázy a troponinu" }
+      ]
+    },
+    {
+      "atc": "C01DA02",
+      "substance": "Nitroglycerin",
+      "effects": [
+        { "frequency": "VERY_COMMON", "text": "Bolest hlavy, návaly, závrať" },
+        { "frequency": "COMMON", "text": "Palpitace, pokles krevního tlaku, slabost" }
+      ]
+    }
+  ]
+}

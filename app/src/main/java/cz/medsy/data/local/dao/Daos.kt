@@ -13,7 +13,6 @@ import cz.medsy.data.local.entity.DoseLogEntity
 import cz.medsy.data.local.entity.InventoryBatchEntity
 import cz.medsy.data.local.entity.MedicationEntity
 import cz.medsy.data.local.entity.MedicationMilestoneEntity
-import cz.medsy.data.local.entity.MedicationTranslationEntity
 import cz.medsy.data.local.entity.PrescriptionEntity
 import cz.medsy.data.local.entity.PrescriptionItemEntity
 import cz.medsy.data.local.entity.ReferenceRangeProfileEntity
@@ -336,26 +335,6 @@ interface SymptomDao {
 
     @Query("DELETE FROM symptom_logs WHERE id = :id")
     suspend fun delete(id: Long)
-}
-
-@Dao
-interface TranslationDao {
-
-    @Query("SELECT * FROM medication_translations WHERE medicationId = :medicationId ORDER BY language")
-    fun observeFor(medicationId: Long): Flow<List<MedicationTranslationEntity>>
-
-    @Query(
-        "SELECT * FROM medication_translations " +
-            "WHERE medicationId = :medicationId AND language = :language LIMIT 1",
-    )
-    suspend fun find(medicationId: Long, language: String): MedicationTranslationEntity?
-
-    /** The unique index on (medicationId, language) turns a re-translation into a replace. */
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun upsert(entity: MedicationTranslationEntity): Long
-
-    @Query("DELETE FROM medication_translations WHERE medicationId = :medicationId AND language = :language")
-    suspend fun delete(medicationId: Long, language: String)
 }
 
 @Dao
