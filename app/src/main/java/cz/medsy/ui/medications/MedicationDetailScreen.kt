@@ -183,18 +183,11 @@ fun MedicationDetailScreen(
             }
         }
 
-        if (medication.pilUrl != null || medication.spcUrl != null) {
+        medication.leafletUrl?.let { url ->
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    medication.pilUrl?.let { url ->
-                        TextButton(onClick = { context.open(url) }) {
-                            Text(stringResource(R.string.meds_detail_pil))
-                        }
-                    }
-                    medication.spcUrl?.let { url ->
-                        TextButton(onClick = { context.open(url) }) {
-                            Text(stringResource(R.string.meds_detail_spc))
-                        }
+                    TextButton(onClick = { context.open(url) }) {
+                        Text(stringResource(R.string.meds_detail_leaflet))
                     }
                 }
             }

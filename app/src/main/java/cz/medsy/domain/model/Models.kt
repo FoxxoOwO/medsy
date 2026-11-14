@@ -18,6 +18,11 @@ data class Medication(
     val strengthValue: BigDecimal? = null,
     val strengthUnit: String? = null,
     val concentrationMgPerMl: BigDecimal? = null,
+    /**
+     * Leaflet and SPC links as stored at scan/lookup time. Records created before SÚKL moved
+     * onto the new site still carry the retired `sukl.gov.cz/download/...` addresses, so the
+     * detail screen ignores those and asks [SuklLinks] instead — see [leafletUrl].
+     */
     val pilUrl: String? = null,
     val spcUrl: String? = null,
     val notes: String? = null,
@@ -26,6 +31,14 @@ data class Medication(
     val isHrt: Boolean = false,
     val isArchived: Boolean = false,
 ) {
+    /** The one link that always resolves: the SÚKL page for this code, or a stored live link. */
+    val leafletUrl: String?
+        get() = suklCode?.takeIf { it.isNotBlank() }?.let(SuklLinks::leaflet)
+            ?: storedLeafletUrl
+
+    private val storedLeafletUrl: String?
+        get() = listOfNotNull(pilUrl, spcUrl).firstOrNull { it.startsWith(SuklLinks.LEAFLET_BASE) }
+
     val displayStrength: String?
         get() = strengthValue?.let { v -> "${v.stripTrailingZeros().toPlainString()} ${strengthUnit.orEmpty()}".trim() }
 }
@@ -163,6 +176,21 @@ data class SymptomLog(
     val heartRate: Int? = null,
 )
 
+/**
+ * Where SÚKL publishes the leaflet (PIL) and the SPC.
+ *
+ * The old `sukl.gov.cz/download/pil/PIL<code>.pdf` pattern is dead: SÚKL replaced the site in
+ * 2024 and those links answer 404. The replacement web app keys the medicine page off the
+ * seven-digit SÚKL code and offers PIL, SPC and the packaging text from there. The direct PDF
+ * (`prehledy.sukl.cz/prehledy/v1/dokumenty/<id>`) needs an internal document id that only the
+ * SÚKL API knows, so it cannot be built from the code alone.
+ */
+object SuklLinks {
+    const val LEAFLET_BASE = "https://prehledy.sukl.cz/prehled_leciv.html#/leciva/"
+
+    fun leaflet(suklCode: String): String = LEAFLET_BASE + suklCode.padStart(7, '0')
+}
+
 data class SuklMedication(
     val suklCode: String,
     val name: String,
@@ -173,13 +201,13 @@ data class SuklMedication(
     val formName: String?,
     val holder: String?,
 ) {
+    /** PIL and the SPC are both on the SÚKL medicine page, so one link opens either. */
     val pilUrl: String
-        get() = "https://sukl.gov.cz/download/pil/PIL${suklCode.padStart(7, '0')}.pdf"
+        get() = SuklLinks.leaflet(suklCode)
 
     val spcUrl: String
-        get() = "https://sukl.gov.cz/download/spc/SPC${suklCode.padStart(7, '0')}.pdf"
+        get() = SuklLinks.leaflet(suklCode)
 }
-
 data class ScannedPackage(
     val gtin: String?,
     val expirationDate: LocalDate?,

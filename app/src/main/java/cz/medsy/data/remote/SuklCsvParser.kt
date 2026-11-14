@@ -1,5 +1,6 @@
 package cz.medsy.data.remote
 
+import cz.medsy.domain.model.SuklLinks
 import cz.medsy.domain.model.SuklMedication
 
 /**
@@ -18,12 +19,12 @@ object SuklConfig {
      */
     const val DLP_CATALOG_URL = "$BASE_URL/katalog-otevrenych-dat/databaze-lecivych-pripravku-dlp"
     const val DLP_CSV_ENTRY = "dlp_lecivepripravky.csv"
-    const val DOC_BASE = "https://sukl.gov.cz/download"
-
-    fun pilUrl(suklCode: String): String = "$DOC_BASE/pil/PIL${pad(suklCode)}.pdf"
-    fun spcUrl(suklCode: String): String = "$DOC_BASE/spc/SPC${pad(suklCode)}.pdf"
-
-    private fun pad(code: String): String = code.padStart(7, '0')
+    /**
+     * SÚKL retired `sukl.gov.cz/download` (404); the leaflet and the SPC now live on the
+     * medicine page in the new web app, keyed off the SÚKL code. See [SuklLinks].
+     */
+    fun pilUrl(suklCode: String): String = SuklLinks.leaflet(suklCode)
+    fun spcUrl(suklCode: String): String = SuklLinks.leaflet(suklCode)
 }
 
 /**

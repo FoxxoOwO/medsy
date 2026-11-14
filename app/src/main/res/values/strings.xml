@@ -220,8 +220,7 @@
     <string name="meds_detail_stock">Stock</string>
     <string name="meds_detail_no_stock">No batch in stock.</string>
     <string name="meds_detail_notes">Notes</string>
-    <string name="meds_detail_pil">Patient leaflet</string>
-    <string name="meds_detail_spc">Summary of product characteristics</string>
+    <string name="meds_detail_leaflet">Patient leaflet &amp; summary (SÚKL)</string>
     <string name="meds_detail_pause">Pause</string>
     <string name="meds_detail_resume">Resume</string>
     <string name="meds_detail_side_effects">Side effects</string>

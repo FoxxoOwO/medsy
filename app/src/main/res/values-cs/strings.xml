@@ -753,8 +753,7 @@
     <string name="meds_detail_stock">Sklad</string>
     <string name="meds_detail_no_stock">Na skladě není žádná šarže.</string>
     <string name="meds_detail_notes">Poznámky</string>
-    <string name="meds_detail_pil">Příbalový leták</string>
-    <string name="meds_detail_spc">Souhrn údajů o přípravku</string>
+    <string name="meds_detail_leaflet">Příbalový leták a souhrn (SÚKL)</string>
     <string name="meds_detail_pause">Pozastavit</string>
     <string name="meds_detail_resume">Obnovit</string>
 

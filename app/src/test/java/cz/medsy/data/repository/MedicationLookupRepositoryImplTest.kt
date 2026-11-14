@@ -91,8 +91,11 @@ class MedicationLookupRepositoryImplTest {
         assertEquals("LOT42", candidate.scannedBatchNumber)
         assertEquals(LocalDate.of(2027, 3, 31), candidate.scannedExpirationDate)
         assertEquals(MedicationForm.TABLET, candidate.form)
-        assertTrue("PIL url missing", candidate.pilPdfUrl?.contains("PIL0012345.pdf") == true)
-        assertTrue("SPC url missing", candidate.spcPdfUrl?.contains("SPC0012345.pdf") == true)
+        assertTrue(
+            "the leaflet link should point at the SÚKL medicine page",
+            candidate.pilPdfUrl?.endsWith("/leciva/0012345") == true,
+        )
+        assertEquals(candidate.pilPdfUrl, candidate.spcPdfUrl)
         // Enriched from the curated catalogue: the register knows no half-life.
         assertNotNull(candidate.halfLifeHours)
         assertEquals(false, supplements.called)
