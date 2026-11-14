@@ -29,6 +29,12 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+            // ML Kit, PDFBox and the graphics path library ship four ABIs, and the two x86
+            // ones are only ever loaded by an emulator. Every real phone is ARM, so the
+            // release keeps ARM and drops ~38 MB of native libraries nobody would execute.
+            ndk {
+                abiFilters += listOf("arm64-v8a", "armeabi-v7a")
+            }
         }
         debug {
             applicationIdSuffix = ".debug"

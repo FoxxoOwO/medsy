@@ -1749,3 +1749,50 @@ A machine-translation card (MyMemory, cached in `medication_translations`) lived
 evening and was removed on request. The table went with it in migration 4→5: every row was a copy of
 text that still exists on the medication, so nothing of the patient's own was lost. The migration
 itself stays — a database created by that build must still reach v5.
+
+## The release build and the size it finally has
+
+`assembleRelease` was the last thing that did not work. R8 stopped on a class that nothing in the
+app can reach:
+
+```
+Missing class com.gemalto.jp2.JP2Decoder (referenced from: org.apache.pdfbox.filter.JPXFilter)
+```
+
+`JPXFilter` is PDFBox' JPEG2000 reader; the codec is an optional Maven artifact
+(`com.gemalto.jp2:jp2-android`) that `pdfbox-android` does not pull in. Only a PDF carrying a
+JPEG2000 image would ever call it, and Czech lab reports carry text and maybe a JPEG. `-dontwarn`
+is the honest fix here rather than adding a 1 MB native codec for a format no lab emits. The rule
+sits next to the existing PDFBox keeps in `app/proguard-rules.pro`.
+
+With R8 satisfied, the APK was 82,960,403 B, of which **66 MB was native code for four ABIs**:
+
+| ABI | `lib/` |
+| --- | --- |
+| `x86` | 19.1 MB |
+| `x86_64` | 18.9 MB |
+| `arm64-v8a` | 17.3 MB |
+| `armeabi-v7a` | 10.6 MB |
+
+`x86`/`x86_64` are only ever loaded by an emulator, and this app's release is not installed on one.
+`app/build.gradle.kts` now sets `ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a") }` in the
+release build type only — the debug type keeps all four, so `emulator-5554` (x86_64, API 35) still
+installs the build used for device checks.
+
+**82,960,403 B → 42,980,864 B (−48 %).** Remaining content, measured from the zip central directory:
+`lib/` 27.9 MB (`libmlkit_google_ocr_pipeline.so` 11.1 + 6.8 MB, `libbarhopper_v3.so` 4.9 + 3.2 MB,
+`libsqlcipher.so` 2.1 MB), `classes.dex` 8.46 MB, `assets/` 6.7 MB, `res/` 0.9 MB.
+
+Two things deliberately not done:
+
+- **Per-ABI splits** would give ~25 MB and ~15 MB artifacts instead of one 43 MB file. For a Google
+  Play upload the App Bundle already splits per device, so the extra APKs would only complicate the
+  side-load instructions for no user-visible gain.
+- **`armeabi-v7a` stays.** Dropping 32-bit would save another 10.6 MB, but `minSdk = 26` still
+  covers 32-bit phones that cannot install a 64-bit-only package.
+
+Verified: `assembleRelease` green (2m 1s, `lintVitalRelease` clean), the APK contains no `lib/x86*`
+entries, `testDebugUnitTest` 863 tests / 0 failures, and `assembleDebug` is unchanged.
+
+Cost: a release APK can no longer be installed on an x86 emulator. That is the trade this change
+makes, and it is why the filter lives in the build type rather than in `defaultConfig`.
