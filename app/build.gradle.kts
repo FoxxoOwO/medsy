@@ -1,9 +1,21 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+}
+
+val keystoreProperties = rootProject.file("keystore.properties")
+
+/**
+ * Loaded with `Properties` rather than `gradle.properties` so the passwords are never read
+ * from a file git tracks. A missing file simply leaves the release unsigned.
+ */
+val keystore = Properties().apply {
+    if (keystoreProperties.exists()) keystoreProperties.inputStream().use { load(it) }
 }
 
 android {
@@ -21,6 +33,21 @@ android {
         vectorDrawables.useSupportLibrary = true
     }
 
+    signingConfigs {
+        // The keystore and its passwords live outside the repository, in keystore.properties
+        // (git-ignored). A release that is not signed cannot be installed, so that file is the
+        // difference between an artifact and a file; without it the build stays unsigned
+        // rather than failing, because R8 can still be checked without a key.
+        if (keystore.getProperty("storeFile") != null) {
+            create("release") {
+                storeFile = rootProject.file(keystore.getProperty("storeFile"))
+                storePassword = keystore.getProperty("storePassword")
+                keyAlias = keystore.getProperty("keyAlias")
+                keyPassword = keystore.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -35,6 +62,9 @@ android {
             ndk {
                 abiFilters += listOf("arm64-v8a", "armeabi-v7a")
             }
+            // Unsigned when keystore.properties is absent, which keeps `assembleRelease`
+            // usable on a fresh clone for R8 checks without shipping a certificate.
+            signingConfigs.findByName("release")?.let { signingConfig = it }
         }
         debug {
             applicationIdSuffix = ".debug"
