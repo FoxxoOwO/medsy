@@ -969,9 +969,8 @@ Mutation checks: removing the duplicate-code guard fails both "the same code twi
 reported, not duplicated" and "the raw dao refuses a duplicate code"; widening the warning
 window to three days fails "two days left warns, three days does not".
 
-Known gaps: no PDF import of eRecept (only QR/text payloads that the parser understands);
-the notification fires on app start, so a prescription that becomes expiring while the app
-stays closed for two days is only reported on the next launch.
+Known gaps: the notification fires on app start, so a prescription that becomes expiring
+while the app stays closed for two days is only reported on the next launch.
 
 ## F8 — Localisation (done)
 
@@ -1796,3 +1795,50 @@ entries, `testDebugUnitTest` 863 tests / 0 failures, and `assembleDebug` is unch
 
 Cost: a release APK can no longer be installed on an x86 emulator. That is the trade this change
 makes, and it is why the filter lives in the build type rather than in `defaultConfig`.
+
+## An eRecept that arrives as a file
+
+The queue only ever filled from a QR code, which assumes the prescription reached the user as a
+code on a screen. It often does not: the pharmacy prints an eRecept on paper, the eRecept portal
+hands out a PDF, and a photo of the paper is what a carer sends. Adding a second reader to the
+parser was not enough — the screen had no way to hand it a file.
+
+`PrescriptionsScreen` now has one "Import PDF or photo" button. It opens a single
+`ActivityResultContracts.OpenDocument` picker with `application/pdf` and `image/*`, because the
+photo picker cannot return a PDF and two buttons would have split one code path.
+
+`data/prescription/PrescriptionImporter` decides which reader gets the file from the MIME type
+and returns four distinct outcomes rather than a `Prescription?`:
+
+| Outcome | When | What the screen says |
+| --- | --- | --- |
+| `Found` | a code was parsed | "eRecept X — 2 items saved" (or "already saved") |
+| `NoCode` | text, no 12-char code | nothing in the file looks like an eRecept code |
+| `NoTextLayer` | PDF with fewer than 40 characters of text | it is a scan, photograph the paper |
+| `Unreadable` | the file would not open, or OCR returned nothing | the file could not be read |
+
+The separation is the point: `NoCode` and `NoTextLayer` are identical in a log line and opposite
+in what the user should do next. A scanned PDF is **not** sent to ML Kit — OCR reads bitmaps and
+this app does not render PDF pages to bitmaps, so claiming to try would only be slower and wrong.
+
+Three things the PDF needed from `EReceptParser`, all found by feeding it real pharmacy text:
+
+- **A labelled code beats the first 12-character token.** A printed prescription also carries the
+  prescriber's IČO and document numbers, and `CODE_REGEX` used to take whichever came first —
+  queuing a prescription under someone else's identifier. `LABELLED_CODE` (`Kód receptu: …`,
+  `code=…`) is tried first and the 12-character filter (`looksLikeCode`) still rejects the IČO.
+- **Dates are printed the Czech way.** `20. 5. 2026`, not `2026-05-20`. `parseDate` accepts both
+  and is anchored in `Europe/Prague` like the rest of the queue, so "valid until 23:59" does not
+  move for a user reading the app abroad.
+- **Metadata lines are not medicines.** `METADATA_LINE` drops lines starting with `Pacient`,
+  `Pojisťovna`, `Předepsal`, `IČO`, `Datum`, `Číslo` — without it the patient's name and the
+  insurer code arrived in the queue as prescriptions for drugs that do not exist.
+
+`PdfTextExtractor` (`data/lab/PdfTextExtractor.kt`) is the interface `LabPdfExtractor` now
+implements, bound by `di/PdfModule`, so the importer can be tested without a real PDF. The MIME
+lookup is an overridable `internal var mimeTypeOf` for the same reason: a JVM test has no content
+provider, and the branch that matters is which reader receives the file.
+
+Tests: `PrescriptionImporterTest` (7) — the four outcomes plus a photo read through OCR and a
+PDF with an unknown MIME type; four new cases in `EReceptParserTest` for the printed shape,
+the labelled code winning over an earlier token, the metadata filter and the IČO.
