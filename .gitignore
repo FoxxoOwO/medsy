@@ -20,3 +20,4 @@ _seed_backup.json
 
 # Release signing: the keystore path and its passwords never belong in the repository.
 keystore.properties
+dist/
