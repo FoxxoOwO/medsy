@@ -53,6 +53,11 @@
     <string name="alert_snooze_minutes">Snooze %1$d min</string>
     <string name="alert_not_now">Not now</string>
     <string name="alert_keeps_reminder">The reminder stays in your notifications until you log the dose</string>
+    <string name="alert_take_all">Take all</string>
+    <plurals name="alert_group_count">
+        <item quantity="one">%1$d medication due at %2$s</item>
+        <item quantity="other">%1$d medications due at %2$s</item>
+    </plurals>
     <string name="notification_low_stock">Low stock: %1$s</string>
     <string name="notification_low_stock_discreet">Low stock on one of your supplies</string>
     <string name="notification_expiry">%1$s expires %2$s</string>

@@ -1878,3 +1878,32 @@ showing the printed number, a moved date reaching both the session and the chart
 correction converting to SI, deleting one value, refusing `420 mg`, a cleared field not counting as
 an error, deleting a draw with its values and chart point, cancelling a delete, and the picked date
 keeping local time.
+
+## One overlay for a whole batch
+
+The alarm fires per schedule, so the lock-screen overlay only ever knew the one dose that woke the
+phone. Two medications on the same minute produced two full-screen intents into the same activity,
+and because that activity was already on screen with `FLAG_ACTIVITY_CLEAR_TOP` the second launch
+reused it and dropped its extras — the second dose was never shown at all. The overlay now rebuilds
+the batch itself and the activity rebuilds itself when a second alarm arrives.
+
+Deliberate choices:
+
+- **The group is computed, not carried.** `dosesDueAt` asks every active schedule for its next
+  occurrence just before the alarm's instant and keeps the ones that land on that minute
+  (`domain/schedule/DoseGroup.kt`). Nothing new is persisted, so a schedule edited between arming
+  and firing cannot make the overlay lie, and a snoozed dose never matches because the snooze moved
+  the occurrence.
+- **One row per medication, with its own Take and Skip.** A batch is rarely all-or-nothing: the
+  user takes the estradiol and postpones the progesterone. "Take all" and one shared snooze cover
+  the common case, and the rows keep the per-drug decision.
+- **The first refusal stops the batch.** A PRN ceiling that blocks one dose leaves the remaining
+  rows alone and shows the reason inline; logging the rest would look like the refusal never
+  happened.
+- **`onNewIntent` recreates the activity.** `FLAG_ACTIVITY_CLEAR_TOP` reuses the visible instance,
+  so the extras of the second alarm are readable only after `setIntent` + `recreate()`.
+- **Two schedules of the same drug on one minute stay one row** (`distinctBy { medicationId }`) —
+  they are one decision and the second `perform` would only find the dose already logged.
+
+Tests: `DoseGroupTest` (3) — only same-minute schedules are grouped, a dose fifteen minutes later
+is a separate batch, and a schedule that starts later contributes nothing.

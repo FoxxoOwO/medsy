@@ -49,6 +49,13 @@
     <string name="alert_snooze_minutes">Odložit o %1$d min</string>
     <string name="alert_not_now">Teď ne</string>
     <string name="alert_keeps_reminder">Připomínka zůstane v oznámeních, dokud dávku nezapíšete</string>
+    <string name="alert_take_all">Vzít vše</string>
+    <plurals name="alert_group_count">
+        <item quantity="one">%1$d lék v %2$s</item>
+        <item quantity="few">%1$d léky v %2$s</item>
+        <item quantity="many">%1$d léků v %2$s</item>
+        <item quantity="other">%1$d léků v %2$s</item>
+    </plurals>
     <string name="notification_low_stock">Nízké zásoby: %1$s</string>
     <string name="notification_low_stock_discreet">Nízké zásoby jedné z vašich pomůcek</string>
     <string name="notification_expiry">%1$s expiruje %2$s</string>
