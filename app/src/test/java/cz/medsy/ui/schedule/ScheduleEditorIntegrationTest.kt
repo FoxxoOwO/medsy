@@ -132,9 +132,14 @@ class ScheduleEditorIntegrationTest {
         error("schedule state never settled")
     }
 
-    /** refresh() reads settings on Dispatchers.IO, so arming is not synchronous. */
+    /**
+     * refresh() reads settings on Dispatchers.IO, so arming is not synchronous.
+     * Bounded by the clock, not by a poll count: under a loaded machine the IO hop takes
+     * longer than any fixed number of 20 ms naps, which made this flake in full-suite runs.
+     */
     private fun awaitAlarmCount(expected: Int) {
-        repeat(100) {
+        val deadline = System.nanoTime() + 10_000_000_000L
+        while (System.nanoTime() < deadline) {
             if (shadowOf(alarmManager).scheduledAlarms.size == expected) return
             Thread.sleep(20)
         }
