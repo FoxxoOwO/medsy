@@ -27,7 +27,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
+import java.time.LocalDate
 import java.time.LocalTime
+import java.time.ZoneId
 
 /**
  * The editor's whole point is that a saved schedule exists *and* has an alarm. The
@@ -41,6 +43,7 @@ class ScheduleEditorIntegrationTest {
     private lateinit var medicationRepository: MedicationRepository
     private lateinit var settingsRepository: SettingsRepository
     private lateinit var alarmManager: AlarmManager
+    private lateinit var scheduler: DoseAlarmScheduler
     private lateinit var coordinator: ReminderCoordinator
     private lateinit var viewModel: ScheduleEditorViewModel
     private var medicationId = 0L
@@ -57,7 +60,11 @@ class ScheduleEditorIntegrationTest {
         // DataStore is process-wide, so another test class may have left reminders off.
         runBlocking { settingsRepository.setRemindersEnabled(true) }
         alarmManager = context.getSystemService(AlarmManager::class.java)
-        val scheduler = DoseAlarmScheduler(context, alarmManager)
+        scheduler = DoseAlarmScheduler(context, alarmManager)
+        // The draft is a daily 08:00 dose, so these assertions used to depend on when the suite
+        // ran. Standing at 06:00 keeps today's occurrence ahead and the test independent of it.
+        val sixAm = LocalDate.now().atTime(6, 0).atZone(ZoneId.systemDefault()).toInstant()
+        scheduler.now = { sixAm }
         coordinator = ReminderCoordinator(
             context,
             scheduler,

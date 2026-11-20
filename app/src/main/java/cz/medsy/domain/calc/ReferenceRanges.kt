@@ -52,15 +52,43 @@ object ReferenceRanges {
         p("TEST_TOTAL", ProfileType.CIS_M, "8.6", "29.0"),
         p("HCT", ProfileType.CIS_M, "40", "52"),
 
-        p("ALT", ProfileType.CIS_F, "0.17", "0.58"),
-        p("ALT", ProfileType.CIS_M, "0.17", "0.83"),
-        p("AST", ProfileType.CIS_F, "0.17", "0.58"),
-        p("AST", ProfileType.CIS_M, "0.17", "0.83"),
         p("CREA", ProfileType.CIS_F, "44", "97"),
         p("CREA", ProfileType.CIS_M, "62", "106"),
         p("GLU", ProfileType.CIS_F, "3.9", "5.6"),
         p("GLU", ProfileType.CIS_M, "3.9", "5.6"),
-    )
+
+        // Prolactin rises with oestrogen and is the marker that catches a prolactinoma, so
+        // the masculinising profiles need a ceiling too, not just the feminising ones.
+        p("PRL", ProfileType.HRT_MASC, "0", "430", warningHigh = "635"),
+        p("PRL", ProfileType.CIS_M, "0", "430"),
+    ) + liverFor(ProfileType.HRT_FEM, female = true) +
+        liverFor(ProfileType.HRT_MASC, female = false) +
+        liverFor(ProfileType.CIS_F, female = true) +
+        liverFor(ProfileType.CIS_M, female = false)
+
+    /**
+     * Transaminases, GGT, ALP and bilirubin. Hormone therapy does not move the intervals, so
+     * every profile shares them; only the sex-typical upper bound differs. Without these the
+     * liver panel drew as a bare line with no target band on the chart.
+     */
+    private fun liverFor(type: ProfileType, female: Boolean): List<ReferenceRangeProfile> =
+        if (female) {
+            listOf(
+                p("ALT", type, "0.17", "0.58"),
+                p("AST", type, "0.17", "0.58"),
+                p("GGT", type, "0.17", "1.05"),
+                p("ALP", type, "0.58", "2.10"),
+                p("BILI", type, "2", "21"),
+            )
+        } else {
+            listOf(
+                p("ALT", type, "0.17", "0.83"),
+                p("AST", type, "0.17", "0.83"),
+                p("GGT", type, "0.33", "1.87"),
+                p("ALP", type, "0.58", "2.60"),
+                p("BILI", type, "2", "21"),
+            )
+        }
 
     fun forBiomarker(code: String, type: ProfileType, custom: List<ReferenceRangeProfile> = emptyList()): ReferenceRangeProfile? {
         custom.firstOrNull { it.biomarkerCode == code && it.profileType == type }?.let { return it }

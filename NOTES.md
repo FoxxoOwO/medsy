@@ -1947,3 +1947,26 @@ days at 08:00"). They are written when the change is recorded, so translating th
 would mean translating data, not labels.
 
 Tests: `ReportContentTest` gained one case proving the supplied labels are what the document prints.
+
+## Prolactin and the liver, on the chart
+
+The labs screen already charted whatever the report contained, and the parser already knew
+`prolaktin`, `alt`, `ast`, `ggt`, `alp` and `bilirubin`. What was missing was the reference
+interval: `ReferenceRanges.defaults` carried ALT/AST only for the cis profiles, and GGT, ALP and
+bilirubin for none of them. A chart without a band is a line the user cannot judge, and the value
+row read "no range" instead of a status.
+
+- **The liver panel is shared by every profile** through `liverFor(type, female)` — hormone therapy
+  does not move transaminases, GGT, ALP or bilirubin, so only the sex-typical upper bound differs
+  (ALT/AST 0.58 vs 0.83 µkat/L, GGT 1.05 vs 1.87, ALP 2.10 vs 2.60, bilirubin 2–21 µmol/L for both).
+- **Prolactin got a masculinising ceiling too** (0–430 mIU/L, warning at 635). It was tracked for
+  the feminising profiles only, even though oestrogen is what drives it and the masculinising path
+  still wants the marker to catch a prolactinoma.
+
+Tests: `MonitoringRangesTest` (3) — the panel and prolactin resolve on all four chartable profiles,
+and ALT keeps the sex-typical bound.
+
+Also fixed here: `ScheduleEditorIntegrationTest` pinned the scheduler clock. The draft is a daily
+08:00 dose, so the alarm assertions depended on when the suite ran and the class failed
+intermittently in full runs.
+
