@@ -81,17 +81,6 @@ class DoseAlarmActivity : ComponentActivity() {
     }
 
     /**
-     * A second alarm due on the same minute lands while this overlay is already up. The platform
-     * reuses the visible instance and drops the new extras, so rebuild from them — otherwise the
-     * overlay keeps showing only the first dose.
-     */
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-        setIntent(intent)
-        recreate()
-    }
-
-    /**
      * `setShowWhenLocked` / `setTurnScreenOn` exist from API 27; the window flags are the
      * only way on 26, which is still our minSdk.
      */

@@ -33,8 +33,8 @@ import cz.medsy.data.settings.AppSettings
 import cz.medsy.ui.theme.MedsyTheme
 
 /**
- * One dose the overlay announces. Drags hold several schedules that land on the same minute,
- * and each of them needs its own Take/Skip so a batch can be logged honestly.
+ * One dose the overlay announces. A single overlay can hold several schedules that land on the
+ * same minute, and each of them needs its own Take/Skip so a batch can be logged honestly.
  */
 data class DoseAlertDose(
     val medicationId: Long,
