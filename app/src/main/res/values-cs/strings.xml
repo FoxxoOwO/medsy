@@ -835,4 +835,20 @@
     <string name="report_change_dose">zmena davky</string>
     <string name="report_change_route">zmena cesty</string>
     <string name="report_change_stopped">vysazeno</string>
+    <!-- Self-updates from the GitHub release -->
+    <string name="settings_update">Aktualizace</string>
+    <string name="settings_update_check">Kontrolovat aktualizace</string>
+    <string name="settings_update_check_desc">Jednou denně se GitHub zeptá, jestli nevyšla novější verze.</string>
+    <string name="settings_update_current">Tato verze: %1$s</string>
+    <string name="settings_update_current_latest">Tato verze je nejnovější.</string>
+    <string name="settings_update_available">K dispozici je verze %1$s.</string>
+    <string name="settings_update_check_now">Zkontrolovat hned</string>
+    <string name="settings_update_install">Stáhnout a nainstalovat</string>
+    <string name="settings_update_checking">Kontroluji…</string>
+    <string name="settings_update_installing">Otevřel se instalátor. Potvrď tam aktualizaci.</string>
+    <string name="settings_update_permission">Povol Medsy instalaci neznámých aplikací a zkus to znovu.</string>
+    <string name="settings_update_failed">Stahování selhalo. Zkontroluj připojení a zkus to znovu.</string>
+    <string name="settings_update_none">Zatím nezkontrolováno.</string>
+    <string name="settings_update_checked">Zkontrolováno %1$s</string>
+
 </resources>

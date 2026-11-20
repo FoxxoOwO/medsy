@@ -43,6 +43,13 @@ data class AppSettings(
     val uvWarningsEnabled: Boolean = true,
     /** City used for the UV lookup; blank means "do not fetch". */
     val uvCity: String? = null,
+    /** Ask GitHub for a newer release once a day. */
+    val updateCheckEnabled: Boolean = true,
+    /** What the last check found, whether or not it was newer than this install. */
+    val latestVersion: String? = null,
+    val latestApkUrl: String? = null,
+    /** 0 until the first check has run. */
+    val updateCheckedAt: Long = 0L,
 ) {
     fun toThemeConfig(): ThemeConfig = ThemeConfig(
         palette = palette,
@@ -73,6 +80,10 @@ class SettingsRepository(private val context: Context) : UvCache {
         val uvValue = doublePreferencesKey("uv_value")
         val uvFetchedAt = longPreferencesKey("uv_fetched_at")
         val uvPlace = stringPreferencesKey("uv_place")
+        val updateCheck = booleanPreferencesKey("update_check")
+        val latestVersion = stringPreferencesKey("latest_version")
+        val latestApkUrl = stringPreferencesKey("latest_apk_url")
+        val updateCheckedAt = longPreferencesKey("update_checked_at")
     }
 
     val settings: Flow<AppSettings> = context.settingsData.data.map { prefs ->
@@ -95,6 +106,10 @@ class SettingsRepository(private val context: Context) : UvCache {
             snoozeMinutes = prefs[Keys.snooze] ?: 15,
             uvWarningsEnabled = prefs[Keys.uvWarnings] ?: true,
             uvCity = prefs[Keys.uvCity]?.takeIf { it.isNotBlank() },
+            updateCheckEnabled = prefs[Keys.updateCheck] ?: true,
+            latestVersion = prefs[Keys.latestVersion],
+            latestApkUrl = prefs[Keys.latestApkUrl],
+            updateCheckedAt = prefs[Keys.updateCheckedAt] ?: 0L,
         )
     }
 
@@ -114,6 +129,16 @@ class SettingsRepository(private val context: Context) : UvCache {
 
     suspend fun setDefaultRangeProfile(profile: String) =
         context.settingsData.edit { it[Keys.defaultRange] = profile }
+
+    suspend fun setUpdateCheck(enabled: Boolean) = context.settingsData.edit { it[Keys.updateCheck] = enabled }
+
+    /** A failed check records nothing but its time: the last known release stays valid. */
+    suspend fun recordUpdateCheck(version: String?, apkUrl: String?, at: Long) =
+        context.settingsData.edit { prefs ->
+            prefs[Keys.updateCheckedAt] = at
+            if (version != null) prefs[Keys.latestVersion] = version
+            if (apkUrl != null) prefs[Keys.latestApkUrl] = apkUrl
+        }
 
     suspend fun setHealthConnect(enabled: Boolean) =
         context.settingsData.edit { it[Keys.healthConnect] = enabled }

@@ -15,6 +15,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -42,6 +44,26 @@ data class SuklSyncUi(
     val failed: Boolean = false,
 )
 
+/** What the update card shows: this build, what the last check found, and what it is doing now. */
+data class UpdateUi(
+    val currentVersion: String = cz.medsy.BuildConfig.VERSION_NAME,
+    val latestVersion: String? = null,
+    val checkedAt: Long? = null,
+    val checking: Boolean = false,
+    val updating: Boolean = false,
+    val message: cz.medsy.domain.message.Message? = null,
+) {
+    /** The release to offer, or null when this install is already the newest. */
+    val newer: String? get() =
+        latestVersion?.takeIf { cz.medsy.data.update.isNewerVersion(it, currentVersion) }
+}
+
+private data class UpdateAction(
+    val checking: Boolean = false,
+    val updating: Boolean = false,
+    val message: cz.medsy.domain.message.Message? = null,
+)
+
 /** A one-time sync that is queued but waiting for network still counts as in progress. */
 internal fun suklSyncRunning(states: List<androidx.work.WorkInfo.State>): Boolean =
     states.any {
@@ -59,6 +81,8 @@ class SettingsViewModel @Inject constructor(
     private val workManager: androidx.work.WorkManager,
     private val suklSyncStore: cz.medsy.data.settings.SuklSyncStore,
     private val backupRepository: cz.medsy.data.backup.BackupRepository,
+    private val updateChecker: cz.medsy.data.update.UpdateChecker,
+    private val apkInstaller: cz.medsy.data.update.ApkInstaller,
     @dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context,
 ) : ViewModel() {
 
@@ -79,6 +103,22 @@ class SettingsViewModel @Inject constructor(
      * cross-process lookup. It used to run inside composition (`remember { viewModel…() }`),
      * which stalls the first frame of the screen; it is resolved on the IO dispatcher instead.
      */
+    private val _updateAction = MutableStateFlow(UpdateAction())
+
+    val update: StateFlow<UpdateUi> = combine(settings, _updateAction) { current, action ->
+        UpdateUi(
+            latestVersion = current.latestVersion,
+            checkedAt = current.updateCheckedAt.takeIf { it > 0L },
+            checking = action.checking,
+            updating = action.updating,
+            message = action.message,
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = UpdateUi(),
+    )
+
     private val _healthStatus =
         MutableStateFlow<cz.medsy.health.HealthConnectAvailability.Status?>(null)
     val healthStatus: StateFlow<cz.medsy.health.HealthConnectAvailability.Status?> =
@@ -396,6 +436,58 @@ class SettingsViewModel @Inject constructor(
     fun discardImport() {
         _pendingImport.value = null
         _backup.value = BackupUi()
+    }
+
+    fun setUpdateCheck(enabled: Boolean) {
+        viewModelScope.launch { settingsRepository.setUpdateCheck(enabled) }
+    }
+
+    /** Pressed on demand; the daily worker does the same thing without the spinner. */
+    fun checkForUpdates() {
+        if (_updateAction.value.checking) return
+        _updateAction.update { it.copy(checking = true, message = null) }
+        viewModelScope.launch {
+            val available = runCatching { updateChecker.check() }.getOrNull()
+            _updateAction.update {
+                it.copy(
+                    checking = false,
+                    message = if (available == null) {
+                        cz.medsy.domain.message.message(MessageKey.UPDATE_UP_TO_DATE)
+                    } else {
+                        cz.medsy.domain.message.message(MessageKey.UPDATE_AVAILABLE, available.version)
+                    },
+                )
+            }
+        }
+    }
+
+    /**
+     * Downloads the release and opens the system installer. Android never installs silently for a
+     * side-loaded app, so this is as automatic as the platform allows.
+     */
+    fun installUpdate() {
+        val url = settings.value.latestApkUrl ?: return
+        if (_updateAction.value.updating) return
+        _updateAction.update { it.copy(updating = true, message = null) }
+        viewModelScope.launch {
+            val result = runCatching { apkInstaller.downloadAndInstall(url) }
+                .getOrDefault(cz.medsy.data.update.ApkInstaller.Result.Failed)
+            _updateAction.update {
+                it.copy(
+                    updating = false,
+                    message = cz.medsy.domain.message.message(
+                        when (result) {
+                            cz.medsy.data.update.ApkInstaller.Result.Started ->
+                                MessageKey.UPDATE_INSTALL_STARTED
+                            cz.medsy.data.update.ApkInstaller.Result.AskedForPermission ->
+                                MessageKey.UPDATE_INSTALL_PERMISSION
+                            cz.medsy.data.update.ApkInstaller.Result.Failed ->
+                                MessageKey.UPDATE_DOWNLOAD_FAILED
+                        },
+                    ),
+                )
+            }
+        }
     }
 
     private fun backupKey(failure: Throwable): MessageKey =

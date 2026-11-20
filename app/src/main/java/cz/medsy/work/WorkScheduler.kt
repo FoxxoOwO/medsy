@@ -21,6 +21,23 @@ class WorkScheduler @Inject constructor(
         scheduleSuklSync()
         scheduleInventoryRecalc()
         scheduleBloodworkReminder()
+        scheduleUpdateCheck()
+    }
+
+    /**
+     * Daily is enough: a release is a rare event, and the check is one request. KEEP keeps the
+     * existing window so the app does not reset it on every start.
+     */
+    fun scheduleUpdateCheck() {
+        val request = PeriodicWorkRequestBuilder<UpdateCheckWorker>(1, TimeUnit.DAYS)
+            .setConstraints(
+                Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .setRequiresBatteryNotLow(true)
+                    .build(),
+            )
+            .build()
+        workManager.enqueueUniquePeriodicWork(UPDATE_CHECK, ExistingPeriodicWorkPolicy.KEEP, request)
     }
 
     fun scheduleSuklSync() {
@@ -59,6 +76,18 @@ class WorkScheduler @Inject constructor(
         )
     }
 
+    /** "Check now" on the settings screen: a check without waiting for the daily window. */
+    fun checkUpdatesNow() {
+        val request = OneTimeWorkRequestBuilder<UpdateCheckWorker>()
+            .setConstraints(
+                Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .build(),
+            )
+            .build()
+        workManager.enqueueUniqueWork(UPDATE_CHECK_NOW, ExistingWorkPolicy.REPLACE, request)
+    }
+
     fun syncSuklNow() {
         val request = OneTimeWorkRequestBuilder<SuklSyncWorker>()
             .setConstraints(
@@ -83,5 +112,7 @@ class WorkScheduler @Inject constructor(
         const val SUKL_SYNC_NOW = "sukl_sync_now"
         const val INVENTORY_RECALC = "inventory_recalc"
         const val BLOODWORK_REMINDER = "bloodwork_reminder"
+        const val UPDATE_CHECK = "update_check"
+        const val UPDATE_CHECK_NOW = "update_check_now"
     }
 }

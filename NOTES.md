@@ -1970,3 +1970,35 @@ Also fixed here: `ScheduleEditorIntegrationTest` pinned the scheduler clock. The
 08:00 dose, so the alarm assertions depended on when the suite ran and the class failed
 intermittently in full runs.
 
+## Updating from the release page, without a store
+
+Medsy is distributed as an APK on GitHub, so `Play Store` never updates it. The app now asks the
+release API once a day and, when something newer exists, offers one button that downloads it and
+hands it to the system installer.
+
+- **`UpdateChecker`** reads `api.github.com/repos/FoxxoOwO/medsy/releases/latest`, takes `tag_name`
+  and the asset ending in `-release.apk`. The request needs a `User-Agent`: GitHub answers 403 to
+  requests without one. `isNewerVersion` compares dotted numbers segment by segment, so `1.10.0`
+  beats `1.9.0` — string comparison would get that backwards.
+- **What the check finds is stored, not decided.** `latestVersion`, `latestApkUrl` and
+  `updateCheckedAt` live in settings whether or not the release is newer, so the screen can say
+  "this version is the newest" instead of looking like it never ran. A failed check updates only
+  the timestamp; the last known release stays, because a flaky network must not erase it.
+- **"Automatic" ends at the installer.** Android never installs a side-loaded APK without a
+  confirmation dialog, and pretending otherwise would be a lie in the UI. `ApkInstaller` downloads
+  into `cacheDir/updates/`, asks for `REQUEST_INSTALL_PACKAGES` through
+  `ACTION_MANAGE_UNKNOWN_APP_SOURCES` if needed, and opens the APK through a `FileProvider`
+  (`${applicationId}.updates`). The copy in the cache is overwritten by the next download; nothing
+  accumulates.
+- **The worker is quiet.** `UpdateCheckWorker` writes settings and returns; there is no
+  notification, because an update is never urgent. It runs daily with `KEEP`, so restarting the app
+  does not reset the window, and it skips entirely when the switch is off. "Check now" enqueues a
+  one-time job instead of touching the periodic one — forcing the periodic work would break its
+  schedule for the next day.
+- **Nothing is done off the network on the main thread**: the check and the download both run in
+  `viewModelScope` and the card only shows the result.
+
+Tests: `UpdateCheckerTest` (6) — numeric version comparison, the release asset being picked out of
+the body, a release with no APK (and an HTML error page) rejected, a newer release offered and
+remembered, an older one remembered but not offered, and an offline check keeping the last known
+release.

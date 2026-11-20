@@ -76,6 +76,7 @@ fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
     }
     val healthStatus by viewModel.healthStatus.collectAsStateWithLifecycle()
     val suklSync by viewModel.suklSync.collectAsStateWithLifecycle()
+    val update by viewModel.update.collectAsStateWithLifecycle()
     val healthPermissionLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
         contract = remember { viewModel.healthConnectPermissionContract() },
     ) { granted ->
@@ -207,6 +208,10 @@ fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
             AppLanguage.apply(picked)
         },
         onSyncSukl = viewModel::syncSukl,
+        update = update,
+        onUpdateCheck = viewModel::setUpdateCheck,
+        onCheckUpdates = viewModel::checkForUpdates,
+        onInstallUpdate = viewModel::installUpdate,
     )
 }
 
@@ -248,6 +253,10 @@ fun SettingsScreen(
     onLanguageChange: (AppLanguage) -> Unit = {},
     onSyncSukl: () -> Unit,
     suklSync: SuklSyncUi = SuklSyncUi(),
+    update: UpdateUi = UpdateUi(),
+    onUpdateCheck: (Boolean) -> Unit = {},
+    onCheckUpdates: () -> Unit = {},
+    onInstallUpdate: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -616,6 +625,76 @@ fun SettingsScreen(
                         },
                     )
                 }
+            }
+        }
+
+        item(key = "settings-update") {
+            SettingsCard(title = stringResource(R.string.settings_update)) {
+                Text(
+                    text = stringResource(R.string.settings_update_current, update.currentVersion),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                update.newer?.let { version ->
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        text = stringResource(R.string.settings_update_available, version),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
+                Spacer(Modifier.height(10.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    Button(onClick = onCheckUpdates, enabled = !update.checking && !update.updating) {
+                        Text(
+                            stringResource(
+                                if (update.checking) {
+                                    R.string.settings_update_checking
+                                } else {
+                                    R.string.settings_update_check_now
+                                },
+                            ),
+                        )
+                    }
+                    if (update.newer != null) {
+                        Button(onClick = onInstallUpdate, enabled = !update.updating) {
+                            Text(stringResource(R.string.settings_update_install))
+                        }
+                    }
+                    if (update.checking || update.updating) {
+                        CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                    }
+                }
+                update.message?.let { message ->
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        text = message.asText(),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    text = update.checkedAt?.let {
+                        stringResource(
+                            R.string.settings_update_checked,
+                            java.time.Instant.ofEpochMilli(it)
+                                .atZone(java.time.ZoneId.systemDefault())
+                                .format(java.time.format.DateTimeFormatter.ofPattern("d. M. yyyy HH:mm")),
+                        )
+                    } ?: stringResource(R.string.settings_update_none),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                SettingSwitch(
+                    title = stringResource(R.string.settings_update_check),
+                    subtitle = stringResource(R.string.settings_update_check_desc),
+                    checked = settings.updateCheckEnabled,
+                    onCheckedChange = onUpdateCheck,
+                )
             }
         }
 

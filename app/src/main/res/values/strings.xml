@@ -807,4 +807,20 @@
     <string name="report_change_dose">dose changed</string>
     <string name="report_change_route">route changed</string>
     <string name="report_change_stopped">stopped</string>
+    <!-- Self-updates from the GitHub release -->
+    <string name="settings_update">Updates</string>
+    <string name="settings_update_check">Check for updates</string>
+    <string name="settings_update_check_desc">Once a day, ask GitHub whether a newer release exists.</string>
+    <string name="settings_update_current">This version: %1$s</string>
+    <string name="settings_update_current_latest">This version is the newest.</string>
+    <string name="settings_update_available">Version %1$s is available.</string>
+    <string name="settings_update_check_now">Check now</string>
+    <string name="settings_update_install">Download and install</string>
+    <string name="settings_update_checking">Checking…</string>
+    <string name="settings_update_installing">Installer opened. Confirm the update there.</string>
+    <string name="settings_update_permission">Allow Medsy to install unknown apps, then press again.</string>
+    <string name="settings_update_failed">The download failed. Check the connection and try again.</string>
+    <string name="settings_update_none">Not checked yet.</string>
+    <string name="settings_update_checked">Checked %1$s</string>
+
 </resources>

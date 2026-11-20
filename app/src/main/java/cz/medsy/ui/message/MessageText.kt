@@ -227,6 +227,11 @@ internal fun MessageKey.res(): Res = when (this) {
     MessageKey.SCHEDULE_MAX_DAILY_NUMBER -> Res(string = R.string.schedule_max_daily_number)
     MessageKey.SCHEDULE_MAX_DAILY_ABOVE_DOSE -> Res(string = R.string.schedule_max_daily_above_dose)
     // Backup and restore.
+    MessageKey.UPDATE_UP_TO_DATE -> Res(string = R.string.settings_update_current_latest)
+    MessageKey.UPDATE_AVAILABLE -> Res(string = R.string.settings_update_available)
+    MessageKey.UPDATE_INSTALL_STARTED -> Res(string = R.string.settings_update_installing)
+    MessageKey.UPDATE_INSTALL_PERMISSION -> Res(string = R.string.settings_update_permission)
+    MessageKey.UPDATE_DOWNLOAD_FAILED -> Res(string = R.string.settings_update_failed)
     MessageKey.BACKUP_UNREADABLE -> Res(string = R.string.backup_unreadable)
     MessageKey.BACKUP_NEWER_VERSION -> Res(string = R.string.backup_newer_version)
     MessageKey.BACKUP_PASSWORD_REQUIRED -> Res(string = R.string.backup_password_required)
