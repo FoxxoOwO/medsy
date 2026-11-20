@@ -20,6 +20,7 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
+import cz.medsy.R
 import cz.medsy.data.repository.DoseRepository
 import cz.medsy.data.repository.MedicationRepository
 import cz.medsy.data.settings.SettingsRepository
@@ -58,7 +59,7 @@ class NextDoseWidget : GlanceAppWidget() {
 
         val medicationName = when {
             next == null -> null
-            discreet -> "Next routine"
+            discreet -> context.getString(R.string.widget_next_routine)
             else -> runCatching { medicationRepository.getById(next.medicationId)?.name }.getOrNull()
         }
 
@@ -71,7 +72,7 @@ class NextDoseWidget : GlanceAppWidget() {
                 verticalAlignment = Alignment.Vertical.CenterVertically,
             ) {
                 Text(
-                    text = "NEXT DOSE",
+                    text = context.getString(R.string.widget_next_dose),
                     style = TextStyle(
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Medium,
@@ -81,7 +82,7 @@ class NextDoseWidget : GlanceAppWidget() {
                 Spacer(modifier = GlanceModifier.height(4.dp))
                 if (next == null) {
                     Text(
-                        text = "Nothing scheduled",
+                        text = context.getString(R.string.widget_nothing_scheduled),
                         style = TextStyle(
                             fontSize = 16.sp,
                             color = ColorProvider(Color(0xFFE6E1E4)),
@@ -89,9 +90,9 @@ class NextDoseWidget : GlanceAppWidget() {
                     )
                 } else {
                     val due = next.dueAt.atZone(zone)
-                    val countdown = formatCountdown(Duration.between(now, next.dueAt))
+                    val countdown = formatCountdown(context, Duration.between(now, next.dueAt))
                     Text(
-                        text = medicationName ?: "Scheduled dose",
+                        text = medicationName ?: context.getString(R.string.widget_scheduled_dose),
                         style = TextStyle(
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
@@ -109,7 +110,7 @@ class NextDoseWidget : GlanceAppWidget() {
                 lastTaken?.actualTimestamp?.let { at ->
                     Spacer(modifier = GlanceModifier.height(2.dp))
                     Text(
-                        text = "Last logged ${formatAgo(at)}",
+                        text = context.getString(R.string.widget_last_logged, formatAgo(context, at)),
                         style = TextStyle(
                             fontSize = 11.sp,
                             color = ColorProvider(Color(0xFF948F97)),
@@ -120,8 +121,8 @@ class NextDoseWidget : GlanceAppWidget() {
         }
     }
 
-    private fun formatCountdown(duration: Duration): String {
-        if (duration.isNegative) return "due now"
+    private fun formatCountdown(context: Context, duration: Duration): String {
+        if (duration.isNegative) return context.getString(R.string.widget_due_now)
         val hours = duration.toHours()
         val days = hours / 24
         return when {
@@ -131,9 +132,13 @@ class NextDoseWidget : GlanceAppWidget() {
         }
     }
 
-    private fun formatAgo(at: Instant): String {
+    private fun formatAgo(context: Context, at: Instant): String {
         val hours = Duration.between(at, Instant.now()).toHours()
-        return if (hours >= 24) "${hours / 24}d ago" else "${hours}h ago"
+        return if (hours >= 24) {
+            context.getString(R.string.widget_ago_days, (hours / 24).toString())
+        } else {
+            context.getString(R.string.widget_ago_hours, hours.toString())
+        }
     }
 }
 

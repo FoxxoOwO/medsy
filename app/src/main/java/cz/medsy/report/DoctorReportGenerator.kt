@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
 import android.graphics.pdf.PdfDocument
+import cz.medsy.R
 import cz.medsy.data.repository.BloodTestRepository
 import cz.medsy.data.repository.DoseRepository
 import cz.medsy.data.repository.MedicationRepository
@@ -26,7 +27,6 @@ import java.io.FileOutputStream
 import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -93,6 +93,7 @@ class DoctorReportGenerator @Inject constructor(
             val canvas = page.canvas
             var cursor = margin
 
+            val labels = ReportLabels.Android(context.resources)
             val content = ReportContent.build(
                 medications = activeMedications,
                 schedules = medications,
@@ -102,9 +103,10 @@ class DoctorReportGenerator @Inject constructor(
                 sessions = sessions,
                 values = sessionValues,
                 flagFor = { value -> flagFor(value, profile) },
+                labels = labels,
             )
 
-            cursor = drawHeader(canvas, cursor)
+            cursor = drawHeader(canvas, cursor, labels)
             cursor = drawContentMedications(canvas, cursor, content)
             cursor = drawContentAdherence(canvas, cursor, content)
             cursor = drawContentMilestones(canvas, cursor, content)
@@ -120,14 +122,12 @@ class DoctorReportGenerator @Inject constructor(
             ReportResult(file, pages)
         }
 
-    private fun drawHeader(canvas: Canvas, startY: Float): Float {
+    private fun drawHeader(canvas: Canvas, startY: Float, labels: ReportLabels): Float {
         var y = startY
-        canvas.drawText("MEDICATION & HRT SUMMARY", margin, y, titlePaint)
+        canvas.drawText(context.getString(R.string.report_title), margin, y, titlePaint)
         y += 16f
-        val generated = Instant.now()
-            .atZone(ZoneId.systemDefault())
-            .format(DateTimeFormatter.ofPattern("d MMMM yyyy HH:mm", Locale.ENGLISH))
-        canvas.drawText("Generated $generated - offline app, patient-entered data", margin, y, bodyPaint)
+        val generated = Instant.now().atZone(ZoneId.systemDefault()).format(labels.dateTime)
+        canvas.drawText(context.getString(R.string.report_generated, generated), margin, y, bodyPaint)
         y += 6f
         canvas.drawLine(margin, y, pageWidth - margin, y, linePaint)
         return y + 16f
@@ -155,10 +155,10 @@ class DoctorReportGenerator @Inject constructor(
 
     private fun drawContentMedications(canvas: Canvas, startY: Float, content: ReportContent.Content): Float {
         var y = startY
-        canvas.drawText("CURRENT MEDICATIONS", margin, y, sectionPaint)
+        canvas.drawText(context.getString(R.string.report_medications), margin, y, sectionPaint)
         y += 14f
         if (content.medications.isEmpty()) {
-            canvas.drawText("None recorded.", margin, y, bodyPaint)
+            canvas.drawText(context.getString(R.string.report_none), margin, y, bodyPaint)
             return y + 18f
         }
         content.medications.forEach { line ->
@@ -168,7 +168,7 @@ class DoctorReportGenerator @Inject constructor(
             y += 12f
         }
         if (content.truncated) {
-            canvas.drawText("(list truncated to fit one page)", margin, y, bodyPaint)
+            canvas.drawText(context.getString(R.string.report_truncated), margin, y, bodyPaint)
             y += 12f
         }
         return y + 8f
@@ -176,11 +176,11 @@ class DoctorReportGenerator @Inject constructor(
 
     private fun drawContentAdherence(canvas: Canvas, startY: Float, content: ReportContent.Content): Float {
         var y = startY
-        canvas.drawText("ADHERENCE", margin, y, sectionPaint)
+        canvas.drawText(context.getString(R.string.report_adherence), margin, y, sectionPaint)
         y += 14f
         content.adherence.forEach { line ->
             canvas.drawText(
-                "Last ${line.days} days: ${line.taken} of ${line.total} doses (${line.percent}%)",
+                context.getString(R.string.report_adherence_line, line.days, line.taken, line.total, line.percent),
                 margin,
                 y,
                 bodyPaint,
@@ -203,7 +203,7 @@ class DoctorReportGenerator @Inject constructor(
     private fun drawContentMilestones(canvas: Canvas, startY: Float, content: ReportContent.Content): Float {
         if (content.milestones.isEmpty()) return startY
         var y = startY
-        canvas.drawText("MEDICATION CHANGES", margin, y, sectionPaint)
+        canvas.drawText(context.getString(R.string.report_changes), margin, y, sectionPaint)
         y += 14f
         content.milestones.forEach { line ->
             canvas.drawText("- ${line.dateLabel} ${line.text}", margin, y, bodyPaint)
@@ -214,14 +214,14 @@ class DoctorReportGenerator @Inject constructor(
 
     private fun drawContentLabs(canvas: Canvas, startY: Float, content: ReportContent.Content): Float {
         var y = startY
-        canvas.drawText("RECENT BLOODWORK", margin, y, sectionPaint)
+        canvas.drawText(context.getString(R.string.report_labs), margin, y, sectionPaint)
         y += 14f
         if (content.labs.isEmpty()) {
-            canvas.drawText("No results recorded.", margin, y, bodyPaint)
+            canvas.drawText(context.getString(R.string.report_no_labs), margin, y, bodyPaint)
             return y + 18f
         }
         content.labs.forEach { block ->
-            val trough = if (block.isTrough) " - trough" else ""
+            val trough = if (block.isTrough) context.getString(R.string.report_trough) else ""
             canvas.drawText("${block.dateLabel}$trough", margin, y, bodyPaint)
             y += 11f
             block.rows.forEach { row ->
@@ -268,7 +268,7 @@ class DoctorReportGenerator @Inject constructor(
         val span = (max - min).takeIf { it > 0.0 } ?: 1.0
 
         canvas.drawText(
-            "TREND: ${spec.displayName}",
+            context.getString(R.string.report_trend, spec.displayName),
             margin,
             chartTop - 8f,
             sectionPaint,
@@ -326,13 +326,13 @@ class DoctorReportGenerator @Inject constructor(
         val lineY = pageHeight - 42f
         canvas.drawLine(margin, lineY, pageWidth - margin, lineY, linePaint)
         canvas.drawText(
-            "Patient-reported data. Not a medical record. Verify against your own notes.",
+            context.getString(R.string.report_footer),
             margin,
             lineY + 14f,
             bodyPaint,
         )
         canvas.drawText(
-            "Medsy - offline-first medication tracker",
+            context.getString(R.string.report_footer_app),
             margin,
             lineY + 25f,
             bodyPaint,

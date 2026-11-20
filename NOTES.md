@@ -1900,10 +1900,50 @@ Deliberate choices:
 - **The first refusal stops the batch.** A PRN ceiling that blocks one dose leaves the remaining
   rows alone and shows the reason inline; logging the rest would look like the refusal never
   happened.
-- **`onNewIntent` recreates the activity.** `FLAG_ACTIVITY_CLEAR_TOP` reuses the visible instance,
-  so the extras of the second alarm are readable only after `setIntent` + `recreate()`.
+- **No `onNewIntent` handling.** A second alarm on the same minute adds nothing, because the batch
+  already contains that dose; and `recreate()` keeps the retained view model, so it never refreshed
+  the extras anyway. The override was removed rather than left as a no-op.
 - **Two schedules of the same drug on one minute stay one row** (`distinctBy { medicationId }`) —
   they are one decision and the second `perform` would only find the dose already logged.
 
 Tests: `DoseGroupTest` (3) — only same-minute schedules are grouped, a dose fifteen minutes later
 is a separate batch, and a schedule that starts later contributes nothing.
+
+## The last English words
+
+Everything the user can *see* now follows the app language. The audit that made this concrete:
+English and Czech had 683 and 681 keys with only the two `translatable="false"` native language
+names (`Čeština`, `English`) missing, and all nineteen plurals carried the same quantities in both
+files — so the gap was not in `strings.xml` at all, it was text that never went through a resource.
+
+Three places carried English as a literal:
+
+- **The schedule editor's "Dose" section header** (`ui/schedule/ScheduleEditorScreen.kt`) — there was
+  already a `schedule_dose` string used elsewhere, so this was a plain oversight.
+- **The whole home-screen widget** (`widget/NextDoseWidget.kt`): "NEXT DOSE", "Nothing scheduled",
+  "due now", "Last logged 3d ago". All of it is now `context.getString(...)`; the "ago" suffix too,
+  because Czech puts the preposition first (`před 3d`) rather than after the number.
+- **The doctor PDF** (`report/DoctorReportGenerator.kt`, `report/ReportContent.kt`).
+
+The PDF is the interesting one. Its text is ASCII-only on purpose — `PdfDocument` has no font
+fallback, so a Czech label with diacritics would print as blank glyphs in any viewer that lacks the
+glyph. Two things followed from that:
+
+- **Czech report labels are written without diacritics** ("Poslednich 30 dni", "zmena davky"). It
+  reads as the usual Czech-without-háčky, and it always renders. The one label that would look
+  broken either way (`- trough` → `- na dne`) is localised, because a doctor reading "trough" in a
+  Czech report is worse than a missing accent.
+- **The words moved out of `ReportContent` into `ReportLabels`** (`report/ReportLabels.kt`), an
+  interface with an `English` default and an `Android` implementation backed by resources. The
+  builder stays Context-free, so `ReportContentTest` still runs as a plain JUnit test, and the
+  document picks up the app language through the generator instead.
+
+Dates follow the same rule: one numeric pattern (`d. M. yyyy HH:mm`) reads correctly in both
+languages, which is cheaper than a translated pattern and avoids `Locale.ENGLISH` leaking an
+American month order into a Czech report.
+
+Left in English on purpose: the milestone *descriptions* stored with each change ("5 mg every 3.5
+days at 08:00"). They are written when the change is recorded, so translating them at render time
+would mean translating data, not labels.
+
+Tests: `ReportContentTest` gained one case proving the supplied labels are what the document prints.

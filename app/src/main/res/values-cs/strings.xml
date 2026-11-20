@@ -800,4 +800,39 @@
     <string name="side_effect_uncommon">Méně časté</string>
     <string name="side_effect_rare">Vzácné</string>
     <string name="side_effect_very_rare">Velmi vzácné</string>
+    <!-- Home-screen widget -->
+    <string name="widget_next_dose">DALŠÍ DÁVKA</string>
+    <string name="widget_nothing_scheduled">Nic naplánováno</string>
+    <string name="widget_scheduled_dose">Naplánovaná dávka</string>
+    <string name="widget_next_routine">Další rutina</string>
+    <string name="widget_due_now">právě teď</string>
+    <string name="widget_last_logged">Naposledy zapsáno %1$s</string>
+    <string name="widget_ago_days">před %1$sd</string>
+    <string name="widget_ago_hours">před %1$sh</string>
+    <!-- Doctor report (bez diakritiky: PdfDocument neumi fallback fontu) -->
+    <string name="report_title">PREHLED LEKU A HRT</string>
+    <string name="report_generated">Vytvoreno %1$s - offline aplikace, data od pacienta</string>
+    <string name="report_medications">SOUCASTNA MEDIKACE</string>
+    <string name="report_none">Nic zaznamenano.</string>
+    <string name="report_truncated">(seznam zkracen, aby se vesel na stranku)</string>
+    <string name="report_adherence">DODRZOVANI</string>
+    <string name="report_adherence_line">Poslednich %1$d dni: %2$d z %3$d davek (%4$d%%)</string>
+    <string name="report_changes">ZMENY MEDIKACE</string>
+    <string name="report_labs">POSLEDNI ODBERY</string>
+    <string name="report_no_labs">Zadne vysledky.</string>
+    <string name="report_trough"> - na dne</string>
+    <string name="report_trend">TREND: %1$s</string>
+    <string name="report_footer">Data od pacienta. Neni to zdravotni dokumentace. Overte si je ve svych poznamkach.</string>
+    <string name="report_footer_app">Medsy - offline evidence leku</string>
+    <string name="report_no_schedule">bez aktivniho schematu</string>
+    <string name="report_daily">denne</string>
+    <string name="report_every_days">kazde %1$s d</string>
+    <string name="report_every_hours">kazdych %1$s h</string>
+    <string name="report_cyclical">cyklicky</string>
+    <string name="report_tapering">snizovani</string>
+    <string name="report_prn">PRN</string>
+    <string name="report_change_started">nasazeno</string>
+    <string name="report_change_dose">zmena davky</string>
+    <string name="report_change_route">zmena cesty</string>
+    <string name="report_change_stopped">vysazeno</string>
 </resources>

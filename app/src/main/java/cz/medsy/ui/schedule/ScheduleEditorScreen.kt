@@ -278,7 +278,7 @@ fun ScheduleEditorScreen(
         }
 
         item {
-            Section(title = "Dose") {
+            Section(title = stringResource(R.string.schedule_dose)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     OutlinedTextField(
                         value = draft.doseAmount,

@@ -10,8 +10,6 @@ import cz.medsy.domain.model.ScheduleType
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 /**
  * Everything the PDF prints, computed without touching a Canvas.
@@ -78,6 +76,7 @@ object ReportContent {
         values: List<BiomarkerValue>,
         flagFor: (BiomarkerValue) -> String,
         zone: ZoneId = ZoneId.systemDefault(),
+        labels: ReportLabels = ReportLabels.English,
     ): Content {
         val bySession = values.groupBy { it.sessionId }
         val orderedSessions = sessions.sortedByDescending { it.timestamp }
@@ -104,8 +103,7 @@ object ReportContent {
                 }
 
             LabBlock(
-                dateLabel = session.timestamp.atZone(zone)
-                    .format(DateTimeFormatter.ofPattern("d MMM yyyy HH:mm", Locale.ENGLISH)),
+                dateLabel = session.timestamp.atZone(zone).format(labels.dateTime),
                 isTrough = session.isTroughLevel,
                 rows = rows,
             )
@@ -118,9 +116,9 @@ object ReportContent {
                     .joinToString(" ")
                     .trim(),
                 schedule = if (own.isEmpty()) {
-                    "no active schedule"
+                    labels.noActiveSchedule()
                 } else {
-                    own.joinToString("; ") { describe(it) }
+                    own.joinToString("; ") { describe(it, labels) }
                 },
             )
         }
@@ -135,9 +133,8 @@ object ReportContent {
                 .take(MAX_MILESTONES)
                 .map { milestone ->
                     MilestoneLine(
-                        dateLabel = milestone.timestamp.atZone(zone)
-                            .format(DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH)),
-                        text = "${milestone.changeType.name.lowercase(Locale.ENGLISH)}: ${milestone.description}",
+                        dateLabel = milestone.timestamp.atZone(zone).format(labels.date),
+                        text = "${labels.milestone(milestone.changeType)}: ${milestone.description}",
                     )
                 },
             labs = blocks,
@@ -154,16 +151,16 @@ object ReportContent {
         return "$sign${diff.stripTrailingZeros().toPlainString()}"
     }
 
-    fun describe(schedule: Schedule): String {
+    fun describe(schedule: Schedule, labels: ReportLabels = ReportLabels.English): String {
         val interval = when (schedule.scheduleType) {
-            ScheduleType.FIXED_DAILY -> "daily"
+            ScheduleType.FIXED_DAILY -> labels.daily()
             ScheduleType.INTERVAL_DAYS ->
-                "every ${schedule.intervalValue?.stripTrailingZeros()?.toPlainString()} d"
+                labels.everyDays(schedule.intervalValue?.stripTrailingZeros()?.toPlainString().orEmpty())
             ScheduleType.INTERVAL_HOURS ->
-                "every ${schedule.intervalValue?.stripTrailingZeros()?.toPlainString()} h"
-            ScheduleType.CYCLICAL -> "cyclical"
-            ScheduleType.TAPERING -> "tapering"
-            ScheduleType.PRN -> "PRN"
+                labels.everyHours(schedule.intervalValue?.stripTrailingZeros()?.toPlainString().orEmpty())
+            ScheduleType.CYCLICAL -> labels.cyclical()
+            ScheduleType.TAPERING -> labels.tapering()
+            ScheduleType.PRN -> labels.prn()
         }
         val times = schedule.timesOfDay.joinToString("/") { it.toString() }
         return "$interval, ${schedule.doseAmount.stripTrailingZeros().toPlainString()} " +

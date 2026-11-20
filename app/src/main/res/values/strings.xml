@@ -772,4 +772,39 @@
     <string name="lab_scan_camera_unavailable">The camera could not be started. Close other apps using it and try again.</string>
     <string name="lab_scan_capture_failed">The photo could not be saved. Try again.</string>
     <string name="symptom_pattern_mean">%1$s/5 %2$s (%3$d×)</string>
+    <!-- Home-screen widget -->
+    <string name="widget_next_dose">NEXT DOSE</string>
+    <string name="widget_nothing_scheduled">Nothing scheduled</string>
+    <string name="widget_scheduled_dose">Scheduled dose</string>
+    <string name="widget_next_routine">Next routine</string>
+    <string name="widget_due_now">due now</string>
+    <string name="widget_last_logged">Last logged %1$s</string>
+    <string name="widget_ago_days">%1$sd ago</string>
+    <string name="widget_ago_hours">%1$sh ago</string>
+    <!-- Doctor report (ASCII only: PdfDocument has no font fallback) -->
+    <string name="report_title">MEDICATION &amp; HRT SUMMARY</string>
+    <string name="report_generated">Generated %1$s - offline app, patient-entered data</string>
+    <string name="report_medications">CURRENT MEDICATIONS</string>
+    <string name="report_none">None recorded.</string>
+    <string name="report_truncated">(list truncated to fit one page)</string>
+    <string name="report_adherence">ADHERENCE</string>
+    <string name="report_adherence_line">Last %1$d days: %2$d of %3$d doses (%4$d%%)</string>
+    <string name="report_changes">MEDICATION CHANGES</string>
+    <string name="report_labs">RECENT BLOODWORK</string>
+    <string name="report_no_labs">No results recorded.</string>
+    <string name="report_trough"> - trough</string>
+    <string name="report_trend">TREND: %1$s</string>
+    <string name="report_footer">Patient-reported data. Not a medical record. Verify against your own notes.</string>
+    <string name="report_footer_app">Medsy - offline-first medication tracker</string>
+    <string name="report_no_schedule">no active schedule</string>
+    <string name="report_daily">daily</string>
+    <string name="report_every_days">every %1$s d</string>
+    <string name="report_every_hours">every %1$s h</string>
+    <string name="report_cyclical">cyclical</string>
+    <string name="report_tapering">tapering</string>
+    <string name="report_prn">PRN</string>
+    <string name="report_change_started">started</string>
+    <string name="report_change_dose">dose changed</string>
+    <string name="report_change_route">route changed</string>
+    <string name="report_change_stopped">stopped</string>
 </resources>

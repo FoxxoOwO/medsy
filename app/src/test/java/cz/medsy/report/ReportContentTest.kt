@@ -71,6 +71,7 @@ class ReportContentTest {
         milestones: List<MedicationMilestone> = emptyList(),
         adherence30: AdherenceSummary = AdherenceSummary(28, 1, 1),
         adherence90: AdherenceSummary = AdherenceSummary(80, 4, 6),
+        labels: ReportLabels = ReportLabels.English,
     ) = ReportContent.build(
         medications = medications,
         schedules = schedules,
@@ -81,6 +82,7 @@ class ReportContentTest {
         values = values,
         flagFor = { "within target" },
         zone = zone,
+        labels = labels,
     )
 
     @Test
@@ -91,6 +93,27 @@ class ReportContentTest {
         assertEquals("Estradiol Enanthate 5 mg", content.medications.single().name)
         assertTrue(content.medications.single().schedule.contains("every 3.5 d"))
         assertTrue(content.medications.single().schedule.contains("08:00"))
+    }
+
+    @Test
+    fun `report text follows the supplied labels`() {
+        val czech = object : ReportLabels {
+            override val dateTime = java.time.format.DateTimeFormatter.ofPattern("d. M. yyyy HH:mm")
+            override val date = java.time.format.DateTimeFormatter.ofPattern("d. M. yyyy")
+            override fun noActiveSchedule() = "bez schematu"
+            override fun daily() = "denne"
+            override fun everyDays(days: String) = "kazde $days d"
+            override fun everyHours(hours: String) = "kazdych $hours h"
+            override fun cyclical() = "cyklicky"
+            override fun tapering() = "snizovani"
+            override fun prn() = "PRN"
+            override fun milestone(type: ChangeType) = "zmena"
+        }
+
+        val content = build(labels = czech)
+
+        assertTrue(content.medications.single().schedule.contains("kazde 3.5 d"))
+        assertEquals("bez schematu", build(schedules = emptyList(), labels = czech).medications.single().schedule)
     }
 
     @Test
