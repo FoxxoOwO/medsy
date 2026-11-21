@@ -14,8 +14,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.yield
+import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -90,9 +92,21 @@ class MedicationDetailViewModelTest {
      * Keeps the ViewModel's state hot and hands back the latest snapshot.
      */
     private fun watch(viewModel: MedicationDetailViewModel): () -> MedicationDetailUi {
-        var latest = MedicationDetailUi()
-        watchers.launch { viewModel.state.collect { latest = it } }
-        return { latest }
+        val latest = AtomicReference(MedicationDetailUi())
+        watchers.launch { viewModel.state.collect { latest.set(it) } }
+        return { latest.get() }
+    }
+
+    /**
+     * Wait on the *observed* snapshot, not on the ViewModel's StateFlow: the collector that
+     * fills the snapshot runs in its own coroutine, so awaiting the StateFlow directly can finish
+     * before it has delivered the emission the assertion then reads.
+     */
+    private suspend fun waitFor(
+        state: () -> MedicationDetailUi,
+        predicate: (MedicationDetailUi) -> Boolean,
+    ) = withTimeout(5_000) {
+        while (!predicate(state())) yield()
     }
 
     private fun viewModel() = MedicationDetailViewModel(
@@ -111,7 +125,7 @@ class MedicationDetailViewModelTest {
     fun `the row is observed, not passed in`() = watching { viewModel ->
         val state = watch(viewModel)
 
-        viewModel.state.first { it.medication != null }
+        waitFor(state) { it.medication != null }
 
         assertEquals("Testovaci", state().medication?.name)
         assertFalse(state().gone)
@@ -120,11 +134,11 @@ class MedicationDetailViewModelTest {
     @Test
     fun `an edit is persisted`() = watching { viewModel ->
         val state = watch(viewModel)
-        viewModel.state.first { it.medication != null }
+        waitFor(state) { it.medication != null }
 
         val loaded = state().medication!!
         viewModel.save(loaded, MedicationEdit.of(loaded).copy(name = "Testovaci 2"))
-        viewModel.state.first { it.medication?.name == "Testovaci 2" }
+        waitFor(state) { it.medication?.name == "Testovaci 2" }
 
         assertEquals("Testovaci 2", repository.getById(medicationId)?.name)
     }
@@ -132,10 +146,10 @@ class MedicationDetailViewModelTest {
     @Test
     fun `deleting the row closes the screen once it is gone`() = watching { viewModel ->
         val state = watch(viewModel)
-        viewModel.state.first { it.medication != null }
+        waitFor(state) { it.medication != null }
 
         viewModel.delete()
-        viewModel.state.first { it.gone }
+        waitFor(state) { it.gone }
 
         assertTrue(state().gone)
         assertNull(repository.getById(medicationId))
@@ -144,10 +158,10 @@ class MedicationDetailViewModelTest {
     @Test
     fun `archiving marks the row and leaves the screen`() = watching { viewModel ->
         val state = watch(viewModel)
-        viewModel.state.first { it.medication != null }
+        waitFor(state) { it.medication != null }
 
         viewModel.archive()
-        viewModel.state.first { it.gone }
+        waitFor(state) { it.gone }
 
         assertTrue(state().gone)
         assertTrue(repository.getById(medicationId)!!.isArchived)
@@ -156,9 +170,9 @@ class MedicationDetailViewModelTest {
     @Test
     fun `the side effects follow the substance`() = watching { viewModel ->
         val state = watch(viewModel)
-        viewModel.state.first { it.medication != null }
+        waitFor(state) { it.medication != null }
 
-        viewModel.state.first { it.sideEffects != null }
+        waitFor(state) { it.sideEffects != null }
 
         val profile = state().sideEffects!!
         assertEquals("G03CA03", profile.atcCode)
@@ -171,12 +185,12 @@ class MedicationDetailViewModelTest {
     @Test
     fun `a substance outside the asset falls back to its group`() = watching { viewModel ->
         val state = watch(viewModel)
-        viewModel.state.first { it.medication != null }
+        waitFor(state) { it.medication != null }
 
         repository.getById(medicationId)!!.let { row ->
             viewModel.save(row, MedicationEdit.of(row).copy(atcCode = "G03CA09"))
         }
-        viewModel.state.first { it.sideEffects?.atcCode == "G03CA" }
+        waitFor(state) { it.sideEffects?.atcCode == "G03CA" }
 
         assertTrue(state().sideEffects!!.isGroupLevel)
         assertEquals("Estrogeny", state().sideEffects!!.substance)
@@ -185,14 +199,14 @@ class MedicationDetailViewModelTest {
     @Test
     fun `no code means no card`() = watching { viewModel ->
         val state = watch(viewModel)
-        viewModel.state.first { it.medication != null }
+        waitFor(state) { it.medication != null }
 
         repository.getById(medicationId)!!.let { row ->
             viewModel.save(row, MedicationEdit.of(row).copy(atcCode = ""))
         }
         // The side-effect profile is derived in a separate flow; waiting only for the
         // cleared ATC code left a race in which the old card was still present here.
-        viewModel.state.first { it.medication?.atcCode == null && it.sideEffects == null }
+        waitFor(state) { it.medication?.atcCode == null && it.sideEffects == null }
 
         assertNull(state().sideEffects)
     }
@@ -200,12 +214,12 @@ class MedicationDetailViewModelTest {
     @Test
     fun `an unknown code does not invent effects`() = watching { viewModel ->
         val state = watch(viewModel)
-        viewModel.state.first { it.medication != null }
+        waitFor(state) { it.medication != null }
 
         repository.getById(medicationId)!!.let { row ->
             viewModel.save(row, MedicationEdit.of(row).copy(atcCode = "Z99ZZ99"))
         }
-        viewModel.state.first { it.medication?.atcCode == "Z99ZZ99" }
+        waitFor(state) { it.medication?.atcCode == "Z99ZZ99" }
         // The profile is computed off the medication flow; give the lookup a moment and assert.
         runBlocking { kotlinx.coroutines.delay(50) }
 
