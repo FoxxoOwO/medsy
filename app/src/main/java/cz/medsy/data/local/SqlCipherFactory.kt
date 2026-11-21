@@ -1,6 +1,5 @@
 package cz.medsy.data.local
 
-import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import net.zetetic.database.sqlcipher.SQLiteDatabase
 import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
@@ -15,14 +14,6 @@ object SqlCipherFactory {
     fun create(passphrase: ByteArray): SupportSQLiteOpenHelper.Factory {
         System.loadLibrary("sqlcipher")
         return SupportOpenHelperFactory(passphrase)
-    }
-
-    fun runCipherSelfTest(db: SupportSQLiteDatabase): Boolean {
-        return runCatching {
-            db.query("PRAGMA cipher_version").use { cursor ->
-                cursor.moveToFirst() && !cursor.getString(0).isNullOrBlank()
-            }
-        }.getOrDefault(false)
     }
 
     internal fun isEncrypted(fileHeader: ByteArray): Boolean {

@@ -1,7 +1,6 @@
 package cz.medsy.data.local.datasource
 
 import android.content.Context
-import android.util.Log
 import cz.medsy.domain.model.DataSourceOrigin
 import cz.medsy.domain.model.MedicationForm
 import cz.medsy.domain.model.ParsedBarcode
@@ -41,16 +40,16 @@ class HrtCuratedCatalogDataSource @Inject constructor(
     private val json = Json { ignoreUnknownKeys = true }
 
     /** Parsed once per process: 40 entries, a few dozen KB, read on the first lookup. */
-    private val catalog: List<Entry> by lazy { load() }
+    private val loaded by lazy {
+        AssetLoader(context).load(ASSET, "HRT catalog") { raw ->
+            json.decodeFromString<CatalogFile>(raw).entries
+        }
+    }
+
+    private val catalog: List<Entry> get() = loaded.entries
 
     /** Non-null when the asset failed to load; forces the lazy read so it is accurate. */
-    val loadError: String?
-        get() {
-            catalog
-            return error
-        }
-
-    private var error: String? = null
+    val loadError: String? get() = loaded.error
 
     fun all(): List<Entry> = catalog
 
@@ -107,22 +106,6 @@ class HrtCuratedCatalogDataSource @Inject constructor(
                 (foldedSubstance.isNullOrBlank() || entry.matches(foldedSubstance))
         } ?: candidates.firstOrNull { entry -> formHint != null && entry.form == formHint.name }
             ?: candidates.first()
-    }
-
-    private fun load(): List<Entry> {
-        val raw = runCatching {
-            context.assets.open(ASSET).bufferedReader().use { it.readText() }
-        }.getOrElse { failure ->
-            error = "HRT catalog asset unreadable: ${failure.message}"
-            Log.e(TAG, error!!, failure)
-            return emptyList()
-        }
-        return runCatching { json.decodeFromString<CatalogFile>(raw).entries }
-            .getOrElse { failure ->
-                error = "HRT catalog malformed: ${failure.message}"
-                Log.e(TAG, error!!, failure)
-                emptyList()
-            }
     }
 
     @Serializable
@@ -195,7 +178,6 @@ class HrtCuratedCatalogDataSource @Inject constructor(
     }
 
     private companion object {
-        const val TAG = "HrtCatalog"
         const val ASSET = "hrt_curated_catalog.json"
 
         const val MATCH_SUBSTANCE = 10

@@ -1,6 +1,6 @@
 package cz.medsy.domain.repository
 
-import cz.medsy.data.local.datasource.AtcFallbackDataSource
+import cz.medsy.domain.model.AtcSuggestion
 import cz.medsy.domain.model.ResolvedMedicationCandidate
 import kotlinx.coroutines.flow.Flow
 
@@ -26,7 +26,7 @@ interface MedicationLookupRepository {
     fun searchByQuery(query: String): Flow<List<ResolvedMedicationCandidate>>
 
     /** ATC suggestions for the manual-entry form (offline, Czech/Latin/English names). */
-    suspend fun suggestAtc(query: String, limit: Int = 10): List<AtcFallbackDataSource.Entry>
+    suspend fun suggestAtc(query: String, limit: Int = 10): List<AtcSuggestion>
 
     /**
      * Builds the pre-filled manual candidate for a scan the waterfall could not identify,

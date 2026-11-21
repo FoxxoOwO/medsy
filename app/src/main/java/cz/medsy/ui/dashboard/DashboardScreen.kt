@@ -108,6 +108,18 @@ fun DashboardRoute(
         )
     }
 
+    state.blockingError?.let { error ->
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = viewModel::dismissBlockingError,
+            text = { Text(error.asText()) },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = viewModel::dismissBlockingError) {
+                    Text(stringResource(R.string.common_done))
+                }
+            },
+        )
+    }
+
     DashboardScreen(
         state = state,
         onLogDose = viewModel::logDose,
@@ -305,7 +317,7 @@ fun DashboardScreen(
                             // In discreet mode the name is replaced: a stock alert is just
                             // as revealing as the medication list itself.
                             val label = if (state.discreetMode) {
-                                cz.medsy.domain.discreet.DiscreetDisplay.MASKED_NAME
+                                stringResource(R.string.meds_detail_title)
                             } else {
                                 line.medicationName
                             }

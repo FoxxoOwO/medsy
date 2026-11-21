@@ -4,7 +4,6 @@ import cz.medsy.domain.model.ScannedPackage
 import cz.medsy.domain.model.Symbology
 import cz.medsy.domain.util.Gs1BarcodeParser
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 /**
  * Scanner-facing adapter over [Gs1BarcodeParser].
@@ -24,13 +23,9 @@ object Gs1Parser {
 
     fun parseGs1Date(value: String): LocalDate? = Gs1BarcodeParser.parseExpiration(value)
 
+    /** Kept because the GTIN conversion is exercised directly by the scanner parser tests. */
     fun toGtin13(gtin14: String): String? =
         if (gtin14.length != 14) null else gtin14.substring(1)
-
-    fun formatExpiry(value: LocalDate?): String? =
-        value?.format(DateTimeFormatter.ISO_LOCAL_DATE)
-
-    fun checksumDigitValid(ean13: String): Boolean = Ean13.isValid(ean13)
 }
 
 object Ean13 {

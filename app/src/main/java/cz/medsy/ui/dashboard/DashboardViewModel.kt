@@ -1,23 +1,22 @@
 package cz.medsy.ui.dashboard
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cz.medsy.data.repository.DoseRepository
-import cz.medsy.data.repository.InventoryRepository
+import cz.medsy.data.repository.InjectionVolumeMissing
 import cz.medsy.data.repository.MedicationRepository
 import cz.medsy.data.settings.SettingsRepository
 import cz.medsy.domain.calc.InteractionAlert
-import cz.medsy.domain.calc.InteractionEngine
 import cz.medsy.domain.calc.InventoryCalculator
 import cz.medsy.domain.bodymap.BodyMap
-import cz.medsy.domain.calc.SiteRotation
-import cz.medsy.domain.schedule.ScheduleEngine
 import cz.medsy.domain.model.ApplicationSite
 import cz.medsy.domain.model.DoseStatus
 import cz.medsy.domain.model.Medication
 import cz.medsy.domain.model.Schedule
 import cz.medsy.domain.schedule.Occurrence
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -25,8 +24,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.Instant
@@ -78,6 +80,8 @@ data class DashboardUiState(
     /** A sublingual dose currently being held under the tongue. */
     val activeHold: ActiveHold? = null,
     val pendingLimitWarning: PrnLimitWarning? = null,
+    /** A dose that could not be logged safely (e.g. an injection without a volume). */
+    val blockingError: cz.medsy.domain.message.Message? = null,
     /** High UV today combined with a photosensitising medication; null hides the card. */
     val uvWarning: cz.medsy.domain.calc.UvWarning? = null,
     /** Scanned eRecepts expiring within the warning window; empty hides the card. */
@@ -116,22 +120,25 @@ data class PrnLimitWarning(
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val medicationRepository: MedicationRepository,
     private val doseRepository: DoseRepository,
-    private val inventoryRepository: InventoryRepository,
     private val settingsRepository: SettingsRepository,
     private val uvRepository: cz.medsy.data.uv.UvRepository,
-    private val prescriptionRepository: cz.medsy.data.repository.PrescriptionRepository,
+    private val loader: DashboardDataLoader,
 ) : ViewModel() {
 
-    /** Kept in a field so the UV lookup does not have to re-read DataStore per refresh. */
-    private var uvCity: String? = null
-    private var uvEnabled: Boolean = true
+    /** Latest UV inputs. Combined with the ticker and flatMapLatest so a slow lookup is cancelled. */
+    private data class UvInput(val city: String?, val enabled: Boolean)
+
+    private val uvInput = MutableStateFlow(UvInput(null, true))
 
     private val ticker = MutableStateFlow(Instant.now())
     private val zone: ZoneId get() = ZoneId.systemDefault()
 
-    private var schedulesById: Map<Long, cz.medsy.domain.model.Schedule> = emptyMap()
+    @Volatile private var schedulesById: Map<Long, cz.medsy.domain.model.Schedule> = emptyMap()
+    /** Needed by the UV flow: photosensitivity depends on the current regimen. */
+    @Volatile private var currentMedications: List<Medication> = emptyList()
 
     private val _uiState = MutableStateFlow(DashboardUiState())
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
@@ -153,138 +160,67 @@ class DashboardViewModel @Inject constructor(
         }
         viewModelScope.launch {
             settingsRepository.settings.collect { settings ->
-                uvCity = settings.uvCity
-                uvEnabled = settings.uvWarningsEnabled
+                uvInput.value = UvInput(settings.uvCity, settings.uvWarningsEnabled)
                 _uiState.update { it.copy(discreetMode = settings.discreetMode) }
             }
+        }
+        // One UV job at a time: the 30-second ticker used to launch a fresh coroutine on
+        // every refresh, so a slow network left several lookups writing stale cards.
+        viewModelScope.launch {
+            combine(uvInput, ticker) { input, _ -> input }
+                .flatMapLatest { input ->
+                    flow {
+                        val city = input.city
+                        val warning = if (!input.enabled || city.isNullOrBlank()) {
+                            null
+                        } else {
+                            runCatching { uvRepository.current(city) }.getOrNull()
+                                ?.let { reading ->
+                                    cz.medsy.domain.calc.Photosensitivity.uvWarning(
+                                        reading.uvIndex,
+                                        currentMedications,
+                                    )
+                                }
+                        }
+                        emit(warning)
+                    }.flowOn(Dispatchers.IO)
+                }
+                .collect { warning -> _uiState.update { it.copy(uvWarning = warning) } }
         }
     }
 
     private suspend fun refresh(medications: List<Medication>, schedules: List<Schedule>) {
         schedulesById = schedules.associateBy { it.id }
+        currentMedications = medications
         val now = Instant.now()
         val today = LocalDate.now(zone)
-        val dayStart = today.atStartOfDay(zone).toInstant()
-        val dayEnd = today.plusDays(1).atStartOfDay(zone).toInstant()
-
-        val medsById = medications.associateBy { it.id }
-        val allOccurrences = schedules.flatMap { schedule ->
-            ScheduleEngine.occurrences(schedule, dayStart, dayEnd, zone)
-        }.sortedBy { it.dueAt }
-
-        val logged = runCatching { doseRepository.observeBetween(dayStart, dayEnd).first() }
-            .getOrDefault(emptyList())
-        val logsByKey = logged.associateBy { it.medicationId to it.scheduledTimestamp }
-
-        val doses = allOccurrences.map { occurrence ->
-            val medication = medsById[occurrence.medicationId]
-            val log = logsByKey[occurrence.medicationId to occurrence.dueAt]
-            DashboardDose(
-                occurrence = occurrence,
-                medicationName = medication?.name ?: "Medication",
-                form = medication?.form ?: cz.medsy.domain.model.MedicationForm.TABLET,
-                status = log?.status,
-                isDueNow = !occurrence.dueAt.isAfter(now) && log == null &&
-                    Duration.between(occurrence.dueAt, now) < Duration.ofHours(4),
-                healthcareNote = null,
-            )
-        }
-
-        val next = doses.firstOrNull { it.status == null && it.occurrence.dueAt.isAfter(now.minusSeconds(60)) }
-        val timeUntil = next?.let { Duration.between(now, it.occurrence.dueAt) }
-
-        val adherence = runCatching {
-            val from = now.minus(Duration.ofDays(30))
-            val expected = doseRepository.expectedDoses(from, now, zone)
-            doseRepository.adherence(from, now, expected)
-        }.getOrNull()
-
-        val stock = runCatching { inventoryRepository.stockLines(today) }.getOrDefault(emptyList())
-            .filter { it.isLow || it.beyondUsePassed.isNotEmpty() || it.expiringBatches.isNotEmpty() }
-
-        // A medication counts if it has a substance name OR an ATC code. Filtering on
-        // the name alone silently skipped every SÚKL row that carries only an ATC code.
-        val alerts = InteractionEngine.evaluate(
-            medications.map { med ->
-                InteractionEngine.ActiveSubstance(
-                    name = med.activeSubstance.orEmpty(),
-                    atcCode = med.atcCode,
-                    medicationId = med.id,
-                )
-            },
+        val snapshot = loader.load(
+            medications = medications,
+            schedules = schedules,
+            now = now,
+            zone = zone,
+            today = today,
+            dayStart = today.atStartOfDay(zone).toInstant(),
+            dayEnd = today.plusDays(1).atStartOfDay(zone).toInstant(),
         )
-
-        val patches = medications.filter { it.form == cz.medsy.domain.model.MedicationForm.PATCH }
-            .mapNotNull { medication ->
-                runCatching { doseRepository.currentPatch(medication.id) }.getOrNull()
-                    ?.let { patch -> medication to patch }
-            }
-        val activePatch = patches.mapNotNull { (medication, patch) ->
-            val wornUntil = patch.wornUntil ?: return@mapNotNull null
-            ActivePatch(
-                doseLogId = patch.id,
-                medicationName = medication.name,
-                state = cz.medsy.domain.patch.PatchLifecycle.removalState(wornUntil, now),
-                wornUntil = wornUntil,
-                description = cz.medsy.domain.patch.PatchLifecycle.describe(
-                    cz.medsy.domain.patch.PatchLifecycle.removalState(wornUntil, now),
-                    wornUntil,
-                    now,
-                ),
-                askForRemoval = cz.medsy.domain.patch.PatchLifecycle.shouldAskForRemoval(wornUntil, now),
-            )
-        }.firstOrNull()
-
-        // One entry per rotation-tracked medication, so the picker always shows the site
-        // list of the dose being logged rather than of whichever medication came first.
-        val siteChoices = schedules.filter { it.requireSiteRotation }
-            .distinctBy { it.medicationId }
-            .mapNotNull { schedule ->
-                val med = medsById[schedule.medicationId] ?: return@mapNotNull null
-                val history = runCatching { doseRepository.recentSiteHistory(med.id) }
-                    .getOrDefault(emptyList())
-                SiteChoices(
-                    medicationId = med.id,
-                    form = med.form,
-                    recommended = SiteRotation.recommend(med.form, history, now)?.site,
-                    states = BodyMap.states(med.form, history, now),
-                )
-            }
-        val site = siteChoices.firstOrNull()?.recommended
-
-        val expiring = runCatching { prescriptionRepository.active() }.getOrDefault(emptyList())
-            .filter { it.isExpiringSoon(now) }
-
-        // Separate coroutine on purpose: a slow or dead network must never delay the dose
-        // list, and a failed lookup simply leaves the previous card (or none) in place.
-        viewModelScope.launch {
-            val city = uvCity
-            val warning = if (!uvEnabled || city.isNullOrBlank()) {
-                null
-            } else {
-                runCatching { uvRepository.current(city) }.getOrNull()
-                    ?.let { reading -> cz.medsy.domain.calc.Photosensitivity.uvWarning(reading.uvIndex, medications) }
-            }
-            _uiState.update { it.copy(uvWarning = warning) }
-        }
 
         _uiState.update {
             it.copy(
                 greeting = greetingFor(now),
                 todayLabel = today.format(java.time.format.DateTimeFormatter.ofPattern("EEEE d. MMMM")),
                 now = now.atZone(zone).format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")),
-                nextDose = next,
-                timeUntilNext = timeUntil,
-                dosesToday = doses,
-                adherencePercent = adherence?.percent?.toInt() ?: 0,
-                adherenceTaken = adherence?.taken ?: 0,
-                adherenceTotal = adherence?.total ?: 0,
-                stockAlerts = stock,
-                interactionAlerts = alerts,
-                recommendedSite = site,
-                siteChoices = siteChoices,
-                activePatch = activePatch,
-                expiringPrescriptions = expiring,
+                nextDose = snapshot.next,
+                timeUntilNext = snapshot.timeUntil,
+                dosesToday = snapshot.doses,
+                adherencePercent = snapshot.adherence?.percent?.toInt() ?: 0,
+                adherenceTaken = snapshot.adherence?.taken ?: 0,
+                adherenceTotal = snapshot.adherence?.total ?: 0,
+                stockAlerts = snapshot.stock,
+                interactionAlerts = snapshot.alerts,
+                recommendedSite = snapshot.recommendedSite,
+                siteChoices = snapshot.siteChoices,
+                activePatch = snapshot.activePatch,
+                expiringPrescriptions = snapshot.expiring,
                 isLoading = false,
             )
         }
@@ -308,6 +244,11 @@ class DashboardViewModel @Inject constructor(
                     allowOverLimit = allowOverLimit,
                 )
             }.onFailure { error ->
+                if (error is InjectionVolumeMissing) {
+                    // Nothing was written. Ask the patient to add a concentration or volume.
+                    _uiState.update { it.copy(blockingError = error.userMessage) }
+                    return@launch
+                }
                 if (error is cz.medsy.data.repository.PrnLimitExceeded) {
                     // Ask rather than refuse: the patient may have a reason, but the
                     // ceiling must not be crossed silently.
@@ -402,6 +343,10 @@ class DashboardViewModel @Inject constructor(
 
     fun dismissLimitWarning() {
         _uiState.update { it.copy(pendingLimitWarning = null) }
+    }
+
+    fun dismissBlockingError() {
+        _uiState.update { it.copy(blockingError = null) }
     }
 
     fun snooze(dose: DashboardDose) {

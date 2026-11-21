@@ -186,7 +186,7 @@ object ScheduleValidator {
                 } else {
                     draft.times.sorted()
                 },
-                doseAmount = dose!!,
+                doseAmount = requireNotNull(dose) { "a validated schedule must have a dose" },
                 doseUnit = draft.doseUnit.trim(),
                 mealRelation = draft.mealRelation,
                 offsetMinutes = draft.offsetMinutes,

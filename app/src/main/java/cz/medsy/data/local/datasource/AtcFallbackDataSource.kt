@@ -1,7 +1,6 @@
 package cz.medsy.data.local.datasource
 
 import android.content.Context
-import android.util.Log
 import cz.medsy.domain.model.DataSourceOrigin
 import cz.medsy.domain.model.MedicationForm
 import cz.medsy.domain.model.ParsedBarcode
@@ -32,16 +31,16 @@ class AtcFallbackDataSource @Inject constructor(
 
     private val json = Json { ignoreUnknownKeys = true }
 
-    private val entries: List<Entry> by lazy { load() }
+    private val loaded by lazy {
+        AssetLoader(context).load(ASSET, "ATC dictionary") { raw ->
+            json.decodeFromString<DictionaryFile>(raw).entries
+        }
+    }
 
-    private var error: String? = null
+    private val entries: List<Entry> get() = loaded.entries
 
     /** Non-null when the asset failed to load; triggers the lazy read first. */
-    val loadError: String?
-        get() {
-            entries
-            return error
-        }
+    val loadError: String? get() = loaded.error
 
     fun size(): Int = entries.size
 
@@ -93,22 +92,6 @@ class AtcFallbackDataSource @Inject constructor(
         )
     }
 
-    private fun load(): List<Entry> {
-        val raw = runCatching {
-            context.assets.open(ASSET).bufferedReader().use { it.readText() }
-        }.getOrElse { failure ->
-            error = "ATC dictionary unreadable: ${failure.message}"
-            Log.e(TAG, error!!, failure)
-            return emptyList()
-        }
-        return runCatching { json.decodeFromString<DictionaryFile>(raw).entries }
-            .getOrElse { failure ->
-                error = "ATC dictionary malformed: ${failure.message}"
-                Log.e(TAG, error!!, failure)
-                emptyList()
-            }
-    }
-
     @Serializable
     private data class DictionaryFile(
         val version: Int = 1,
@@ -151,7 +134,6 @@ class AtcFallbackDataSource @Inject constructor(
     }
 
     private companion object {
-        const val TAG = "AtcFallback"
         const val ASSET = "atc_dictionary.json"
 
         /** Shared folding so "zel" finds "Železo" and "bicalu" finds "Bikalutamid". */

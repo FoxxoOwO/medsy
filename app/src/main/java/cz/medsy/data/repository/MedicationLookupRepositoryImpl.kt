@@ -4,6 +4,7 @@ import cz.medsy.data.local.datasource.AtcFallbackDataSource
 import cz.medsy.data.local.datasource.HrtCuratedCatalogDataSource
 import cz.medsy.data.local.datasource.SuklCatalogDataSource
 import cz.medsy.domain.repository.SupplementLookup
+import cz.medsy.domain.model.AtcSuggestion
 import cz.medsy.domain.model.DataSourceOrigin
 import cz.medsy.domain.model.MedicationForm
 import cz.medsy.domain.model.ParsedBarcode
@@ -97,7 +98,16 @@ class MedicationLookupRepositoryImpl @Inject constructor(
     override suspend fun suggestAtc(
         query: String,
         limit: Int,
-    ): List<AtcFallbackDataSource.Entry> = atc.suggest(query, limit)
+    ): List<AtcSuggestion> = atc.suggest(query, limit).map { entry ->
+        AtcSuggestion(
+            code = entry.code,
+            latin = entry.latin,
+            czech = entry.czech,
+            english = entry.english,
+            keywords = entry.keywords,
+            note = entry.note,
+        )
+    }
 
     override suspend fun manualCandidate(
         rawBarcode: String?,

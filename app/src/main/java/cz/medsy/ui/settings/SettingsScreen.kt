@@ -56,18 +56,23 @@ import cz.medsy.ui.theme.ThemeMode
 import kotlinx.coroutines.launch
 
 @Composable
-fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
+fun SettingsRoute(
+    viewModel: SettingsViewModel = hiltViewModel(),
+    reminderViewModel: ReminderSettingsViewModel = hiltViewModel(),
+    backupViewModel: BackupViewModel = hiltViewModel(),
+    updateViewModel: UpdateViewModel = hiltViewModel(),
+) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
-    val exported by viewModel.exportedReport.collectAsStateWithLifecycle()
-    var notificationsBlocked by remember { mutableStateOf(viewModel.notificationsBlocked()) }
-    var fullScreenAllowed by remember { mutableStateOf(viewModel.fullScreenAllowed()) }
+    val exported by backupViewModel.exportedReport.collectAsStateWithLifecycle()
+    var notificationsBlocked by remember { mutableStateOf(reminderViewModel.notificationsBlocked()) }
+    var fullScreenAllowed by remember { mutableStateOf(reminderViewModel.fullScreenAllowed()) }
     // AppCompat recreates the activity when the locale changes, so this is only read once — but a
     // language can also be picked in the system settings on Android 13+, hence the resume refresh.
     var language by remember { mutableStateOf(AppLanguage.current()) }
     // Both permissions live in system settings, so they can change while the app is away.
     androidx.lifecycle.compose.LifecycleResumeEffect(Unit) {
-        notificationsBlocked = viewModel.notificationsBlocked()
-        fullScreenAllowed = viewModel.fullScreenAllowed()
+        notificationsBlocked = reminderViewModel.notificationsBlocked()
+        fullScreenAllowed = reminderViewModel.fullScreenAllowed()
         language = AppLanguage.current()
         // Health Connect grants also change outside the app (the sheet, or the "Open settings"
         // button), and the switch has to follow them instead of showing a stale state.
@@ -75,17 +80,17 @@ fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
         onPauseOrDispose { }
     }
     val healthStatus by viewModel.healthStatus.collectAsStateWithLifecycle()
-    val suklSync by viewModel.suklSync.collectAsStateWithLifecycle()
-    val update by viewModel.update.collectAsStateWithLifecycle()
+    val suklSync by updateViewModel.suklSync.collectAsStateWithLifecycle()
+    val update by updateViewModel.update.collectAsStateWithLifecycle()
     val healthPermissionLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
         contract = remember { viewModel.healthConnectPermissionContract() },
     ) { granted ->
         viewModel.onHealthPermissionsResult(granted)
     }
 
-    val backup by viewModel.backup.collectAsStateWithLifecycle()
-    val exportPayload by viewModel.exportPayload.collectAsStateWithLifecycle()
-    val pendingImport by viewModel.pendingImport.collectAsStateWithLifecycle()
+    val backup by backupViewModel.backup.collectAsStateWithLifecycle()
+    val exportPayload by backupViewModel.exportPayload.collectAsStateWithLifecycle()
+    val pendingImport by backupViewModel.pendingImport.collectAsStateWithLifecycle()
     var exportPasswordDialog by remember { mutableStateOf(false) }
     var importPasswordDialog by remember { mutableStateOf(false) }
     var importModeDialog by remember { mutableStateOf(false) }
@@ -96,12 +101,12 @@ fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
     val saveBackup = androidx.activity.compose.rememberLauncherForActivityResult(
         contract = remember { androidx.activity.result.contract.ActivityResultContracts.CreateDocument("application/json") },
     ) { uri ->
-        if (uri != null) viewModel.writeExport(uri) else viewModel.discardExport()
+        if (uri != null) backupViewModel.writeExport(uri) else backupViewModel.discardExport()
     }
     val pickBackup = androidx.activity.compose.rememberLauncherForActivityResult(
         contract = remember { androidx.activity.result.contract.ActivityResultContracts.OpenDocument() },
     ) { uri ->
-        if (uri != null) viewModel.readImport(uri) else viewModel.discardImport()
+        if (uri != null) backupViewModel.readImport(uri) else backupViewModel.discardImport()
     }
 
     LaunchedEffect(exportPayload) {
@@ -123,7 +128,7 @@ fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
             optional = true,
             onConfirm = { password ->
                 exportPasswordDialog = false
-                viewModel.exportBackup(password)
+                backupViewModel.exportBackup(password)
             },
             onDismiss = { exportPasswordDialog = false },
         )
@@ -140,7 +145,7 @@ fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
             },
             onDismiss = {
                 importPasswordDialog = false
-                viewModel.discardImport()
+                backupViewModel.discardImport()
             },
         )
     }
@@ -148,120 +153,136 @@ fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
         BackupModeDialog(
             onReplace = {
                 importModeDialog = false
-                viewModel.importBackup(importPassword, BackupRepository.Mode.REPLACE)
+                backupViewModel.importBackup(importPassword, BackupRepository.Mode.REPLACE)
             },
             onMerge = {
                 importModeDialog = false
-                viewModel.importBackup(importPassword, BackupRepository.Mode.MERGE)
+                backupViewModel.importBackup(importPassword, BackupRepository.Mode.MERGE)
             },
             onDismiss = {
                 importModeDialog = false
-                viewModel.discardImport()
+                backupViewModel.discardImport()
             },
         )
     }
     SettingsScreen(
         settings = settings,
+        actions = SettingsActions(
+            onOpenNotificationSettings = {
+                reminderViewModel.openNotificationSettings()
+                notificationsBlocked = reminderViewModel.notificationsBlocked()
+            },
+            onRemindersEnabled = reminderViewModel::setRemindersEnabled,
+            onReminderSound = reminderViewModel::setReminderSound,
+            onReminderVibration = reminderViewModel::setReminderVibration,
+            onReminderLead = reminderViewModel::setReminderLeadMinutes,
+            onSnooze = reminderViewModel::setSnoozeMinutes,
+            onFullScreenReminders = reminderViewModel::setFullScreenReminders,
+            onOpenFullScreenSettings = reminderViewModel::openFullScreenIntentSettings,
+            onTestNotification = reminderViewModel::sendTestNotification,
+            onUvWarnings = viewModel::setUvWarnings,
+            onUvCity = viewModel::setUvCity,
+            onHealthConnect = { enabled ->
+                if (!enabled) {
+                    viewModel.setHealthConnect(false)
+                } else {
+                    healthPermissionLauncher.launch(cz.medsy.health.HealthPermissions.all)
+                }
+            },
+            onOpenHealthConnectSettings = viewModel::openHealthConnectSettings,
+            onExportReport = backupViewModel::exportReport,
+            onShareReport = backupViewModel::shareReport,
+            onClearReport = backupViewModel::clearExportedReport,
+            onExportBackup = { exportPasswordDialog = true },
+            onImportBackup = {
+                pickBackup.launch(arrayOf("application/json", "text/plain", "application/octet-stream"))
+            },
+            onDiscreetMode = viewModel::setDiscreetMode,
+            onDiscreetIcon = viewModel::setDiscreetIcon,
+            onBiometricLock = viewModel::setBiometricLock,
+            onDynamicColor = viewModel::setDynamicColor,
+            onPalette = viewModel::setPalette,
+            onThemeMode = viewModel::setThemeMode,
+            onLanguageChange = { picked ->
+                language = picked
+                AppLanguage.apply(picked)
+            },
+            onSyncSukl = updateViewModel::syncSukl,
+            onUpdateCheck = updateViewModel::setUpdateCheck,
+            onCheckUpdates = updateViewModel::checkForUpdates,
+            onInstallUpdate = updateViewModel::installUpdate,
+        ),
         notificationsBlocked = notificationsBlocked,
-        onOpenNotificationSettings = {
-            viewModel.openNotificationSettings()
-            notificationsBlocked = viewModel.notificationsBlocked()
-        },
-        onRemindersEnabled = viewModel::setRemindersEnabled,
-        onReminderSound = viewModel::setReminderSound,
-        onReminderVibration = viewModel::setReminderVibration,
-        onReminderLead = viewModel::setReminderLeadMinutes,
-        onSnooze = viewModel::setSnoozeMinutes,
         fullScreenAllowed = fullScreenAllowed,
-        onFullScreenReminders = viewModel::setFullScreenReminders,
-        onOpenFullScreenSettings = viewModel::openFullScreenIntentSettings,
-        onTestNotification = viewModel::sendTestNotification,
-        onUvWarnings = viewModel::setUvWarnings,
-        onUvCity = viewModel::setUvCity,
         healthConnectStatus = healthStatus,
         suklSync = suklSync,
-        onHealthConnect = { enabled ->
-            if (!enabled) {
-                viewModel.setHealthConnect(false)
-            } else {
-                healthPermissionLauncher.launch(cz.medsy.health.HealthPermissions.all)
-            }
-        },
-        onOpenHealthConnectSettings = viewModel::openHealthConnectSettings,
         exportedReportName = exported?.name,
-        onExportReport = viewModel::exportReport,
-        onShareReport = viewModel::shareReport,
         backup = backup,
-        onExportBackup = { exportPasswordDialog = true },
-        onImportBackup = {
-            pickBackup.launch(arrayOf("application/json", "text/plain", "application/octet-stream"))
-        },
-        onDiscreetMode = viewModel::setDiscreetMode,
-        onDiscreetIcon = viewModel::setDiscreetIcon,
-        onBiometricLock = viewModel::setBiometricLock,
-        onDynamicColor = viewModel::setDynamicColor,
-        onPalette = viewModel::setPalette,
-        onThemeMode = viewModel::setThemeMode,
         currentLanguage = language,
-        onLanguageChange = { picked ->
-            language = picked
-            AppLanguage.apply(picked)
-        },
-        onSyncSukl = viewModel::syncSukl,
         update = update,
-        onUpdateCheck = viewModel::setUpdateCheck,
-        onCheckUpdates = viewModel::checkForUpdates,
-        onInstallUpdate = viewModel::installUpdate,
     )
 }
+
+/**
+ * Every action the settings cards can trigger, in one object. The screen used to take
+ * 29 callbacks as separate parameters; grouping them keeps the signature readable and
+ * makes previews and tests pass only the handful they care about.
+ */
+data class SettingsActions(
+    val onOpenNotificationSettings: () -> Unit = {},
+    val onRemindersEnabled: (Boolean) -> Unit = {},
+    val onReminderSound: (Boolean) -> Unit = {},
+    val onReminderVibration: (Boolean) -> Unit = {},
+    val onReminderLead: (Int) -> Unit = {},
+    val onSnooze: (Int) -> Unit = {},
+    val onFullScreenReminders: (Boolean) -> Unit = {},
+    val onOpenFullScreenSettings: () -> Unit = {},
+    val onTestNotification: () -> Unit = {},
+    val onUvWarnings: (Boolean) -> Unit = {},
+    val onUvCity: (String) -> Unit = {},
+    val onHealthConnect: (Boolean) -> Unit = {},
+    val onOpenHealthConnectSettings: () -> Unit = {},
+    val onExportReport: () -> Unit = {},
+    val onShareReport: () -> Unit = {},
+    val onClearReport: () -> Unit = {},
+    val onExportBackup: () -> Unit = {},
+    val onImportBackup: () -> Unit = {},
+    val onDiscreetMode: (Boolean) -> Unit = {},
+    val onDiscreetIcon: (Boolean) -> Unit = {},
+    val onBiometricLock: (Boolean) -> Unit = {},
+    val onDynamicColor: (Boolean) -> Unit = {},
+    val onPalette: (MedsyPalette) -> Unit = {},
+    val onThemeMode: (ThemeMode) -> Unit = {},
+    val onLanguageChange: (AppLanguage) -> Unit = {},
+    val onSyncSukl: () -> Unit = {},
+    val onUpdateCheck: (Boolean) -> Unit = {},
+    val onCheckUpdates: () -> Unit = {},
+    val onInstallUpdate: () -> Unit = {},
+)
 
 @Composable
 fun SettingsScreen(
     settings: AppSettings,
+    actions: SettingsActions = SettingsActions(),
     notificationsBlocked: Boolean = false,
-    onOpenNotificationSettings: () -> Unit = {},
-    onRemindersEnabled: (Boolean) -> Unit = {},
-    onReminderSound: (Boolean) -> Unit = {},
-    onReminderVibration: (Boolean) -> Unit = {},
-    onReminderLead: (Int) -> Unit = {},
-    onSnooze: (Int) -> Unit = {},
     /** Whether Android allows this app to cover the lock screen (Android 14+ asks per app). */
     fullScreenAllowed: Boolean = true,
-    onFullScreenReminders: (Boolean) -> Unit = {},
-    onOpenFullScreenSettings: () -> Unit = {},
-    onTestNotification: () -> Unit = {},
-    onUvWarnings: (Boolean) -> Unit = {},
-    onUvCity: (String) -> Unit = {},
     /** null while the provider is still being asked — never claim "not installed" before knowing. */
     healthConnectStatus: cz.medsy.health.HealthConnectAvailability.Status? = null,
-    onHealthConnect: (Boolean) -> Unit = {},
-    onOpenHealthConnectSettings: () -> Unit = {},
     exportedReportName: String? = null,
-    onExportReport: () -> Unit = {},
-    onShareReport: () -> Unit = {},
     backup: BackupUi = BackupUi(),
-    onExportBackup: () -> Unit = {},
-    onImportBackup: () -> Unit = {},
-    onDiscreetMode: (Boolean) -> Unit,
-    onDiscreetIcon: (Boolean) -> Unit,
-    onBiometricLock: (Boolean) -> Unit,
-    onDynamicColor: (Boolean) -> Unit,
-    onPalette: (MedsyPalette) -> Unit,
-    onThemeMode: (ThemeMode) -> Unit,
     /** Where the in-app language switch points right now; SYSTEM keeps following the device. */
     currentLanguage: AppLanguage = AppLanguage.SYSTEM,
-    onLanguageChange: (AppLanguage) -> Unit = {},
-    onSyncSukl: () -> Unit,
     suklSync: SuklSyncUi = SuklSyncUi(),
     update: UpdateUi = UpdateUi(),
-    onUpdateCheck: (Boolean) -> Unit = {},
-    onCheckUpdates: () -> Unit = {},
-    onInstallUpdate: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
+    // All callbacks resolve as members of `actions` inside this scope, so the cards below
+    // keep their readable `onXxx(...)` calls without a large mechanical rewrite.
+    with(actions) {
     LazyColumn(
         modifier = modifier.fillMaxWidth(),
         contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 16.dp, bottom = 120.dp),
@@ -578,6 +599,7 @@ fun SettingsScreen(
                     Button(onClick = onExportReport) { Text(stringResource(R.string.settings_export_report)) }
                     if (exportedReportName != null) {
                         Button(onClick = onShareReport) { Text(stringResource(R.string.settings_share)) }
+                        TextButton(onClick = onClearReport) { Text(stringResource(R.string.common_done)) }
                     }
                 }
                 exportedReportName?.let { name ->
@@ -701,6 +723,7 @@ fun SettingsScreen(
         item(key = "settings-credit") {
             AppCredit()
         }
+    }
     }
 }
 
@@ -940,14 +963,8 @@ private fun SettingsPreview() {
     MedsyTheme {
         SettingsScreen(
             settings = AppSettings(discreetMode = true, palette = MedsyPalette.NONBINARY),
+            actions = SettingsActions(),
             healthConnectStatus = cz.medsy.health.HealthConnectAvailability.Status.AVAILABLE,
-            onDiscreetMode = {},
-            onDiscreetIcon = {},
-            onBiometricLock = {},
-            onDynamicColor = {},
-            onPalette = {},
-            onThemeMode = {},
-            onSyncSukl = {},
         )
     }
 }

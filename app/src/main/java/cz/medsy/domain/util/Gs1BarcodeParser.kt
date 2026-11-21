@@ -200,9 +200,6 @@ object Gs1BarcodeParser {
         return LocalDate.of(year, month, day)
     }
 
-    /** AI (11) production date; same YYMMDD encoding as (17). */
-    fun parseProductionDate(value: String): LocalDate? = parseExpiration(value)
-
     /**
      * Longest AI first, and a fixed-length AI is only accepted when its value fits and
      * has the shape the AI requires. Without the shape check, the payload
