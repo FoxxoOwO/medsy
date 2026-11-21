@@ -28,6 +28,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import cz.medsy.domain.inventory.BatchDraft
 import cz.medsy.domain.inventory.BatchValidation
+import cz.medsy.domain.message.Message
+import cz.medsy.domain.message.MessageKey
+import cz.medsy.domain.message.message
 import cz.medsy.ui.message.asText
 import cz.medsy.domain.model.Medication
 import cz.medsy.ui.message.defaultUnitText
@@ -63,7 +66,7 @@ fun BatchEditorDialog(
     var threshold by remember { mutableStateOf("7") }
     var beyondUse by remember { mutableStateOf("") }
     var feedback by remember { mutableStateOf<BatchValidation?>(null) }
-    var localError by remember { mutableStateOf<String?>(null) }
+    var localError by remember { mutableStateOf<Message?>(null) }
 
     val parsedQuantity = quantity.trim().replace(',', '.').toBigDecimalOrNull()
     val parsedExpiry = expiry.toLocalDateOrNull()
@@ -214,7 +217,7 @@ fun BatchEditorDialog(
                 localError?.let { error ->
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        text = error,
+                        text = error.asText(),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.error,
                     )
@@ -229,11 +232,11 @@ fun BatchEditorDialog(
                     TextButton(
                         onClick = {
                             if (selected == null) {
-                                localError = "Choose a medication."
+                                localError = message(MessageKey.BATCH_CHOOSE_MEDICATION)
                                 return@TextButton
                             }
                             if (expiryInvalid) {
-                                localError = "Use the format yyyy-MM-dd for the expiry date."
+                                localError = message(MessageKey.BATCH_EXPIRY_FORMAT)
                                 return@TextButton
                             }
                             localError = null

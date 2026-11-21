@@ -76,6 +76,8 @@ enum class MessageKey {
     NOTIFY_LIMIT_TITLE,
     NOTIFY_LIMIT_DEFAULT,
     NOTIFY_LIMIT_MESSAGE,
+    /** Generic PRN-limit reason for discreet mode: no dose amounts or medication names. */
+    NOTIFY_LIMIT_DISCREET,
 
     // Failures the user must see, even though they happen outside a screen.
     HEALTH_SYNC_DISABLED,
@@ -86,6 +88,19 @@ enum class MessageKey {
     TARGET_MIN_UNREADABLE,
     TARGET_MAX_UNREADABLE,
     SCHEDULE_MEDICATION_MISSING,
+
+    // Doctor-target validation. Keys, never English sentences: a Czech phone must read Czech.
+    TARGET_UNKNOWN_BIOMARKER,
+    TARGET_MIN_NOT_NUMBER,
+    TARGET_MAX_NOT_NUMBER,
+    TARGET_AT_LEAST_ONE_BOUND,
+    TARGET_MIN_POSITIVE,
+    TARGET_MAX_POSITIVE,
+    TARGET_MIN_BELOW_MAX,
+    TARGET_UNIT_MIXUP,
+
+    /** An injectable without concentration and without an explicit volume must not be deducted by its mg dose. */
+    INJECTION_VOLUME_MISSING,
 
     /** Dashboard hint when the UV index is high and a medication is photosensitising. */
     UV_EXPOSURE,
@@ -179,6 +194,7 @@ enum class MessageKey {
     CONSUMABLE_INJECTION_NEEDLES,
     CONSUMABLE_ALCOHOL_SWABS,
     BATCH_CHOOSE_MEDICATION,
+    BATCH_EXPIRY_FORMAT,
     BATCH_QUANTITY_POSITIVE,
     BATCH_UNIT_REQUIRED,
     BATCH_THRESHOLD_NEGATIVE,
@@ -283,4 +299,33 @@ enum class MessageKey {
     // Camera used for photographing a lab report.
     LAB_SCAN_CAMERA_UNAVAILABLE,
     LAB_SCAN_CAPTURE_FAILED,
+
+    // Labels that used to be English literals inside domain objects. `displayName` stays
+    // as the stable search key; these keys carry the text the user actually reads.
+    DISCREET_MEDICATION,
+    UNKNOWN_MEDICATION,
+    BIOMARKER_E2,
+    BIOMARKER_TEST_TOTAL,
+    BIOMARKER_PRL,
+    BIOMARKER_P4,
+    BIOMARKER_SHBG,
+    BIOMARKER_LH,
+    BIOMARKER_FSH,
+    BIOMARKER_HCT,
+    BIOMARKER_HGB,
+    BIOMARKER_ALT,
+    BIOMARKER_AST,
+    BIOMARKER_GGT,
+    BIOMARKER_ALP,
+    BIOMARKER_BILI,
+    BIOMARKER_CREA,
+    BIOMARKER_GLU,
+    BIOMARKER_CHOL,
+    BIOMARKER_LDL,
+    BIOMARKER_HDL,
+    BIOMARKER_TAG,
+    BIOMARKER_K,
+    BIOMARKER_NA,
+    BIOMARKER_FERR,
+    BIOMARKER_TSH,
 }

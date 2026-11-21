@@ -1,5 +1,6 @@
 package cz.medsy.ui.bloodwork
 
+import cz.medsy.domain.message.MessageKey
 import cz.medsy.ui.message.asText
 
 import androidx.compose.foundation.layout.Arrangement
@@ -82,7 +83,7 @@ fun CustomTargetScreen(
                     style = MaterialTheme.typography.displaySmallEmphasized,
                 )
                 Text(
-                    text = state.displayName,
+                    text = state.displayNameKey?.asText() ?: state.displayName,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -97,11 +98,11 @@ fun CustomTargetScreen(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Column(modifier = Modifier.padding(14.dp)) {
-                        // Both lists land in one card: validator prose and message-typed
-                        // errors must not look like two different problems.
-                        (state.errors + state.messageErrors.map { it.asText() }).forEach { error ->
+                        // Both lists land in one card: validator errors and ViewModel errors
+                        // are messages now, so both follow the phone language.
+                        (state.errors + state.messageErrors).forEach { error ->
                             Text(
-                                text = "• $error",
+                                text = "• ${error.asText()}",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onErrorContainer,
                             )
@@ -121,7 +122,7 @@ fun CustomTargetScreen(
                     Column(modifier = Modifier.padding(14.dp)) {
                         state.warnings.forEach { warning ->
                             Text(
-                                text = warning,
+                                text = warning.asText(),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSecondaryContainer,
                             )
@@ -212,6 +213,7 @@ private fun CustomTargetPreview() {
             state = CustomTargetUiState(
                 code = "E2",
                 displayName = "Estradiol",
+                displayNameKey = MessageKey.BIOMARKER_E2,
                 siUnit = "pmol/L",
                 conventionalUnit = "pg/mL",
                 inputUnit = "pmol/L",

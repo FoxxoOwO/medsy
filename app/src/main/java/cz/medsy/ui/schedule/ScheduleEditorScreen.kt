@@ -139,7 +139,7 @@ fun ScheduleEditorScreen(
                     val discreet = cz.medsy.ui.theme.LocalDiscreetMode.current
                     Text(
                         text = if (discreet) {
-                            cz.medsy.domain.discreet.DiscreetDisplay.MASKED_NAME
+                            stringResource(R.string.meds_detail_title)
                         } else {
                             medication.name
                         },

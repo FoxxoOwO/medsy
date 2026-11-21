@@ -44,6 +44,7 @@ import cz.medsy.ui.message.asText
 import cz.medsy.domain.message.Message
 import cz.medsy.domain.message.MessageKey
 import cz.medsy.domain.message.message
+import cz.medsy.domain.calc.Biomarkers
 import cz.medsy.domain.calc.BloodworkCalculator
 import cz.medsy.domain.calc.RangeStatus
 import cz.medsy.domain.model.ProfileType
@@ -216,7 +217,7 @@ fun BloodworkScreen(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = selected.displayName,
+                                    text = selected.displayNameKey.asText(),
                                     style = MaterialTheme.typography.titleMedium,
                                 )
                                 selected.lastValue?.let { value ->
@@ -310,7 +311,7 @@ fun BloodworkScreen(
                                     ).joinToString(" – ") + " ${selected.unit}",
                                 )
                             } else {
-                                stringResource(R.string.labs_no_target_for, selected.displayName)
+                                stringResource(R.string.labs_no_target_for, selected.displayNameKey.asText())
                             },
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.weight(1f),
@@ -411,7 +412,7 @@ fun BloodworkScreen(
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = series.displayName,
+                                text = series.displayNameKey.asText(),
                                 style = MaterialTheme.typography.titleSmall,
                             )
                             Text(
@@ -470,7 +471,8 @@ fun BloodworkScreen(
                                 Text(
                                     text = stringResource(
                                         R.string.labs_row_line,
-                                        row.displayName,
+                                        Biomarkers.find(row.code)?.displayNameKey?.asText()
+                                            ?: row.displayName,
                                         row.rawValue,
                                         row.rawUnit,
                                         row.siValue?.let { "$it ${row.siUnit}" }
@@ -565,6 +567,7 @@ private fun BloodworkPreview() {
                     BiomarkerSeries(
                         code = "E2",
                         displayName = "Estradiol",
+                        displayNameKey = MessageKey.BIOMARKER_E2,
                         unit = "pmol/L",
                         points = listOf(
                             SeriesPoint(Instant.now().minusSeconds(86400L * 60), 420.0),

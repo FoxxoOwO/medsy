@@ -1,13 +1,14 @@
 package cz.medsy.ui.bloodwork
 
-import cz.medsy.domain.message.message
-
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cz.medsy.data.repository.BloodTestRepository
 import cz.medsy.domain.calc.Biomarkers
 import cz.medsy.domain.calc.CustomTargetValidator
 import cz.medsy.domain.calc.ReferenceRanges
+import cz.medsy.domain.message.Message
+import cz.medsy.domain.message.MessageKey
+import cz.medsy.domain.message.message
 import cz.medsy.domain.model.ProfileType
 import cz.medsy.domain.model.ReferenceRangeProfile
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,6 +24,7 @@ import javax.inject.Inject
 data class CustomTargetUiState(
     val code: String = "",
     val displayName: String = "",
+    val displayNameKey: MessageKey? = null,
     val siUnit: String = "",
     val conventionalUnit: String? = null,
     val minText: String = "",
@@ -30,13 +32,10 @@ data class CustomTargetUiState(
     /** Unit the user is typing in; values are converted to SI before saving. */
     val inputUnit: String = "",
     val existing: ReferenceRangeProfile? = null,
-    val errors: List<String> = emptyList(),
-    /**
-     * Errors phrased as messages, so they follow the phone language. The validator still
-     * returns plain sentences in `errors`; both lists are shown in the same card.
-     */
-    val messageErrors: List<cz.medsy.domain.message.Message> = emptyList(),
-    val warnings: List<String> = emptyList(),
+    /** Validator errors and ViewModel errors, both phrased as messages that follow the phone language. */
+    val errors: List<Message> = emptyList(),
+    val messageErrors: List<Message> = emptyList(),
+    val warnings: List<Message> = emptyList(),
     val saved: Boolean = false,
     val removed: Boolean = false,
 )
@@ -65,6 +64,7 @@ class CustomTargetViewModel @Inject constructor(
             _state.value = CustomTargetUiState(
                 code = spec.code,
                 displayName = spec.displayName,
+                displayNameKey = spec.displayNameKey,
                 siUnit = spec.siUnit,
                 conventionalUnit = spec.conventionalUnit,
                 inputUnit = existing?.let { spec.siUnit } ?: spec.siUnit,
@@ -99,7 +99,7 @@ class CustomTargetViewModel @Inject constructor(
                 it.copy(
                     messageErrors = listOf(
                         message(
-                            cz.medsy.domain.message.MessageKey.TARGET_MIN_UNREADABLE,
+                            MessageKey.TARGET_MIN_UNREADABLE,
                             current.inputUnit,
                         ),
                     ),
@@ -112,7 +112,7 @@ class CustomTargetViewModel @Inject constructor(
                 it.copy(
                     messageErrors = listOf(
                         message(
-                            cz.medsy.domain.message.MessageKey.TARGET_MAX_UNREADABLE,
+                            MessageKey.TARGET_MAX_UNREADABLE,
                             current.inputUnit,
                         ),
                     ),
@@ -139,7 +139,7 @@ class CustomTargetViewModel @Inject constructor(
                 }.onFailure { error ->
                     _state.update {
                         it.copy(
-                            messageErrors = listOf(message(cz.medsy.domain.message.MessageKey.SAVE_TARGET_FAILED)),
+                            messageErrors = listOf(message(MessageKey.SAVE_TARGET_FAILED)),
                         )
                     }
                 }

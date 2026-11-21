@@ -13,12 +13,8 @@
 
     <!-- Dashboard -->
     <string name="dashboard_greeting">Today</string>
-    <string name="dashboard_next_dose">Next dose</string>
     <string name="dashboard_until_next">until next dose</string>
     <string name="dashboard_adherence">30-day adherence</string>
-    <string name="dashboard_doses_today">Doses today</string>
-    <string name="dashboard_stock">Stock</string>
-    <string name="dashboard_last_lab">Last lab</string>
     <string name="dashboard_all_done">All doses logged. Nice work.</string>
     <string name="dashboard_nothing_scheduled">Nothing scheduled today</string>
 
@@ -26,15 +22,7 @@
     <string name="dose_take">Take</string>
     <string name="dose_skip">Skip</string>
     <string name="dose_snooze">Snooze 15 min</string>
-    <string name="dose_taken">Taken</string>
-    <string name="dose_skipped">Skipped</string>
-    <string name="dose_late">Late</string>
     <string name="dose_snoozed">Snoozed</string>
-    <string name="dose_logged">Dose logged</string>
-    <string name="dose_confirm_title">Log dose</string>
-    <string name="dose_confirm_volume">Volume</string>
-    <string name="dose_confirm_site">Application site</string>
-    <string name="dose_confirm_recommended">Recommended</string>
 
     <!-- Notification -->
     <string name="channel_doses">Medication reminders</string>
@@ -43,8 +31,6 @@
     <string name="channel_inventory_desc">Low stock, expiry and beyond-use date alerts</string>
     <string name="channel_bloodwork">Bloodwork</string>
     <string name="channel_bloodwork_desc">Pre-test and fasting reminders</string>
-    <string name="notification_take">Take</string>
-    <string name="notification_skip">Skip</string>
     <string name="notification_dose_title">%1$s</string>
     <string name="notification_dose_title_discreet">Time for your daily routine</string>
     <string name="notification_dose_text">%1$s · scheduled %2$s</string>
@@ -58,51 +44,27 @@
         <item quantity="one">%1$d medication due at %2$s</item>
         <item quantity="other">%1$d medications due at %2$s</item>
     </plurals>
-    <string name="notification_low_stock">Low stock: %1$s</string>
     <string name="notification_low_stock_discreet">Low stock on one of your supplies</string>
-    <string name="notification_expiry">%1$s expires %2$s</string>
-    <string name="notification_bud">Discard %1$s after %2$s (beyond-use date)</string>
 
     <!-- Medications -->
     <string name="medications_title">Medications</string>
-    <string name="medications_empty">No medications yet. Scan a box to add one.</string>
-    <string name="medications_add">Add medication</string>
-    <string name="scanner_title">Scan medication</string>
-    <string name="scanner_hint">Point at the DataMatrix or EAN-13 barcode on the box</string>
-    <string name="scanner_torch">Torch</string>
 
     <!-- Bloodwork -->
-    <string name="bloodwork_title">Bloodwork</string>
-    <string name="bloodwork_add_session">Add test</string>
     <string name="bloodwork_empty">No results yet. Import a lab PDF or add numbers manually.</string>
-    <string name="bloodwork_trough">Drawn %1$s after last dose — %2$s</string>
     <string name="bloodwork_true_trough">True trough</string>
     <string name="bloodwork_not_trough">Not at trough</string>
-    <string name="bloodwork_fasting_warning">Fasting draw: do not take morning HRT/thyroid doses before venipuncture.</string>
-    <string name="bloodwork_import_pdf">Import lab PDF</string>
-    <string name="bloodwork_review_title">Review parsed results</string>
-    <string name="bloodwork_review_save">Save %1$d results</string>
 
     <!-- Reference ranges -->
-    <string name="range_hrt_fem">HRT feminizing target</string>
-    <string name="range_hrt_masc">HRT masculinizing target</string>
-    <string name="range_cis_f">Cis female reference</string>
-    <string name="range_cis_m">Cis male reference</string>
     <string name="range_custom">Doctor target</string>
-    <string name="range_lab">Lab printed range</string>
 
     <!-- Inventory -->
     <string name="inventory_title">Inventory</string>
     <string name="inventory_consumables">Consumables</string>
-    <string name="inventory_batches">Batches</string>
     <string name="inventory_travel_plan">Travel plan</string>
     <string name="inventory_travel_start">Trip start</string>
     <string name="inventory_travel_end">Trip end</string>
-    <string name="inventory_travel_buffer">Safety buffer (days)</string>
-    <string name="inventory_travel_shortfall">You are short on %1$s</string>
 
     <!-- Settings -->
-    <string name="settings_title">Settings</string>
     <string name="settings_discreet_mode">Discreet mode</string>
     <string name="settings_discreet_mode_desc">Mask medication names in notifications and hide HRT badges</string>
     <string name="settings_discreet_icon">Discreet launcher icon</string>
@@ -116,20 +78,12 @@
     <string name="settings_language_czech" translatable="false">Čeština</string>
     <string name="settings_language_english" translatable="false">English</string>
     <string name="settings_sukl_sync">Sync SÚKL database</string>
-    <string name="settings_report">Export doctor report</string>
 
     <!-- Common -->
     <string name="common_cancel">Cancel</string>
     <string name="common_save">Save</string>
     <string name="common_delete">Delete</string>
     <string name="common_done">Done</string>
-    <string name="common_at">at</string>
-    <string name="common_days">%1$d days</string>
-    <string name="common_hours">%1$s h</string>
-    <string name="common_ml">%1$s mL</string>
-    <string name="common_mg">%1$s mg</string>
-    <string name="common_locked_title">Medsy is locked</string>
-    <string name="common_locked_subtitle">Unlock to view your health data</string>
     <string name="common_unlock">Unlock</string>
     <string name="notification_test_title">Test reminder</string>
     <string name="notification_test_text">If you can see this, dose reminders reach your device.</string>
@@ -141,9 +95,7 @@
     <string name="settings_reminder_vibration">Vibration</string>
     <string name="settings_reminder_vibration_desc">Vibrate when a dose reminder fires</string>
     <string name="settings_reminder_lead">Alert before</string>
-    <string name="settings_reminder_lead_desc">How long before the scheduled time the alarm should fire</string>
     <string name="settings_snooze">Snooze length</string>
-    <string name="settings_snooze_desc">How long the Snooze action postpones the reminder</string>
     <string name="settings_full_screen_alert">Full-screen alert</string>
     <string name="settings_full_screen_alert_desc">Show the dose over the lock screen when the phone is locked</string>
     <string name="settings_credit">Created by FoxxoOwO ❤️</string>
@@ -158,8 +110,6 @@
     <string name="permission_exact_action">Allow exact alarms</string>
     <string name="permission_full_screen_body">Android does not allow this app to cover the lock screen. Allow full-screen notifications in system settings to get the alert while locked.</string>
     <string name="permission_full_screen_action">Allow full-screen alerts</string>
-    <string name="reminders_off_banner">Reminders are turned off</string>
-    <string name="reminders_off_action">Turn on</string>
     <string name="lead_exact">On time</string>
 
     <!-- Labels extracted from composables -->
@@ -428,6 +378,7 @@
     <string name="msg_notify_limit_title">Dose not recorded</string>
     <string name="msg_notify_limit_default">You have reached the daily limit for this medication.</string>
     <string name="msg_notify_limit_message">%1$s Open the app to confirm if this was intended.</string>
+    <string name="msg_notify_limit_discreet">A daily dose limit was reached.</string>
     <string name="msg_health_sync_disabled">Health Connect sync is switched off</string>
     <string name="msg_health_sync_nothing">Nothing to write to Health Connect</string>
     <string name="msg_health_sync_failed">Health Connect write failed — the entry is saved in the app</string>
@@ -435,6 +386,15 @@
     <string name="msg_target_min_unreadable">Minimum could not be read in %1$s</string>
     <string name="msg_target_max_unreadable">Maximum could not be read in %1$s</string>
     <string name="msg_schedule_medication_missing">Medication not found</string>
+    <string name="msg_target_unknown_biomarker">Unknown biomarker: %1$s</string>
+    <string name="msg_target_min_not_number">Minimum must be a number</string>
+    <string name="msg_target_max_not_number">Maximum must be a number</string>
+    <string name="msg_target_at_least_one_bound">Enter at least one bound</string>
+    <string name="msg_target_min_positive">Minimum must be greater than zero</string>
+    <string name="msg_target_max_positive">Maximum must be greater than zero</string>
+    <string name="msg_target_min_below_max">Minimum must be lower than maximum</string>
+    <string name="msg_target_unit_mixup">Value %1$s %2$s is unusual for %3$s, but %1$s %4$s equals %5$s %2$s, which is plausible. Did you mean %4$s?</string>
+    <string name="msg_injection_volume_missing">Cannot log this injection: the vial has no concentration and no volume was entered. Add the concentration in mg/mL in the medication details, or enter the drawn volume. Nothing was deducted from the vial.</string>
     <string name="msg_save_schedule_failed">Could not save the schedule</string>
     <string name="msg_uv_exposure">UV %1$s today — one of your medications can make skin photosensitive. Shade and SPF 50.</string>
     <string name="settings_privacy">Privacy</string>
@@ -822,5 +782,32 @@
     <string name="settings_update_failed">The download failed. Check the connection and try again.</string>
     <string name="settings_update_none">Not checked yet.</string>
     <string name="settings_update_checked">Checked %1$s</string>
+
+    <!-- Localised domain labels (were English literals in Kotlin) -->
+    <string name="unknown_medication">Medication %1$d</string>
+    <string name="biomarker_e2">Estradiol</string>
+    <string name="biomarker_test_total">Testosterone (total)</string>
+    <string name="biomarker_prl">Prolactin</string>
+    <string name="biomarker_p4">Progesterone</string>
+    <string name="biomarker_shbg">SHBG</string>
+    <string name="biomarker_lh">LH</string>
+    <string name="biomarker_fsh">FSH</string>
+    <string name="biomarker_hct">Hematocrit</string>
+    <string name="biomarker_hgb">Hemoglobin</string>
+    <string name="biomarker_alt">ALT</string>
+    <string name="biomarker_ast">AST</string>
+    <string name="biomarker_ggt">GGT</string>
+    <string name="biomarker_alp">ALP</string>
+    <string name="biomarker_bili">Bilirubin</string>
+    <string name="biomarker_crea">Creatinine</string>
+    <string name="biomarker_glu">Glucose</string>
+    <string name="biomarker_chol">Total cholesterol</string>
+    <string name="biomarker_ldl">LDL cholesterol</string>
+    <string name="biomarker_hdl">HDL cholesterol</string>
+    <string name="biomarker_tag">Triglycerides</string>
+    <string name="biomarker_k">Potassium</string>
+    <string name="biomarker_na">Sodium</string>
+    <string name="biomarker_ferr">Ferritin</string>
+    <string name="biomarker_tsh">TSH</string>
 
 </resources>

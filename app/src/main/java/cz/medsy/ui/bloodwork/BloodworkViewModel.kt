@@ -38,6 +38,7 @@ data class SeriesPoint(
 data class BiomarkerSeries(
     val code: String,
     val displayName: String,
+    val displayNameKey: MessageKey,
     val unit: String,
     val points: List<SeriesPoint>,
     val lastValue: Double?,
@@ -109,6 +110,8 @@ data class ScanValueDraft(
     val id: Long,
     val code: String,
     val displayName: String,
+    /** Null for a code the app does not know; the raw label is then the only option. */
+    val displayNameKey: MessageKey?,
     val text: String,
     val unit: String,
     val invalid: Boolean = false,
@@ -255,6 +258,7 @@ class BloodworkViewModel @Inject constructor(
             BiomarkerSeries(
                 code = code,
                 displayName = spec.displayName,
+                displayNameKey = spec.displayNameKey,
                 unit = spec.siUnit,
                 points = points,
                 lastValue = last.value,
@@ -357,6 +361,7 @@ class BloodworkViewModel @Inject constructor(
                     code = value.biomarkerCode,
                     displayName = Biomarkers.find(value.biomarkerCode)?.displayName
                         ?: value.biomarkerCode,
+                    displayNameKey = Biomarkers.find(value.biomarkerCode)?.displayNameKey,
                     text = value.rawValue.stripTrailingZeros().toPlainString(),
                     unit = value.rawUnit,
                 )

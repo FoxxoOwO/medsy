@@ -240,6 +240,40 @@ class MessageLocalisationTest {
         assertTrue("continue with stringResource instead: $offenders", offenders.isEmpty())
     }
 
+    @Test
+    fun `every localization guard rejects a representative English literal`() {
+        // The guards are regexes over source text, so a broken one fails open: all the
+        // product checks go green while nothing is checked. Feed each guard a line it is
+        // supposed to catch, exactly as a mutation test would.
+        val samples = listOf(
+            ENGLISH_FALLBACK to """val text = error.message ?: "Something failed"""",
+            PROSE_FIELD to """errors += "Minimum must be greater than zero"""",
+            PROSE_FIELD to """reason = "This value is unusual for the lab"""",
+            ERROR_LITERAL to """errors += "Enter at least one bound"""",
+            ELVIS_SENTENCE to """val name = it ?: "No results yet"""",
+            PROSE_BRANCH to """else -> "Good evening everyone"""",
+            NAMED_PARAMETER to """label = "Choose a medication"""",
+            LEADING_LITERAL to """"This is an English sentence with spaces"""",
+            ASSIGNMENT to """statusMessage = "Saved correctly"""",
+        )
+        samples.forEach { (guard, line) ->
+            assertTrue("guard ${guard.pattern} did not match: $line", guard.containsMatchIn(line))
+        }
+    }
+
+    @Test
+    fun `no guard pattern contains a control character`() {
+        // Regression for the U+0008 that used to sit where \b belonged in PROSE_FIELD:
+        // the test stayed green for months because a backspace matches no real source.
+        val guards = listOf(
+            ENGLISH_FALLBACK, PROSE_FIELD, ERROR_LITERAL, ELVIS_SENTENCE,
+            PROSE_BRANCH, NAMED_PARAMETER, LEADING_LITERAL, ASSIGNMENT,
+        )
+        val broken = guards.filter { guard -> guard.pattern.any { it.isISOControl() } }
+        assertTrue("a control character silently disables a guard: $broken", broken.isEmpty())
+        assertTrue("PROSE_FIELD must use a word boundary", PROSE_FIELD.pattern.contains("\\b"))
+    }
+
     internal companion object {
 
         /**
@@ -250,7 +284,7 @@ class MessageLocalisationTest {
 
         /** A prose field: `reason = "…"`, `warnings += "…"`, `detail = "…"`. */
         val PROSE_FIELD = Regex(
-            """(label|reason|detail|suggestion|message|errors|warnings|title|subtitle|description)""" +
+            """\b(label|reason|detail|suggestion|message|errors|warnings|title|subtitle|description)""" +
                 """\s*(\+=|=)\s*"[^"]*\s[^"]*"""",
         )
 

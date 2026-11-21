@@ -11,27 +11,15 @@
     <string name="nav_settings">Nastavení</string>
 
     <string name="dashboard_greeting">Dnes</string>
-    <string name="dashboard_next_dose">Další dávka</string>
     <string name="dashboard_until_next">do další dávky</string>
     <string name="dashboard_adherence">Dodržování za 30 dní</string>
-    <string name="dashboard_doses_today">Dávky dnes</string>
-    <string name="dashboard_stock">Zásoby</string>
-    <string name="dashboard_last_lab">Poslední odběr</string>
     <string name="dashboard_all_done">Všechny dávky zapsány. Skvělá práce.</string>
     <string name="dashboard_nothing_scheduled">Dnes není nic naplánováno</string>
 
     <string name="dose_take">Vzít</string>
     <string name="dose_skip">Přeskočit</string>
     <string name="dose_snooze">Odložit o 15 min</string>
-    <string name="dose_taken">Vzato</string>
-    <string name="dose_skipped">Přeskočeno</string>
-    <string name="dose_late">Pozdě</string>
     <string name="dose_snoozed">Odloženo</string>
-    <string name="dose_logged">Dávka zapsána</string>
-    <string name="dose_confirm_title">Zapsat dávku</string>
-    <string name="dose_confirm_volume">Objem</string>
-    <string name="dose_confirm_site">Místo aplikace</string>
-    <string name="dose_confirm_recommended">Doporučeno</string>
 
     <string name="channel_doses">Připomínky léků</string>
     <string name="channel_doses_desc">Upozornění na dávky podle vašeho režimu</string>
@@ -39,8 +27,6 @@
     <string name="channel_inventory_desc">Upozornění na nízké zásoby, expiraci a dobu použitelnosti</string>
     <string name="channel_bloodwork">Odběry krve</string>
     <string name="channel_bloodwork_desc">Připomínky před odběrem a na lačno</string>
-    <string name="notification_take">Vzít</string>
-    <string name="notification_skip">Přeskočit</string>
     <string name="notification_dose_title">%1$s</string>
     <string name="notification_dose_title_discreet">Je čas na vaši denní rutinu</string>
     <string name="notification_dose_text">%1$s · naplánováno %2$s</string>
@@ -56,46 +42,22 @@
         <item quantity="many">%1$d léků v %2$s</item>
         <item quantity="other">%1$d léků v %2$s</item>
     </plurals>
-    <string name="notification_low_stock">Nízké zásoby: %1$s</string>
     <string name="notification_low_stock_discreet">Nízké zásoby jedné z vašich pomůcek</string>
-    <string name="notification_expiry">%1$s expiruje %2$s</string>
-    <string name="notification_bud">Zlikvidujte %1$s po %2$s (doba použitelnosti)</string>
 
     <string name="medications_title">Léky</string>
-    <string name="medications_empty">Zatím žádné léky. Naskenujte krabičku a přidejte lék.</string>
-    <string name="medications_add">Přidat lék</string>
-    <string name="scanner_title">Skenovat lék</string>
-    <string name="scanner_hint">Namiřte na DataMatrix nebo EAN-13 kód na krabičce</string>
-    <string name="scanner_torch">Světlo</string>
 
-    <string name="bloodwork_title">Odběry krve</string>
-    <string name="bloodwork_add_session">Přidat odběr</string>
     <string name="bloodwork_empty">Zatím žádné výsledky. Importujte PDF z laboratoře nebo zadejte hodnoty ručně.</string>
-    <string name="bloodwork_trough">Odebráno %1$s po poslední dávce — %2$s</string>
     <string name="bloodwork_true_trough">Skutečné minimum</string>
     <string name="bloodwork_not_trough">Mimo minimum</string>
-    <string name="bloodwork_fasting_warning">Odběr na lačno: před odběrem neberte ranní dávku HRT/štítné žlázy.</string>
-    <string name="bloodwork_import_pdf">Importovat PDF z laboratoře</string>
-    <string name="bloodwork_review_title">Zkontrolovat načtené výsledky</string>
-    <string name="bloodwork_review_save">Uložit %1$d výsledků</string>
 
-    <string name="range_hrt_fem">Cíl feminizační HRT</string>
-    <string name="range_hrt_masc">Cíl maskulinizační HRT</string>
-    <string name="range_cis_f">Referenční rozmezí ženy</string>
-    <string name="range_cis_m">Referenční rozmezí muže</string>
     <string name="range_custom">Cíl lékaře</string>
-    <string name="range_lab">Rozmezí z laboratoře</string>
 
     <string name="inventory_title">Zásoby</string>
     <string name="inventory_consumables">Spotřební materiál</string>
-    <string name="inventory_batches">Šarže</string>
     <string name="inventory_travel_plan">Plán cesty</string>
     <string name="inventory_travel_start">Začátek cesty</string>
     <string name="inventory_travel_end">Konec cesty</string>
-    <string name="inventory_travel_buffer">Rezerva (dny)</string>
-    <string name="inventory_travel_shortfall">Nedostatek: %1$s</string>
 
-    <string name="settings_title">Nastavení</string>
     <string name="settings_discreet_mode">Diskrétní režim</string>
     <string name="settings_discreet_mode_desc">Skrýt názvy léků v oznámeních a HRT štítky</string>
     <string name="settings_discreet_icon">Diskrétní ikona</string>
@@ -107,19 +69,11 @@
     <string name="settings_language_desc">Platí pro celou aplikaci včetně upozornění na dávky.</string>
     <string name="settings_language_system">Systém</string>
     <string name="settings_sukl_sync">Synchronizovat databázi SÚKL</string>
-    <string name="settings_report">Exportovat zprávu pro lékaře</string>
 
     <string name="common_cancel">Zrušit</string>
     <string name="common_save">Uložit</string>
     <string name="common_delete">Smazat</string>
     <string name="common_done">Hotovo</string>
-    <string name="common_at">v</string>
-    <string name="common_days">%1$d dní</string>
-    <string name="common_hours">%1$s h</string>
-    <string name="common_ml">%1$s ml</string>
-    <string name="common_mg">%1$s mg</string>
-    <string name="common_locked_title">Medsy je uzamčeno</string>
-    <string name="common_locked_subtitle">Odemkněte pro zobrazení zdravotních dat</string>
     <string name="common_unlock">Odemknout</string>
     <string name="notification_test_title">Testovací připomínka</string>
     <string name="notification_test_text">Pokud toto vidíte, připomínky léků se doručují.</string>
@@ -131,9 +85,7 @@
     <string name="settings_reminder_vibration">Vibrace</string>
     <string name="settings_reminder_vibration_desc">Zavibrovat při připomínce dávky</string>
     <string name="settings_reminder_lead">Upozornit předem</string>
-    <string name="settings_reminder_lead_desc">Jak dlouho před naplánovaným časem má budík zazvonit</string>
     <string name="settings_snooze">Délka odložení</string>
-    <string name="settings_snooze_desc">O kolik akce Odložit posune připomínku</string>
     <string name="settings_full_screen_alert">Celá obrazovka</string>
     <string name="settings_full_screen_alert_desc">Zobrazit dávku přes zamčenou obrazovku, když je telefon zamčený</string>
     <string name="settings_credit">Vytvořila FoxxoOwO ❤️</string>
@@ -148,8 +100,6 @@
     <string name="permission_exact_action">Povolit přesné budíky</string>
     <string name="permission_full_screen_body">Android nedovoluje této aplikaci překrýt zamčenou obrazovku. Povolte oznámení na celou obrazovku v nastavení systému, abyste dostali upozornění i při zamčeném telefonu.</string>
     <string name="permission_full_screen_action">Povolit celou obrazovku</string>
-    <string name="reminders_off_banner">Připomínky jsou vypnuté</string>
-    <string name="reminders_off_action">Zapnout</string>
     <string name="lead_exact">Přesně</string>
 
     <!-- Labels extracted from composables -->
@@ -403,6 +353,7 @@
     <string name="msg_notify_limit_title">Dávka nezaznamenána</string>
     <string name="msg_notify_limit_default">Dosáhli jste denního limitu tohoto léku.</string>
     <string name="msg_notify_limit_message">%1$s Otevřete aplikaci a potvrďte, jestli to bylo zamýšlené.</string>
+    <string name="msg_notify_limit_discreet">Byl dosažen denní limit dávky.</string>
     <string name="msg_health_sync_disabled">Synchronizace s Health Connect je vypnutá</string>
     <string name="msg_health_sync_nothing">Do Health Connect není co zapsat</string>
     <string name="msg_health_sync_failed">Zápis do Health Connect se nezdařil — záznam zůstal v aplikaci</string>
@@ -410,6 +361,15 @@
     <string name="msg_target_min_unreadable">Minimum se nepodařilo přečíst v %1$s</string>
     <string name="msg_target_max_unreadable">Maximum se nepodařilo přečíst v %1$s</string>
     <string name="msg_schedule_medication_missing">Lék se nepodařilo najít</string>
+    <string name="msg_target_unknown_biomarker">Neznámý biomarker: %1$s</string>
+    <string name="msg_target_min_not_number">Minimum musí být číslo</string>
+    <string name="msg_target_max_not_number">Maximum musí být číslo</string>
+    <string name="msg_target_at_least_one_bound">Zadejte alespoň jednu hranici</string>
+    <string name="msg_target_min_positive">Minimum musí být větší než nula</string>
+    <string name="msg_target_max_positive">Maximum musí být větší než nula</string>
+    <string name="msg_target_min_below_max">Minimum musí být menší než maximum</string>
+    <string name="msg_target_unit_mixup">Hodnota %1$s %2$s je pro %3$s neobvyklá, ale %1$s %4$s odpovídá %5$s %2$s, což je pravděpodobné. Neměli jste na mysli %4$s?</string>
+    <string name="msg_injection_volume_missing">Injekci nelze zapsat: lahev nemá zadanou koncentraci a nebyl uveden objem. Doplňte koncentraci v mg/mL v detailu léku nebo zadejte natáhnutý objem. Z lahve nic nebylo odečteno.</string>
     <string name="msg_save_schedule_failed">Rozvrh se nepodařilo uložit</string>
     <string name="msg_uv_exposure">Dnes UV %1$s — jeden z vašich léků může zvýšit citlivost kůže na světlo. Hledejte stín a SPF 50.</string>
     <string name="settings_privacy">Soukromí</string>
@@ -850,5 +810,32 @@
     <string name="settings_update_failed">Stahování selhalo. Zkontroluj připojení a zkus to znovu.</string>
     <string name="settings_update_none">Zatím nezkontrolováno.</string>
     <string name="settings_update_checked">Zkontrolováno %1$s</string>
+
+    <!-- Lokalizované popisky z domény (dříve anglické literály v Kotlinu) -->
+    <string name="unknown_medication">Lék %1$d</string>
+    <string name="biomarker_e2">Estradiol</string>
+    <string name="biomarker_test_total">Testosteron (celkový)</string>
+    <string name="biomarker_prl">Prolaktin</string>
+    <string name="biomarker_p4">Progesteron</string>
+    <string name="biomarker_shbg">SHBG</string>
+    <string name="biomarker_lh">LH</string>
+    <string name="biomarker_fsh">FSH</string>
+    <string name="biomarker_hct">Hematokrit</string>
+    <string name="biomarker_hgb">Hemoglobin</string>
+    <string name="biomarker_alt">ALT</string>
+    <string name="biomarker_ast">AST</string>
+    <string name="biomarker_ggt">GGT</string>
+    <string name="biomarker_alp">ALP</string>
+    <string name="biomarker_bili">Bilirubin</string>
+    <string name="biomarker_crea">Kreatinin</string>
+    <string name="biomarker_glu">Glukóza</string>
+    <string name="biomarker_chol">Celkový cholesterol</string>
+    <string name="biomarker_ldl">LDL cholesterol</string>
+    <string name="biomarker_hdl">HDL cholesterol</string>
+    <string name="biomarker_tag">Triacylglyceroly</string>
+    <string name="biomarker_k">Draslík</string>
+    <string name="biomarker_na">Sodík</string>
+    <string name="biomarker_ferr">Ferritin</string>
+    <string name="biomarker_tsh">TSH</string>
 
 </resources>

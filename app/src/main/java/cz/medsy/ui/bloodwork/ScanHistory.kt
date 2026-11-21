@@ -37,7 +37,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import cz.medsy.R
+import cz.medsy.domain.message.MessageKey
 import cz.medsy.domain.model.LabImportSource
+import cz.medsy.ui.message.asText
 import cz.medsy.ui.theme.BentoSmall
 import cz.medsy.ui.theme.MedsyTheme
 import java.time.Instant
@@ -241,7 +243,7 @@ fun ScanEditDialog(
                         OutlinedTextField(
                             value = row.text,
                             onValueChange = { onValue(row.id, it) },
-                            label = { Text(row.displayName) },
+                            label = { Text(row.displayNameKey?.asText() ?: row.displayName) },
                             suffix = { Text(row.unit) },
                             isError = row.invalid,
                             singleLine = true,
@@ -366,7 +368,7 @@ private fun ScanEditPreview() {
                 timestamp = Instant.now(),
                 labName = "Fingerland",
                 fasting = true,
-                values = listOf(ScanValueDraft(1, "E2", "Estradiol", "420", "pg/mL")),
+                values = listOf(ScanValueDraft(1, "E2", "Estradiol", MessageKey.BIOMARKER_E2, "420", "pg/mL")),
             ),
             onTimestamp = {},
             onLabName = {},

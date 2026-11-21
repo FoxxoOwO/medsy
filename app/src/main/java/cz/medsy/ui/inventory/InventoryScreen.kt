@@ -35,6 +35,7 @@ import cz.medsy.domain.calc.InventoryCalculator
 import cz.medsy.domain.model.Consumable
 import cz.medsy.ui.theme.BentoMedium
 import cz.medsy.ui.theme.BentoSmall
+import cz.medsy.ui.message.asText
 import cz.medsy.ui.theme.MedsyTheme
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -127,7 +128,7 @@ fun InventoryScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = if (discreet) {
-                                cz.medsy.domain.discreet.DiscreetDisplay.MASKED_NAME
+                                stringResource(R.string.meds_detail_title)
                             } else {
                                 line.medicationName
                             },
@@ -345,9 +346,9 @@ private fun TravelPlanner(
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = if (discreet) {
-                                    cz.medsy.domain.discreet.DiscreetDisplay.MASKED_NAME
+                                    stringResource(R.string.meds_detail_title)
                                 } else {
-                                    item.medicationName
+                                    item.nameMessage?.asText() ?: item.medicationName
                                 },
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onTertiaryContainer,

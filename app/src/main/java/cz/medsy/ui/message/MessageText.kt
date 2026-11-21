@@ -81,6 +81,7 @@ internal fun MessageKey.res(): Res = when (this) {
     MessageKey.NOTIFY_LIMIT_TITLE -> Res(string = R.string.msg_notify_limit_title)
     MessageKey.NOTIFY_LIMIT_DEFAULT -> Res(string = R.string.msg_notify_limit_default)
     MessageKey.NOTIFY_LIMIT_MESSAGE -> Res(string = R.string.msg_notify_limit_message)
+    MessageKey.NOTIFY_LIMIT_DISCREET -> Res(string = R.string.msg_notify_limit_discreet)
     MessageKey.HEALTH_SYNC_DISABLED -> Res(string = R.string.msg_health_sync_disabled)
     MessageKey.HEALTH_SYNC_NOTHING -> Res(string = R.string.msg_health_sync_nothing)
     MessageKey.HEALTH_SYNC_FAILED -> Res(string = R.string.msg_health_sync_failed)
@@ -89,6 +90,15 @@ internal fun MessageKey.res(): Res = when (this) {
     MessageKey.TARGET_MIN_UNREADABLE -> Res(string = R.string.msg_target_min_unreadable)
     MessageKey.TARGET_MAX_UNREADABLE -> Res(string = R.string.msg_target_max_unreadable)
     MessageKey.SCHEDULE_MEDICATION_MISSING -> Res(string = R.string.msg_schedule_medication_missing)
+    MessageKey.TARGET_UNKNOWN_BIOMARKER -> Res(string = R.string.msg_target_unknown_biomarker)
+    MessageKey.TARGET_MIN_NOT_NUMBER -> Res(string = R.string.msg_target_min_not_number)
+    MessageKey.TARGET_MAX_NOT_NUMBER -> Res(string = R.string.msg_target_max_not_number)
+    MessageKey.TARGET_AT_LEAST_ONE_BOUND -> Res(string = R.string.msg_target_at_least_one_bound)
+    MessageKey.TARGET_MIN_POSITIVE -> Res(string = R.string.msg_target_min_positive)
+    MessageKey.TARGET_MAX_POSITIVE -> Res(string = R.string.msg_target_max_positive)
+    MessageKey.TARGET_MIN_BELOW_MAX -> Res(string = R.string.msg_target_min_below_max)
+    MessageKey.TARGET_UNIT_MIXUP -> Res(string = R.string.msg_target_unit_mixup)
+    MessageKey.INJECTION_VOLUME_MISSING -> Res(string = R.string.msg_injection_volume_missing)
     MessageKey.UV_EXPOSURE -> Res(string = R.string.msg_uv_exposure)
     MessageKey.UV_EXPOSURE_ONE -> Res(string = R.string.msg_uv_exposure_one)
     MessageKey.UV_EXPOSURE_TWO -> Res(string = R.string.msg_uv_exposure_two)
@@ -173,6 +183,7 @@ internal fun MessageKey.res(): Res = when (this) {
     MessageKey.CONSUMABLE_INJECTION_NEEDLES -> Res(string = R.string.consumable_injection_needles)
     MessageKey.CONSUMABLE_ALCOHOL_SWABS -> Res(string = R.string.consumable_alcohol_swabs)
     MessageKey.BATCH_CHOOSE_MEDICATION -> Res(string = R.string.batch_choose_medication)
+    MessageKey.BATCH_EXPIRY_FORMAT -> Res(string = R.string.batch_expiry_error)
     MessageKey.BATCH_QUANTITY_POSITIVE -> Res(string = R.string.batch_quantity_positive)
     MessageKey.BATCH_UNIT_REQUIRED -> Res(string = R.string.batch_unit_required)
     MessageKey.BATCH_THRESHOLD_NEGATIVE -> Res(string = R.string.batch_threshold_negative)
@@ -268,6 +279,32 @@ internal fun MessageKey.res(): Res = when (this) {
     MessageKey.BODYMAP_A11Y -> Res(string = R.string.bodymap_a11y)
     MessageKey.LAB_SCAN_CAMERA_UNAVAILABLE -> Res(string = R.string.lab_scan_camera_unavailable)
     MessageKey.LAB_SCAN_CAPTURE_FAILED -> Res(string = R.string.lab_scan_capture_failed)
+    MessageKey.DISCREET_MEDICATION -> Res(string = R.string.meds_detail_title)
+    MessageKey.UNKNOWN_MEDICATION -> Res(string = R.string.unknown_medication)
+    MessageKey.BIOMARKER_E2 -> Res(string = R.string.biomarker_e2)
+    MessageKey.BIOMARKER_TEST_TOTAL -> Res(string = R.string.biomarker_test_total)
+    MessageKey.BIOMARKER_PRL -> Res(string = R.string.biomarker_prl)
+    MessageKey.BIOMARKER_P4 -> Res(string = R.string.biomarker_p4)
+    MessageKey.BIOMARKER_SHBG -> Res(string = R.string.biomarker_shbg)
+    MessageKey.BIOMARKER_LH -> Res(string = R.string.biomarker_lh)
+    MessageKey.BIOMARKER_FSH -> Res(string = R.string.biomarker_fsh)
+    MessageKey.BIOMARKER_HCT -> Res(string = R.string.biomarker_hct)
+    MessageKey.BIOMARKER_HGB -> Res(string = R.string.biomarker_hgb)
+    MessageKey.BIOMARKER_ALT -> Res(string = R.string.biomarker_alt)
+    MessageKey.BIOMARKER_AST -> Res(string = R.string.biomarker_ast)
+    MessageKey.BIOMARKER_GGT -> Res(string = R.string.biomarker_ggt)
+    MessageKey.BIOMARKER_ALP -> Res(string = R.string.biomarker_alp)
+    MessageKey.BIOMARKER_BILI -> Res(string = R.string.biomarker_bili)
+    MessageKey.BIOMARKER_CREA -> Res(string = R.string.biomarker_crea)
+    MessageKey.BIOMARKER_GLU -> Res(string = R.string.biomarker_glu)
+    MessageKey.BIOMARKER_CHOL -> Res(string = R.string.biomarker_chol)
+    MessageKey.BIOMARKER_LDL -> Res(string = R.string.biomarker_ldl)
+    MessageKey.BIOMARKER_HDL -> Res(string = R.string.biomarker_hdl)
+    MessageKey.BIOMARKER_TAG -> Res(string = R.string.biomarker_tag)
+    MessageKey.BIOMARKER_K -> Res(string = R.string.biomarker_k)
+    MessageKey.BIOMARKER_NA -> Res(string = R.string.biomarker_na)
+    MessageKey.BIOMARKER_FERR -> Res(string = R.string.biomarker_ferr)
+    MessageKey.BIOMARKER_TSH -> Res(string = R.string.biomarker_tsh)
 }
 
 /** Renders the message in a composable, recursively for nested arguments. */
@@ -306,3 +343,10 @@ fun Message.asText(context: Context): String {
         context.getString(res.string, *rendered.toTypedArray())
     }
 }
+
+/** Shortcut for resource-backed labels that carry no arguments. */
+@Composable
+fun MessageKey.asText(): String = Message(this).asText()
+
+/** Same shortcut outside composition: PDF export, workers, dialogs built in Kotlin. */
+fun MessageKey.asText(context: Context): String = Message(this).asText(context)

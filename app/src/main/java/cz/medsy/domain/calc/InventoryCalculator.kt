@@ -197,6 +197,11 @@ object InventoryCalculator {
         val available: BigDecimal,
         val shortfall: BigDecimal,
         val suggestion: Message,
+        /**
+         * Set only when the medication has no name in the catalogue: the fallback label is a
+         * resource-backed [Message] so a Czech phone reads "Lék 12", never "Medication 12".
+         */
+        val nameMessage: Message? = null,
     )
 
     data class TravelConsumable(
@@ -248,14 +253,16 @@ object InventoryCalculator {
                     units[medicationId].orEmpty(),
                 )
             }
+            val name = names[medicationId]
             TravelItem(
                 medicationId = medicationId,
-                medicationName = names[medicationId] ?: "Medication $medicationId",
+                medicationName = name.orEmpty(),
                 unit = units[medicationId].orEmpty(),
                 required = required,
                 available = available,
                 shortfall = shortfall,
                 suggestion = suggestion,
+                nameMessage = if (name == null) message(MessageKey.UNKNOWN_MEDICATION, medicationId) else null,
             )
         }
         val injections = injectionCount(

@@ -13,9 +13,6 @@ import cz.medsy.domain.model.Medication
  */
 object DiscreetDisplay {
 
-    /** Shown instead of the medication name when the row must be anonymised. */
-    const val MASKED_NAME = "Medication"
-
     data class Row(
         val name: String,
         val detail: String,
@@ -24,7 +21,11 @@ object DiscreetDisplay {
         val nameMasked: Boolean,
     )
 
-    fun row(medication: Medication, discreet: Boolean): Row {
+    /**
+     * @param maskedName the localised anonymous label, supplied by the UI. The domain cannot
+     *   read resources, and the label must follow the phone's language just like any other copy.
+     */
+    fun row(medication: Medication, discreet: Boolean, maskedName: String): Row {
         val detail = listOfNotNull(
             medication.displayStrength,
             if (discreet) null else medication.activeSubstance,
@@ -33,7 +34,7 @@ object DiscreetDisplay {
 
         return if (discreet) {
             Row(
-                name = MASKED_NAME,
+                name = maskedName,
                 detail = detail,
                 showHrtBadge = false,
                 nameMasked = true,

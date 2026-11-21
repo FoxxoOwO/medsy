@@ -15,6 +15,9 @@ import java.math.BigDecimal
  */
 class DiscreetDisplayTest {
 
+    /** The real label comes from resources; tests only need a stable stand-in. */
+    private val MASKED_NAME = "Medication"
+
     private fun esradiol() = Medication(
         id = 1,
         name = "Estradiol Enanthate",
@@ -41,24 +44,24 @@ class DiscreetDisplayTest {
 
     @Test
     fun `without discreet mode the real name is shown`() {
-        val row = DiscreetDisplay.row(esradiol(), discreet = false)
+        val row = DiscreetDisplay.row(esradiol(), discreet = false, MASKED_NAME)
         assertEquals("Estradiol Enanthate", row.name)
         assertFalse(row.nameMasked)
     }
 
     @Test
     fun `without discreet mode an HRT medication shows its badge`() {
-        assertTrue(DiscreetDisplay.row(esradiol(), discreet = false).showHrtBadge)
+        assertTrue(DiscreetDisplay.row(esradiol(), discreet = false, MASKED_NAME).showHrtBadge)
     }
 
     @Test
     fun `without discreet mode a non HRT medication shows no badge`() {
-        assertFalse(DiscreetDisplay.row(paracetamol(), discreet = false).showHrtBadge)
+        assertFalse(DiscreetDisplay.row(paracetamol(), discreet = false, MASKED_NAME).showHrtBadge)
     }
 
     @Test
     fun `without discreet mode the substance and ATC are shown`() {
-        val detail = DiscreetDisplay.row(esradiol(), discreet = false).detail
+        val detail = DiscreetDisplay.row(esradiol(), discreet = false, MASKED_NAME).detail
         assertTrue(detail, detail.contains("Estradiolum enanthicum"))
         assertTrue(detail, detail.contains("G03CA03"))
     }
@@ -67,25 +70,25 @@ class DiscreetDisplayTest {
 
     @Test
     fun `discreet mode hides the HRT badge`() {
-        assertFalse(DiscreetDisplay.row(esradiol(), discreet = true).showHrtBadge)
+        assertFalse(DiscreetDisplay.row(esradiol(), discreet = true, MASKED_NAME).showHrtBadge)
     }
 
     @Test
     fun `discreet mode masks the medication name`() {
-        val row = DiscreetDisplay.row(esradiol(), discreet = true)
-        assertEquals(DiscreetDisplay.MASKED_NAME, row.name)
+        val row = DiscreetDisplay.row(esradiol(), discreet = true, MASKED_NAME)
+        assertEquals(MASKED_NAME, row.name)
         assertTrue(row.nameMasked)
     }
 
     @Test
     fun `discreet mode hides the active substance`() {
-        val detail = DiscreetDisplay.row(esradiol(), discreet = true).detail
+        val detail = DiscreetDisplay.row(esradiol(), discreet = true, MASKED_NAME).detail
         assertFalse("substance would reveal the diagnosis: $detail", detail.contains("Estradiol", ignoreCase = true))
     }
 
     @Test
     fun `discreet mode hides the ATC code`() {
-        val detail = DiscreetDisplay.row(esradiol(), discreet = true).detail
+        val detail = DiscreetDisplay.row(esradiol(), discreet = true, MASKED_NAME).detail
         assertFalse("ATC G03CA is an oestrogen: $detail", detail.contains("G03CA"))
         assertFalse(detail.contains("ATC", ignoreCase = true))
     }
@@ -93,7 +96,7 @@ class DiscreetDisplayTest {
     @Test
     fun `discreet mode never leaks the real name for any medication`() {
         listOf(esradiol(), paracetamol()).forEach { medication ->
-            val row = DiscreetDisplay.row(medication, discreet = true)
+            val row = DiscreetDisplay.row(medication, discreet = true, MASKED_NAME)
             assertFalse(row.name.contains(medication.name))
         }
     }
@@ -102,20 +105,20 @@ class DiscreetDisplayTest {
 
     @Test
     fun `discreet mode still shows the strength`() {
-        val detail = DiscreetDisplay.row(esradiol(), discreet = true).detail
+        val detail = DiscreetDisplay.row(esradiol(), discreet = true, MASKED_NAME).detail
         assertTrue("strength must stay visible: $detail", detail.contains("5 mg"))
     }
 
     @Test
     fun `discreet mode leaves an empty detail when there is nothing safe to show`() {
         val bare = Medication(id = 3, name = "Something", form = MedicationForm.TABLET)
-        assertEquals("", DiscreetDisplay.row(bare, discreet = true).detail)
+        assertEquals("", DiscreetDisplay.row(bare, discreet = true, MASKED_NAME).detail)
     }
 
     @Test
     fun `masked rows share one label so the list cannot be told apart by name`() {
-        val first = DiscreetDisplay.row(esradiol(), discreet = true)
-        val second = DiscreetDisplay.row(paracetamol(), discreet = true)
+        val first = DiscreetDisplay.row(esradiol(), discreet = true, MASKED_NAME)
+        val second = DiscreetDisplay.row(paracetamol(), discreet = true, MASKED_NAME)
         assertEquals(first.name, second.name)
     }
 }

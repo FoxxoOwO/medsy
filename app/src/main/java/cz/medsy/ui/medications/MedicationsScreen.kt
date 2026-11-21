@@ -186,7 +186,11 @@ private fun MedicationCard(
                 size = 46.dp,
             )
             Spacer(Modifier.width(14.dp))
-            val display = cz.medsy.domain.discreet.DiscreetDisplay.row(medication, discreet)
+            val display = cz.medsy.domain.discreet.DiscreetDisplay.row(
+                medication,
+                discreet,
+                stringResource(cz.medsy.R.string.meds_detail_title),
+            )
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(

@@ -1,5 +1,8 @@
 package cz.medsy.domain.calc
 
+import cz.medsy.domain.message.Message
+import cz.medsy.domain.message.MessageArg
+import cz.medsy.domain.message.MessageKey
 import cz.medsy.domain.model.ProfileType
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -16,7 +19,7 @@ class CustomTargetValidatorTest {
     private fun validate(min: String, max: String, code: String = "E2") =
         CustomTargetValidator.validate(code, min, max)
 
-    private fun errorsOf(min: String, max: String, code: String = "E2"): List<String> {
+    private fun errorsOf(min: String, max: String, code: String = "E2"): List<Message> {
         val result = validate(min, max, code)
         assertTrue("expected rejection of $min–$max", result is CustomTargetValidator.Result.Invalid)
         return (result as CustomTargetValidator.Result.Invalid).errors
@@ -67,17 +70,17 @@ class CustomTargetValidatorTest {
 
     @Test
     fun `empty input is rejected`() {
-        assertTrue(errorsOf("", "").any { it.contains("at least one") })
+        assertTrue(errorsOf("", "").any { it.key == MessageKey.TARGET_AT_LEAST_ONE_BOUND })
     }
 
     @Test
     fun `inverted bounds are rejected`() {
-        assertTrue(errorsOf("600", "400").any { it.contains("lower than maximum") })
+        assertTrue(errorsOf("600", "400").any { it.key == MessageKey.TARGET_MIN_BELOW_MAX })
     }
 
     @Test
     fun `equal bounds are rejected`() {
-        assertTrue(errorsOf("500", "500").any { it.contains("lower than maximum") })
+        assertTrue(errorsOf("500", "500").any { it.key == MessageKey.TARGET_MIN_BELOW_MAX })
     }
 
     @Test
@@ -92,7 +95,7 @@ class CustomTargetValidatorTest {
 
     @Test
     fun `non numeric input is rejected`() {
-        assertTrue(errorsOf("abc", "100").any { it.contains("number") })
+        assertTrue(errorsOf("abc", "100").any { it.key == MessageKey.TARGET_MIN_NOT_NUMBER })
     }
 
     @Test
@@ -108,7 +111,10 @@ class CustomTargetValidatorTest {
         val result = validOf("100", "200")
         assertTrue(
             "a 3.7x-low window should warn: ${result.warnings}",
-            result.warnings.any { it.contains("pg/mL") || it.contains("unusual") },
+            result.warnings.any { warning ->
+                warning.key == MessageKey.TARGET_UNIT_MIXUP &&
+                    warning.args.any { it is MessageArg.Text && it.value == "pg/mL" }
+            },
         )
     }
 
@@ -116,7 +122,7 @@ class CustomTargetValidatorTest {
     fun `typing ng per dl for testosterone is flagged`() {
         // 300–1000 ng/dL stored as nmol/L would be ~30x too high.
         val result = validOf("300", "1000", code = "TEST_TOTAL")
-        assertTrue(result.warnings.any { it.contains("unusual") })
+        assertTrue(result.warnings.any { it.key == MessageKey.TARGET_UNIT_MIXUP })
     }
 
     @Test

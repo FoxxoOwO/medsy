@@ -260,7 +260,11 @@ private fun SectionTitle(text: String) {
 @Composable
 private fun SummaryCard(medication: Medication) {
     val discreet = LocalDiscreetMode.current
-    val display = cz.medsy.domain.discreet.DiscreetDisplay.row(medication, discreet)
+    val display = cz.medsy.domain.discreet.DiscreetDisplay.row(
+        medication,
+        discreet,
+        stringResource(cz.medsy.R.string.meds_detail_title),
+    )
     Surface(shape = BentoMedium, color = MaterialTheme.colorScheme.surfaceContainerLow, modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(18.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {

@@ -1,5 +1,8 @@
 package cz.medsy.domain.calc
 
+import cz.medsy.domain.message.Message
+import cz.medsy.domain.message.MessageKey
+import cz.medsy.domain.message.message
 import cz.medsy.domain.model.ProfileType
 import cz.medsy.domain.model.ReferenceRangeProfile
 import java.math.BigDecimal
@@ -17,10 +20,10 @@ object CustomTargetValidator {
     sealed interface Result {
         data class Valid(
             val range: ReferenceRangeProfile,
-            val warnings: List<String>,
+            val warnings: List<Message>,
         ) : Result
 
-        data class Invalid(val errors: List<String>) : Result
+        data class Invalid(val errors: List<Message>) : Result
     }
 
     /**
@@ -36,30 +39,30 @@ object CustomTargetValidator {
         knownRanges: List<ReferenceRangeProfile> = ReferenceRanges.defaults,
     ): Result {
         val spec = Biomarkers.find(code)
-            ?: return Result.Invalid(listOf("Unknown biomarker '$code'"))
+            ?: return Result.Invalid(listOf(message(MessageKey.TARGET_UNKNOWN_BIOMARKER, code)))
 
         val min = minText.trim().takeIf { it.isNotEmpty() }?.let(::parseAmount)
         val max = maxText.trim().takeIf { it.isNotEmpty() }?.let(::parseAmount)
 
         if (minText.isNotBlank() && min == null) {
-            return Result.Invalid(listOf("Minimum must be a number"))
+            return Result.Invalid(listOf(message(MessageKey.TARGET_MIN_NOT_NUMBER)))
         }
         if (maxText.isNotBlank() && max == null) {
-            return Result.Invalid(listOf("Maximum must be a number"))
+            return Result.Invalid(listOf(message(MessageKey.TARGET_MAX_NOT_NUMBER)))
         }
         if (min == null && max == null) {
-            return Result.Invalid(listOf("Enter at least one bound"))
+            return Result.Invalid(listOf(message(MessageKey.TARGET_AT_LEAST_ONE_BOUND)))
         }
 
-        val errors = ArrayList<String>()
-        if (min != null && min.signum() <= 0) errors += "Minimum must be greater than zero"
-        if (max != null && max.signum() <= 0) errors += "Maximum must be greater than zero"
+        val errors = ArrayList<Message>()
+        if (min != null && min.signum() <= 0) errors += message(MessageKey.TARGET_MIN_POSITIVE)
+        if (max != null && max.signum() <= 0) errors += message(MessageKey.TARGET_MAX_POSITIVE)
         if (min != null && max != null && min >= max) {
-            errors += "Minimum must be lower than maximum"
+            errors += message(MessageKey.TARGET_MIN_BELOW_MAX)
         }
         if (errors.isNotEmpty()) return Result.Invalid(errors)
 
-        val warnings = ArrayList<String>()
+        val warnings = ArrayList<Message>()
         val envelope = envelopeFor(code, knownRanges)
         if (envelope != null) {
             listOfNotNull(min, max).forEach { value ->
@@ -104,11 +107,6 @@ object CustomTargetValidator {
 
     /**
      * Warns only when the number is *outside* the plausible envelope as SI but *inside*
-     * it once interpreted in the conventional unit. That is the signature of a unit
-     * mix-up, and it avoids nagging about an unusual but genuine target.
-     */
-    /**
-     * Warns only when the number is *outside* the plausible envelope as SI but *inside*
      * it once read in the conventional unit — the signature of a unit mix-up. The typed
      * number is therefore interpreted as the conventional unit and converted to SI
      * before comparing; doing it the other way round compares the wrong quantity.
@@ -119,14 +117,20 @@ object CustomTargetValidator {
         envelope: Pair<BigDecimal, BigDecimal>,
         knownRanges: List<ReferenceRangeProfile>,
         code: String,
-    ): String? {
+    ): Message? {
         val conventional = spec.conventionalUnit ?: return null
         val asSi = runCatching { UnitConverter.convert(spec, value, conventional) }.getOrNull()
             ?: return null
         val insideEnvelope = asSi >= envelope.first && asSi <= envelope.second
         if (!insideEnvelope) return null
-        return "Value $value ${spec.siUnit} is unusual for $code, but $value $conventional " +
-            "equals $asSi ${spec.siUnit}, which is plausible. Did you mean $conventional?"
+        return message(
+            MessageKey.TARGET_UNIT_MIXUP,
+            value,
+            spec.siUnit,
+            code,
+            conventional,
+            asSi,
+        )
     }
 
     /** Converts a user-typed value from a conventional unit into SI, for the unit picker. */
