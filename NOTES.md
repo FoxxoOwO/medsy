@@ -7,7 +7,8 @@ Offline-first Android medication / HRT / bloodwork tracker. Package `cz.medsy`.
 | Check | Result |
 |---|---|
 | `:app:assembleDebug` | **BUILD SUCCESSFUL**, `app/build/outputs/apk/debug/app-debug.apk` (~112 MB, debug) |
-| `:app:testDebugUnitTest` | **BUILD SUCCESSFUL**, **541 tests, 0 failed, 0 skipped** |
+| `:app:testDebugUnitTest` | **BUILD SUCCESSFUL**, **912 tests, 0 failed, 0 skipped** |
+| `:app:lintDebug` | **BUILD SUCCESSFUL**, 0 errors (warnings only) |
 | SQLCipher natives | `lib/{arm64-v8a,armeabi-v7a,x86,x86_64}/libsqlcipher.so` are packaged |
 | Room schema export | `app/schemas/` written via KSP |
 
@@ -998,7 +999,7 @@ while the app stays closed for two days is only reported on the next launch.
   `dashboard_adherence`, `nav_bloodwork`, `medications_title`, `nav_settings`, `meds_scan`.
   `values-cs` now has 250 keys.
 
-Tests: `StringsParityTest` (5) — key parity, placeholders identical in both languages,
+Tests: `StringsParityTest` (6) — key parity, placeholders identical in both languages,
 extracted keys really exist, every `<plurals>` translated with the same placeholders and an
 `other` form; `HardcodedStringTest` (6) — scans `ui/**/*.kt` outside `@Preview` for
 `Text("…")`, `text = "…"`, `else "…"` **and** `contentDescription = "…"`, flags templates that
@@ -1791,7 +1792,7 @@ Two things deliberately not done:
   covers 32-bit phones that cannot install a 64-bit-only package.
 
 Verified: `assembleRelease` green (2m 1s, `lintVitalRelease` clean), the APK contains no `lib/x86*`
-entries, `testDebugUnitTest` 863 tests / 0 failures, and `assembleDebug` is unchanged.
+entries, `testDebugUnitTest` 912 tests / 0 failures, and `assembleDebug` is unchanged.
 
 Cost: a release APK can no longer be installed on an x86 emulator. That is the trade this change
 makes, and it is why the filter lives in the build type rather than in `defaultConfig`.

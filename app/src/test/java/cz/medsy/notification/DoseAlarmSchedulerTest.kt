@@ -20,6 +20,9 @@ import java.time.LocalTime
 import java.time.ZoneId
 
 @RunWith(RobolectricTestRunner::class)
+// Robolectric's shadow still exposes the trigger/operation fields only through deprecated
+// members; the replacement getters are not available in the pinned Robolectric version.
+@Suppress("DEPRECATION")
 class DoseAlarmSchedulerTest {
 
     private lateinit var context: Context

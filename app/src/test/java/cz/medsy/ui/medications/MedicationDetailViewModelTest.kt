@@ -190,7 +190,9 @@ class MedicationDetailViewModelTest {
         repository.getById(medicationId)!!.let { row ->
             viewModel.save(row, MedicationEdit.of(row).copy(atcCode = ""))
         }
-        viewModel.state.first { it.medication?.atcCode == null }
+        // The side-effect profile is derived in a separate flow; waiting only for the
+        // cleared ATC code left a race in which the old card was still present here.
+        viewModel.state.first { it.medication?.atcCode == null && it.sideEffects == null }
 
         assertNull(state().sideEffects)
     }

@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   build:
-    name: Unit tests & debug build
+    name: Unit tests, lint & debug build
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -44,6 +44,9 @@ jobs:
 
       - name: Unit tests
         run: ./gradlew :app:testDebugUnitTest
+
+      - name: Android lint (0 errors, regressions must not slip in)
+        run: ./gradlew :app:lintDebug
 
       - name: Assemble debug APK
         run: ./gradlew :app:assembleDebug
