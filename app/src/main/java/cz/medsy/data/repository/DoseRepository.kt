@@ -11,6 +11,9 @@ import cz.medsy.data.mapper.toEntity
 import cz.medsy.domain.calc.AdherenceCalculator
 import cz.medsy.domain.schedule.ScheduleEngine
 import cz.medsy.domain.calc.VialCalculator
+import cz.medsy.domain.message.Message
+import cz.medsy.domain.message.MessageKey
+import cz.medsy.domain.message.message
 import cz.medsy.domain.model.AdherenceSummary
 import cz.medsy.domain.model.ApplicationSite
 import cz.medsy.domain.model.DoseLog
@@ -150,6 +153,15 @@ class PrnLimitExceeded(val decision: cz.medsy.domain.calc.PrnLimit.Decision.Woul
         cz.medsy.domain.calc.PrnLimit.describe(decision)
 }
 
+/**
+ * Thrown when an injectable has neither an explicit volume nor a concentration to derive
+ * one from. Deducting the mg dose as if it were mL is a 50x inventory error, so nothing is
+ * written at all; the caller shows [userMessage] and asks the patient to fix the data.
+ */
+class InjectionVolumeMissing : IllegalStateException("Injectable dose has no derivable volume") {
+    val userMessage: Message = message(MessageKey.INJECTION_VOLUME_MISSING)
+}
+
 @Singleton
 class DoseRepository @Inject constructor(
     private val doseLogDao: DoseLogDao,
@@ -223,6 +235,18 @@ class DoseRepository @Inject constructor(
             status == DoseStatus.TAKEN || status == DoseStatus.LATE ->
                 deriveVolumeMl(medication?.toDomain(), effectiveDose)
             else -> null
+        }
+
+        // Refuse before any write only when a vial can actually be deducted: without a
+        // volume, applyInventory would subtract the dose in mg from a vial measured in mL
+        // (5 instead of 0.10 mL). Logging an injection the user does not track in inventory
+        // stays possible.
+        if (form != null && form.isInjectable &&
+            (status == DoseStatus.TAKEN || status == DoseStatus.LATE) &&
+            effectiveVolume == null &&
+            inventoryDao.dispensibleBatches(occurrence.medicationId).isNotEmpty()
+        ) {
+            throw InjectionVolumeMissing()
         }
 
         // A patch is a state, not an event: only an actually applied one enters the
@@ -312,14 +336,18 @@ class DoseRepository @Inject constructor(
         val puncturedEpochDay = LocalDate.now().toEpochDay()
         when {
             form != null && form.isInjectable -> {
-                val volume = volumeMl ?: dose
-                val batches = inventoryDao.dispensibleBatches(medicationId)
-                val deadSpace = batches.firstOrNull { it.firstPuncturedDateEpochDay != null }
-                    ?.deadSpaceMlPerDose
-                    ?: batches.firstOrNull()?.deadSpaceMlPerDose
-                    ?: 0.0
-                val deduct = volume.add(BigDecimal.valueOf(deadSpace)).toDouble()
-                inventoryDao.deduct(medicationId, deduct, puncturedEpochDay)
+                // Never substitute `dose` (mg) for mL. A vial without a derivable volume is
+                // refused in log(); when there is no vial at all there is nothing to deduct.
+                val volume = volumeMl
+                if (volume != null) {
+                    val batches = inventoryDao.dispensibleBatches(medicationId)
+                    val deadSpace = batches.firstOrNull { it.firstPuncturedDateEpochDay != null }
+                        ?.deadSpaceMlPerDose
+                        ?: batches.firstOrNull()?.deadSpaceMlPerDose
+                        ?: 0.0
+                    val deduct = volume.add(BigDecimal.valueOf(deadSpace)).toDouble()
+                    inventoryDao.deduct(medicationId, deduct, puncturedEpochDay)
+                }
                 deductConsumables(medicationId)
             }
             // Gels and sprays are counted in actuations: a two-pump dose must remove two

@@ -4,6 +4,7 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import cz.medsy.data.local.MedsyDatabase
 import cz.medsy.data.repository.DoseRepository
+import cz.medsy.data.repository.InjectionVolumeMissing
 import cz.medsy.data.repository.MedicationRepository
 import cz.medsy.domain.model.ApplicationSite
 import cz.medsy.domain.model.DoseStatus
@@ -13,6 +14,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -53,14 +55,17 @@ class DoseLoggingTest {
     @After
     fun tearDown() = db.close()
 
-    private suspend fun seedInjectable(withVial: Boolean = true): Pair<Long, Long> {
+    private suspend fun seedInjectable(
+        withVial: Boolean = true,
+        concentration: Double? = 50.0,
+    ): Pair<Long, Long> {
         val medicationId = db.medicationDao().insert(
             cz.medsy.data.local.entity.MedicationEntity(
                 name = "Estradiol Enanthate",
                 form = MedicationForm.INJECTION_IM.name,
                 strengthValue = 5.0,
                 strengthUnit = "mg",
-                concentrationMgPerMl = 50.0,
+                concentrationMgPerMl = concentration,
                 isHrt = true,
             ),
         )
@@ -109,6 +114,20 @@ class DoseLoggingTest {
         val batch = db.inventoryDao().dispensibleBatches(medicationId).single()
         // 5 mg at 50 mg/mL = 0.10 mL + 0.05 mL dead space = 0.15 mL
         assertEquals(1.85, batch.remainingQuantity, 0.0001)
+    }
+
+    @Test
+    fun `injection without concentration is refused instead of deducting mg as mL`() = runTest {
+        val (medicationId, scheduleId) = seedInjectable(concentration = null)
+
+        val error = runCatching {
+            doseRepository.log(occurrence(medicationId, scheduleId), DoseStatus.TAKEN)
+        }.exceptionOrNull()
+
+        assertTrue(error is InjectionVolumeMissing)
+        // No volume could be derived, so the vial must not be touched at all.
+        val batch = db.inventoryDao().dispensibleBatches(medicationId).single()
+        assertEquals(2.0, batch.remainingQuantity, 0.0001)
     }
 
     @Test
