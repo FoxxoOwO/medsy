@@ -2,6 +2,8 @@ package cz.medsy.data.update
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
 import androidx.core.content.FileProvider
@@ -11,6 +13,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
+import java.security.MessageDigest
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -38,6 +41,13 @@ class ApkInstaller @Inject constructor(
 
     suspend fun downloadAndInstall(url: String): Result {
         val file = withContext(Dispatchers.IO) { download(url) } ?: return Result.Failed
+        // A URL allowlist alone is not enough: verify that the bytes are really signed by
+        // the same key as the installed app and carry the same package name. Otherwise a
+        // compromised release asset could install a different app after one tap.
+        if (!hasOwnSignature(file)) {
+            file.delete()
+            return Result.Failed
+        }
         if (!context.packageManager.canRequestPackageInstalls()) {
             askForInstallPermission()
             return Result.AskedForPermission
@@ -65,7 +75,24 @@ class ApkInstaller @Inject constructor(
         }
     }
 
-    /** Replaces the previous download: the cache is not a place to collect APKs. */
+    /**
+     * The APK must be the same app, signed with the very same certificate. Android would
+     * refuse to *replace* this install with a different signature, but a foreign package
+     * name would happily install as a new app — so both are checked here.
+     */
+    private fun hasOwnSignature(file: File): Boolean {
+        val manager = context.packageManager
+        val archive = manager.getPackageArchiveInfo(file.path, PackageManager.GET_SIGNATURES)
+            ?: return false
+        val installed = runCatching {
+            manager.getPackageInfo(context.packageName, PackageManager.GET_SIGNATURES)
+        }.getOrNull()
+        return signaturesMatch(installed, archive)
+    }
+
+    /**
+     * Replaces the previous download: the cache is not a place to collect APKs.
+     */
     private fun download(url: String): File? = runCatching {
         val dir = File(context.cacheDir, "updates").apply { mkdirs() }
         val target = File(dir, "medsy-update.apk")
@@ -95,4 +122,20 @@ class ApkInstaller @Inject constructor(
         const val APK_MIME = "application/vnd.android.package-archive"
         const val AUTHORITY_SUFFIX = "updates"
     }
+}
+
+/**
+ * The APK must be the same app, signed with the very same certificate. Android would refuse
+ * to *replace* this install with a different signature, but a foreign package name would
+ * happily install as a new app — so both are checked. Kept top-level so the decision is
+ * testable without a real PackageManager.
+ */
+@Suppress("DEPRECATION")
+internal fun signaturesMatch(own: PackageInfo?, archive: PackageInfo?): Boolean {
+    if (own == null || archive == null) return false
+    if (archive.packageName != own.packageName) return false
+    val expected = own.signatures?.firstOrNull()?.toByteArray() ?: return false
+    val actual = archive.signatures?.firstOrNull()?.toByteArray() ?: return false
+    return MessageDigest.getInstance("SHA-256").digest(expected)
+        .contentEquals(MessageDigest.getInstance("SHA-256").digest(actual))
 }

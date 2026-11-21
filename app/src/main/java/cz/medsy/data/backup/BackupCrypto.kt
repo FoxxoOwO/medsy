@@ -34,6 +34,9 @@ object BackupCrypto {
     private const val KDF = "PBKDF2WithHmacSHA256"
     private const val CIPHER = "AES/GCM/NoPadding"
     private const val ITERATIONS = 120_000
+    /** Bounds for the count read from an imported file: a hostile value must not peg the CPU. */
+    private const val MIN_ITERATIONS = 100_000
+    private const val MAX_ITERATIONS = 1_000_000
     private const val KEY_BITS = 256
     private const val SALT_BYTES = 16
     private const val IV_BYTES = 12
@@ -82,7 +85,11 @@ object BackupCrypto {
             throw BackupException(MessageKey.BACKUP_UNREADABLE)
         }
         val decoder = Base64.getDecoder()
-        val iterations = root["iterations"]?.jsonPrimitive?.contentOrNull?.toIntOrNull() ?: ITERATIONS
+        val iterations = when (val parsed = root["iterations"]?.jsonPrimitive?.contentOrNull?.toIntOrNull()) {
+            null -> ITERATIONS
+            in MIN_ITERATIONS..MAX_ITERATIONS -> parsed
+            else -> throw BackupException(MessageKey.BACKUP_UNREADABLE)
+        }
         val salt = root.stringOrThrow("salt", decoder)
         val iv = root.stringOrThrow("iv", decoder)
         val data = root.stringOrThrow("data", decoder)

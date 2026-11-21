@@ -1,6 +1,5 @@
 package cz.medsy.notification
 
-import android.app.AlarmManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -126,6 +125,7 @@ class DoseActionReceiver : BroadcastReceiver() {
 
     @Inject lateinit var actionHandler: DoseActionHandler
     @Inject lateinit var notifier: DoseNotifier
+    @Inject lateinit var settingsRepository: SettingsRepository
 
     override fun onReceive(context: Context, intent: Intent) {
         val medicationId = intent.getLongExtra(DoseAlarmReceiver.EXTRA_MEDICATION_ID, -1L)
@@ -157,7 +157,8 @@ class DoseActionReceiver : BroadcastReceiver() {
                 // A PRN ceiling refused the dose: the notification is still there, so the
                 // user needs to be told why the button appeared to do nothing.
                 if (result is DoseActionHandler.Result.LimitBlocked) {
-                    notifier.notifyLimitBlocked(scheduleId, result.message)
+                    val discreet = settingsRepository.settings.first().discreetMode
+                    notifier.notifyLimitBlocked(scheduleId, result.message, discreet)
                 }
             } finally {
                 pendingResult.finish()
@@ -239,12 +240,17 @@ class BootCompletedReceiver : BroadcastReceiver() {
     }
 
     private companion object {
+        // The platform constant is API 31; inlining it would trip lint at minSdk 26 and is
+        // unnecessary — the broadcast action string is a stable contract.
+        const val ACTION_EXACT_ALARM_PERMISSION_CHANGED =
+            "android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED"
+
         val HANDLED_ACTIONS = setOf(
             Intent.ACTION_BOOT_COMPLETED,
             Intent.ACTION_MY_PACKAGE_REPLACED,
             Intent.ACTION_TIMEZONE_CHANGED,
             Intent.ACTION_TIME_CHANGED,
-            AlarmManager.ACTION_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED,
+            ACTION_EXACT_ALARM_PERMISSION_CHANGED,
         )
     }
 }

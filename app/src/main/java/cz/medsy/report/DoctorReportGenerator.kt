@@ -16,7 +16,9 @@ import cz.medsy.domain.model.BiomarkerValue
 import cz.medsy.domain.model.BloodTestSession
 import cz.medsy.domain.model.Medication
 import cz.medsy.domain.model.ProfileType
+import cz.medsy.domain.message.Message
 import cz.medsy.domain.model.Schedule
+import cz.medsy.ui.message.asText
 import dagger.hilt.android.qualifiers.ApplicationContext
 import android.content.Context
 import kotlinx.coroutines.Dispatchers
@@ -24,6 +26,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
+import java.text.Normalizer
 import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
@@ -115,7 +118,10 @@ class DoctorReportGenerator @Inject constructor(
             drawFooter(canvas, cursor)
 
             document.finishPage(page)
-            val file = File(context.cacheDir, "medsy-doctor-report-${now.toEpochMilli()}.pdf")
+            // Dedicated subdirectory so the FileProvider can expose only reports, never
+            // arbitrary cache files (including the downloaded update APK).
+            val dir = File(context.cacheDir, "reports").apply { mkdirs() }
+            val file = File(dir, "medsy-doctor-report-${now.toEpochMilli()}.pdf")
             FileOutputStream(file).use(document::writeTo)
             val pages = document.pages.size
             document.close()
@@ -268,7 +274,7 @@ class DoctorReportGenerator @Inject constructor(
         val span = (max - min).takeIf { it > 0.0 } ?: 1.0
 
         canvas.drawText(
-            context.getString(R.string.report_trend, spec.displayName),
+            context.getString(R.string.report_trend, spec.displayNameKey.asText(context).ascii()),
             margin,
             chartTop - 8f,
             sectionPaint,
@@ -321,6 +327,10 @@ class DoctorReportGenerator @Inject constructor(
     private fun formatNumber(value: Double): String =
         if (value >= 100) value.toInt().toString()
         else String.format(Locale.ENGLISH, "%.1f", value)
+
+    /** PdfDocument has no Czech glyphs; a translated label must lose its diacritics here. */
+    private fun String.ascii(): String = Normalizer.normalize(this, Normalizer.Form.NFD)
+        .replace(Regex("\\p{M}"), "")
 
     private fun drawFooter(canvas: Canvas, y: Float) {
         val lineY = pageHeight - 42f

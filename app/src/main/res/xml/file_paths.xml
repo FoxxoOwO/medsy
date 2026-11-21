@@ -2,5 +2,5 @@
 <paths>
     <cache-path
         name="reports"
-        path="." />
+        path="reports/" />
 </paths>

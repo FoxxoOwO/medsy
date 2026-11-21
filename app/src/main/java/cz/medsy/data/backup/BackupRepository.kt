@@ -26,6 +26,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.long
 import kotlinx.serialization.json.longOrNull
 import kotlinx.serialization.json.put
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -47,6 +48,19 @@ import javax.inject.Singleton
 class BackupRepository @Inject constructor(
     private val db: MedsyDatabase,
 ) {
+
+    /** Real schema columns per table, so a hostile JSON key can never reach an INSERT statement. */
+    private val allowedColumns = ConcurrentHashMap<String, Set<String>>()
+
+    private fun columnsOf(table: BackupFormat.Table): Set<String> =
+        allowedColumns.computeIfAbsent(table.name) {
+            val names = HashSet<String>()
+            db.query("PRAGMA table_info(${table.name})", null).use { cursor ->
+                val nameIndex = cursor.getColumnIndexOrThrow("name")
+                while (cursor.moveToNext()) names += cursor.getString(nameIndex)
+            }
+            names
+        }
 
     enum class Mode { REPLACE, MERGE }
 
@@ -174,8 +188,10 @@ class BackupRepository @Inject constructor(
         restoredIds: Map<String, Map<Long, Long>>,
     ): ContentValues? {
         val values = ContentValues()
+        val allowed = columnsOf(table)
         for ((column, element) in row) {
             if (column == "id") continue
+            if (column !in allowed) continue
             val parent = table.parents[column]
             if (parent != null) {
                 val old = (element as? JsonPrimitive)?.longOrNull

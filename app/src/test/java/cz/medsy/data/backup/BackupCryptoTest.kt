@@ -1,6 +1,9 @@
 package cz.medsy.data.backup
 
 import cz.medsy.domain.message.MessageKey
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -56,5 +59,40 @@ class BackupCryptoTest {
         val failure = runCatching { BackupCrypto.decrypt(broken, "korecek".toCharArray()) }
             .exceptionOrNull()
         assertTrue(failure is BackupException)
+    }
+
+    @Test
+    fun `an out of range iteration count is rejected before any KDF work`() {
+        val envelope = BackupCrypto.encrypt(plain, "korecek".toCharArray())
+        listOf(Int.MAX_VALUE, 0, -1).forEach { hostile ->
+            val tampered = Json.parseToJsonElement(envelope).jsonObject.toString()
+                .replace(Regex("\"iterations\":\\d+"), "\"iterations\":$hostile")
+            val failure = runCatching { BackupCrypto.decrypt(tampered, "korecek".toCharArray()) }
+                .exceptionOrNull()
+            assertEquals(
+                "iterations=$hostile must be refused as unreadable",
+                MessageKey.BACKUP_UNREADABLE,
+                (failure as? BackupException)?.key,
+            )
+        }
+    }
+
+    @Test
+    fun `tampering with the ciphertext fails authentication`() {
+        val envelope = BackupCrypto.encrypt(plain, "korecek".toCharArray())
+        val original = Json.parseToJsonElement(envelope).jsonObject["data"]!!.jsonPrimitive.content
+        val bytes = android.util.Base64.decode(original, android.util.Base64.DEFAULT)
+        bytes[0] = (bytes[0].toInt() xor 0x01).toByte()
+        val changed = android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP)
+        // Replace in the original text so the rest of the envelope stays byte-for-byte valid.
+        val tampered = envelope.replace("\"data\":\"$original\"", "\"data\":\"$changed\"")
+        val failure = runCatching { BackupCrypto.decrypt(tampered, "korecek".toCharArray()) }
+            .exceptionOrNull()
+        assertEquals(MessageKey.BACKUP_WRONG_PASSWORD, (failure as BackupException).key)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `an empty password is refused`() {
+        BackupCrypto.encrypt(plain, charArrayOf())
     }
 }

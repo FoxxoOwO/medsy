@@ -1,6 +1,7 @@
 package cz.medsy.notification
 
 import cz.medsy.data.repository.DoseRepository
+import cz.medsy.data.repository.InjectionVolumeMissing
 import cz.medsy.data.repository.MedicationRepository
 import cz.medsy.data.repository.PrnLimitExceeded
 import cz.medsy.domain.message.Message
@@ -39,8 +40,9 @@ class DoseActionHandler @Inject constructor(
         data object NotFound : Result
 
         /**
-         * A PRN ceiling refused the dose. Deliberately nothing was written: silently
-         * exceeding the limit from a lock-screen button would defeat the limit entirely.
+         * A safety rule refused the dose. Deliberately nothing was written: a PRN ceiling
+         * crossed from a lock-screen button, or an injection with no derivable volume,
+         * would both corrupt the record silently.
          */
         data class LimitBlocked(val message: Message?) : Result
     }
@@ -68,6 +70,9 @@ class DoseActionHandler @Inject constructor(
                 } catch (error: PrnLimitExceeded) {
                     // The notification stays: the user still has to resolve it in the app.
                     return Result.LimitBlocked(error.limitMessage)
+                } catch (error: InjectionVolumeMissing) {
+                    // Likewise: the dose must not be logged with a guessed volume.
+                    return Result.LimitBlocked(error.userMessage)
                 }
                 notifier.cancel(notificationId)
             }

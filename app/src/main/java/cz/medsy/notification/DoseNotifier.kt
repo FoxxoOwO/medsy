@@ -13,6 +13,8 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import cz.medsy.MainActivity
 import cz.medsy.R
+import cz.medsy.domain.message.Message
+import cz.medsy.domain.message.MessageKey
 import cz.medsy.ui.message.asText
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -196,9 +198,15 @@ class DoseNotifier @Inject constructor(
      * would defeat the limit entirely.
      */
     @SuppressLint("MissingPermission")
-    fun notifyLimitBlocked(scheduleId: Long, message: cz.medsy.domain.message.Message?) {
+    fun notifyLimitBlocked(scheduleId: Long, message: Message?, discreet: Boolean) {
         if (!canPostNotifications()) return
-        val reason = message?.asText(context) ?: context.getString(R.string.msg_notify_limit_default)
+        // The PRN-limit message carries concrete dose amounts. On a lock screen those would
+        // leak the regimen, so discreet mode swaps it for a reason with no numbers or names.
+        val reason = if (discreet) {
+            Message(key = MessageKey.NOTIFY_LIMIT_DISCREET).asText(context)
+        } else {
+            message?.asText(context) ?: context.getString(R.string.msg_notify_limit_default)
+        }
         val notification = NotificationCompat.Builder(context, NotificationChannels.DOSES)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(context.getString(R.string.msg_notify_limit_title))

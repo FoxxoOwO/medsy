@@ -9,6 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.net.HttpURLConnection
+import java.net.URI
 import java.net.URL
 import java.time.Instant
 import javax.inject.Inject
@@ -16,6 +17,13 @@ import javax.inject.Singleton
 
 /** A release newer than the one running: the tag without the leading `v`, and its APK. */
 data class AvailableUpdate(val version: String, val apkUrl: String)
+
+/** Hosts GitHub may serve release assets from. Keep in sync with the downloader's redirect policy. */
+private val ALLOWED_APK_HOSTS = setOf(
+    "github.com",
+    "objects.githubusercontent.com",
+    "release-assets.githubusercontent.com",
+)
 
 /**
  * Compares dotted versions numerically, so 1.10.0 is newer than 1.9.0 — a string compare would
@@ -34,6 +42,17 @@ fun isNewerVersion(candidate: String, current: String): Boolean {
     return false
 }
 
+/**
+ * Release assets are hosted on github.com and its CDN. Never hand an arbitrary URL from a
+ * JSON response to the downloader: a compromised release body must not turn into an
+ * install prompt for a foreign package.
+ */
+private fun isAllowedApkUrl(raw: String): Boolean = runCatching {
+    val uri = URI(raw)
+    uri.scheme.equals("https", ignoreCase = true) &&
+        uri.host?.lowercase() in ALLOWED_APK_HOSTS
+}.getOrDefault(false)
+
 /** Pulls the version and the release APK out of a GitHub `releases/latest` body. */
 internal fun parseRelease(body: String): AvailableUpdate? = runCatching {
     val root = JSONObject(body)
@@ -44,6 +63,7 @@ internal fun parseRelease(body: String): AvailableUpdate? = runCatching {
             .map { array.getJSONObject(it) }
             .firstOrNull { it.optString("name").endsWith("-release.apk") }
             ?.optString("browser_download_url")
+            ?.takeIf(::isAllowedApkUrl)
     }
     if (version.isBlank() || apk.isNullOrBlank()) null else AvailableUpdate(version, apk)
 }.getOrNull()
